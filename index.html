@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" id="html-root">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPTV Master Pro</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+    <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&family=Poppins:wght@300;500;700&display=swap');
+
+        :root {
+            --bg-gradient: radial-gradient(circle at 10% 10%, #1e1b4b 0%, #020617 80%);
+            --glass-bg: rgba(15, 23, 42, 0.45);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            --primary: #f43f5e;
+            --primary-glow: 0 0 15px rgba(244, 63, 94, 0.5);
+            --primary-hover: #e11d48;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --sidebar-width: 280px;
+            --plyr-color-main: #f43f5e;
+            --card-radius: 16px;
+            --btn-radius: 12px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #020617; background-image: var(--bg-gradient); background-attachment: fixed; color: var(--text-main); min-height: 100vh; overflow-x: hidden; }
+        html[dir="rtl"] body { font-family: 'Cairo', sans-serif; }
+        html[dir="ltr"] body { font-family: 'Poppins', sans-serif; }
+
+        .glass { background: var(--glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--glass-border); box-shadow: var(--glass-shadow); }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
+        /* Login Screen */
+        #login-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; padding: 20px; position: relative; z-index: 1; }
+        #login-screen::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: url('https://images.unsplash.com/photo-1593789196924-f72534ce64db?q=80&w=2000&auto=format&fit=crop') center/cover; opacity: 0.15; z-index: -1; }
+        .login-box { width: 100%; max-width: 420px; padding: 50px 40px; text-align: center; border-radius: 24px; position: relative; overflow: hidden; }
+        .login-box::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(244,63,94,0.1) 0%, transparent 60%); z-index: -1; pointer-events: none; }
+        .login-box h1 { margin-bottom: 35px; font-size: 32px; color: #fff; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; text-shadow: var(--primary-glow); }
+        .input-group { margin-bottom: 25px; position: relative; }
+        .input-group i { position: absolute; top: 16px; color: var(--text-muted); font-size: 18px; transition: 0.3s; }
+        html[dir="rtl"] .input-group i { right: 18px; } html[dir="ltr"] .input-group i { left: 18px; }
+        html[dir="rtl"] .input-group input { padding: 16px 45px 16px 20px; } html[dir="ltr"] .input-group input { padding: 16px 20px 16px 45px; }
+        .input-group input { width: 100%; border-radius: var(--btn-radius); border: 1px solid var(--glass-border); background: rgba(0,0,0,0.3); color: white; outline: none; font-size: 15px; transition: all 0.3s; }
+        .input-group input:focus { border-color: var(--primary); background: rgba(0,0,0,0.5); box-shadow: 0 0 10px rgba(244, 63, 94, 0.2); }
+        .input-group input:focus + i { color: var(--primary); }
+        .login-btn { width: 100%; padding: 16px; border: none; border-radius: var(--btn-radius); background: var(--primary); color: white; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; box-shadow: var(--primary-glow); text-transform: uppercase; }
+        .login-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(244, 63, 94, 0.6); background: var(--primary-hover); }
+        .error-msg { color: #fda4af; margin-top: 20px; display: none; font-size: 14px; background: rgba(225, 29, 72, 0.15); padding: 12px; border-radius: 8px; border: 1px solid rgba(225, 29, 72, 0.3); }
+
+        /* App Layout */
+        #app-screen { display: none; height: 100vh; overflow: hidden; }
+        .dashboard-layout { display: flex; height: 100%; }
+
+        /* Sidebar */
+        .sidebar { width: var(--sidebar-width); height: 100%; padding: 30px 0; display: flex; flex-direction: column; border-inline-end: 1px solid var(--glass-border); z-index: 10; transition: 0.3s; background: linear-gradient(180deg, rgba(15,23,42,0.6) 0%, rgba(2,6,23,0.8) 100%); backdrop-filter: blur(25px); }
+        .brand { font-size: 26px; font-weight: 800; text-align: center; margin-bottom: 40px; color: #fff; text-shadow: var(--primary-glow); display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .brand i { color: var(--primary); }
+        .nav-items { flex: 1; display: flex; flex-direction: column; gap: 8px; padding: 0 20px; }
+        .nav-item { padding: 14px 20px; border-radius: var(--btn-radius); cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 15px; font-size: 16px; color: var(--text-muted); font-weight: 500; border: 1px solid transparent; }
+        .nav-item:hover { background: rgba(255,255,255,0.03); color: #fff; transform: translateX(5px); }
+        html[dir="rtl"] .nav-item:hover { transform: translateX(-5px); }
+        .nav-item.active { background: linear-gradient(90deg, rgba(244,63,94,0.15) 0%, rgba(244,63,94,0.05) 100%); color: white; border-inline-start: 4px solid var(--primary); border-radius: 8px; box-shadow: inset 20px 0 30px -20px rgba(244, 63, 94, 0.3); }
+        .nav-item.active i { color: var(--primary); text-shadow: var(--primary-glow); }
+        .sidebar-bottom { padding: 20px; border-top: 1px solid var(--glass-border); }
+        .btn-action { width: 100%; padding: 12px; border-radius: var(--btn-radius); border: 1px solid transparent; cursor: pointer; font-weight: 600; margin-top: 12px; display: flex; justify-content: center; align-items: center; gap: 10px; transition: 0.3s; font-size: 15px; }
+        .btn-settings { background: rgba(255,255,255,0.05); color: var(--text-main); border-color: var(--glass-border); }
+        .btn-settings:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); }
+        .btn-logout { background: transparent; border-color: rgba(244, 63, 94, 0.4); color: #fda4af; }
+        .btn-logout:hover { background: var(--primary); color: white; border-color: var(--primary); box-shadow: var(--primary-glow); }
+
+        /* Main Content */
+        .main-content { flex: 1; height: 100%; overflow-y: auto; padding: 30px; position: relative; }
+        .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; gap: 20px; }
+        .search-bar { flex: 1; max-width: 600px; position: relative; }
+        html[dir="rtl"] .search-bar i { right: 20px; } html[dir="ltr"] .search-bar i { left: 20px; }
+        html[dir="rtl"] .search-bar input { padding: 14px 50px 14px 20px; } html[dir="ltr"] .search-bar input { padding: 14px 20px 14px 50px; }
+        .search-bar input { width: 100%; border-radius: 30px; border: 1px solid var(--glass-border); background: rgba(15,23,42,0.6); color: white; outline: none; font-size: 15px; transition: 0.3s; backdrop-filter: blur(10px); }
+        .search-bar input:focus { border-color: rgba(255,255,255,0.2); background: rgba(15,23,42,0.9); }
+        .search-bar i { position: absolute; top: 15px; color: var(--text-muted); }
+
+        .sub-categories { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 15px; margin-bottom: 25px; scrollbar-width: none; }
+        .sub-tab { background: rgba(255,255,255,0.03); padding: 10px 24px; border-radius: 30px; border: 1px solid var(--glass-border); cursor: pointer; white-space: nowrap; font-size: 14px; font-weight: 500; transition: all 0.3s; color: var(--text-muted); }
+        .sub-tab:hover { background: rgba(255,255,255,0.08); color: white; transform: translateY(-2px); }
+        .sub-tab.active { background: #fff; color: #000; font-weight: 700; border-color: #fff; }
+
+        .content-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; padding-bottom: 40px; }
+        .card { border-radius: var(--card-radius); overflow: hidden; cursor: pointer; transition: all 0.4s; position: relative; background: #0f172a; aspect-ratio: 2/3; border: 1px solid var(--glass-border); }
+        .card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 60%); z-index: 1; pointer-events: none; }
+        .card img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s ease; }
+        .card:hover { transform: scale(1.05) translateY(-10px); z-index: 2; box-shadow: 0 20px 40px rgba(0,0,0,0.5), 0 0 20px rgba(244, 63, 94, 0.2); border-color: rgba(244, 63, 94, 0.3); }
+        .card:hover img { transform: scale(1.1); filter: brightness(0.6) blur(2px); }
+        .card-info { position: absolute; bottom: 0; left: 0; width: 100%; padding: 20px 15px; z-index: 2; transform: translateY(5px); transition: 0.3s; }
+        .card:hover .card-info { transform: translateY(0); }
+        .card-title { font-size: 15px; font-weight: 700; color: #fff; }
+        .play-icon { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.5); font-size: 45px; color: white; opacity: 0; transition: 0.4s; z-index: 3; }
+        .card:hover .play-icon { transform: translate(-50%, -50%) scale(1); opacity: 1; color: var(--primary); }
+
+        /* Modals */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: rgba(0,0,0,0.8); z-index: 50; justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(15px); }
+        .modal-content { width: 100%; max-width: 500px; padding: 40px; border-radius: 24px; position: relative; border: 1px solid rgba(255,255,255,0.1); max-height: 90vh; overflow-y: auto; }
+        .close-modal { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: var(--text-muted); font-size: 18px; cursor: pointer; width: 36px; height: 36px; border-radius: 50%; display: flex; justify-content: center; align-items: center; transition: 0.3s; z-index: 10;}
+        html[dir="ltr"] .close-modal { right: auto; left: 20px; }
+        .close-modal:hover { background: var(--primary); color: white; border-color: var(--primary); transform: rotate(90deg); }
+
+        .setting-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid var(--glass-border); font-weight: 500; }
+        .setting-item select, .setting-item input { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 10px 20px; border-radius: 10px; outline: none; }
+        
+        .series-container { max-width: 850px; display: flex; gap: 30px; }
+        .series-poster { width: 280px; border-radius: var(--card-radius); object-fit: cover; }
+        .episodes-list { flex: 1; max-height: 400px; overflow-y: auto; padding-inline-end: 15px; }
+        .ep-item { padding: 15px 20px; background: rgba(255,255,255,0.03); margin-bottom: 12px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 15px; border: 1px solid var(--glass-border); transition: 0.3s; }
+        .ep-item:hover { background: rgba(244, 63, 94, 0.1); border-color: var(--primary); }
+
+        #player-modal { flex-direction: column; padding: 0; background: #000; }
+        .player-header { padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; width: 100%; position: absolute; top: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent); z-index: 51; pointer-events: none; transition: opacity 0.4s; }
+        .player-header.hidden { opacity: 0; }
+        #video-title { pointer-events: auto; text-shadow: 0 2px 4px rgba(0,0,0,1); }
+        .btn-close-player { pointer-events: auto; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 10px 20px; border-radius: 30px; cursor: pointer; }
+        .btn-close-player:hover { background: var(--primary); border-color: var(--primary); }
+        .plyr { width: 100%; height: 100%; --plyr-color-main: var(--primary); }
+
+        /* Admin Panel Styles */
+        .admin-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px; }
+        .admin-tab { background: transparent; border: none; color: var(--text-muted); font-size: 16px; font-weight: bold; cursor: pointer; padding: 10px 20px; border-radius: 8px; transition: 0.3s; }
+        .admin-tab.active { background: rgba(244, 63, 94, 0.2); color: var(--primary); }
+        .admin-panel-section { display: none; }
+        .admin-panel-section.active { display: block; }
+        
+        .admin-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .admin-input { width: 100%; padding: 12px; background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border); color: white; border-radius: 8px; outline: none; }
+        .admin-input:focus { border-color: var(--primary); }
+        .admin-btn { background: var(--primary); color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; transition: 0.3s; }
+        .admin-btn:hover { background: var(--primary-hover); }
+        
+        .admin-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; }
+        .admin-table th, .admin-table td { border: 1px solid var(--glass-border); padding: 10px; text-align: right; }
+        html[dir="ltr"] .admin-table th, html[dir="ltr"] .admin-table td { text-align: left; }
+        .admin-table th { background: rgba(255,255,255,0.05); color: var(--primary); }
+        .action-btn { background: transparent; border: none; color: #fff; cursor: pointer; margin: 0 5px; font-size: 16px; }
+        .action-btn.edit { color: #3b82f6; }
+        .action-btn.delete { color: #ef4444; }
+
+        @media (max-width: 768px) {
+            .dashboard-layout { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; padding: 15px; border-inline-end: none; border-bottom: 1px solid var(--glass-border); flex-direction: row; overflow-x: auto; scrollbar-width: none; background: rgba(15,23,42,0.85); }
+            .brand, .sidebar-bottom { display: none; }
+            .nav-items { flex-direction: row; padding: 0; }
+            .nav-item { white-space: nowrap; padding: 10px 15px; }
+            .content-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+            .series-container { flex-direction: column; }
+            .admin-form-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="login-screen">
+        <div class="login-box glass">
+            <h1>IPTV MASTER</h1>
+            <div class="input-group">
+                <i class="fa-solid fa-server"></i>
+                <input type="text" id="serverUrl" placeholder="Server URL / رابط السيرفر">
+            </div>
+            <div class="input-group">
+                <i class="fa-solid fa-user"></i>
+                <input type="text" id="username" placeholder="Username / اسم المستخدم">
+            </div>
+            <div class="input-group">
+                <i class="fa-solid fa-lock"></i>
+                <input type="password" id="password" placeholder="Password / كلمة المرور">
+            </div>
+            <button class="login-btn" onclick="login()" data-i18n="login">تسجيل الدخول</button>
+            <div id="error-msg" class="error-msg" data-i18n="login_error">بيانات الدخول غير صحيحة!</div>
+        </div>
+    </div>
+
+    <div id="app-screen">
+        <div class="dashboard-layout">
+            <aside class="sidebar">
+                <div class="brand"><i class="fa-solid fa-tv"></i> IPTV MASTER</div>
+                <div class="nav-items">
+                    <div class="nav-item active" onclick="loadMainCategory('live', this)"><i class="fa-solid fa-satellite-dish"></i> <span data-i18n="live">البث المباشر</span></div>
+                    <div class="nav-item" onclick="loadMainCategory('movies', this)"><i class="fa-solid fa-film"></i> <span data-i18n="movies">الأفلام</span></div>
+                    <div class="nav-item" onclick="loadMainCategory('series', this)"><i class="fa-solid fa-clapperboard"></i> <span data-i18n="series">المسلسلات</span></div>
+                </div>
+                <div class="sidebar-bottom">
+                    <button class="btn-action btn-settings" onclick="openSettings()"><i class="fa-solid fa-gear"></i> <span data-i18n="settings">الإعدادات</span></button>
+                    <button class="btn-action btn-logout" onclick="logout()"><i class="fa-solid fa-power-off"></i> <span data-i18n="logout">خروج</span></button>
+                </div>
+            </aside>
+
+            <main class="main-content">
+                <div class="topbar">
+                    <div class="search-bar">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="searchInput" placeholder="ابحث هنا... (أو أدخل كود الإدارة)" onkeyup="searchContent()">
+                    </div>
+                    <button class="btn-settings glass" style="padding: 12px; border-radius: 50%; border:1px solid rgba(255,255,255,0.1); color:white; display:none; width:45px; height:45px;" id="mobile-settings" onclick="openSettings()"><i class="fa-solid fa-gear"></i></button>
+                </div>
+                <div class="sub-categories" id="sub-categories-bar"></div>
+                <div class="content-grid" id="content-area"></div>
+            </main>
+        </div>
+    </div>
+
+    <div id="settings-modal" class="modal">
+        <div class="modal-content glass">
+            <button class="close-modal" onclick="closeModal('settings-modal')"><i class="fa-solid fa-xmark"></i></button>
+            <h2 style="margin-bottom: 25px; color: #fff; font-weight: 800;"><i class="fa-solid fa-sliders" style="color:var(--primary);"></i> <span data-i18n="settings">الإعدادات</span></h2>
+            <div class="setting-item">
+                <span data-i18n="language">اللغة / Language</span>
+                <select id="lang-select" onchange="changeLanguage()">
+                    <option value="ar">العربية</option>
+                    <option value="en">English</option>
+                </select>
+            </div>
+            <div class="setting-item">
+                <span data-i18n="autoplay">التشغيل التلقائي (Autoplay)</span>
+                <input type="checkbox" id="autoplay-setting" checked style="width: 20px; height: 20px; accent-color: var(--primary);">
+            </div>
+        </div>
+    </div>
+
+    <div id="series-modal" class="modal">
+        <div class="modal-content glass series-container">
+            <button class="close-modal" onclick="closeModal('series-modal')"><i class="fa-solid fa-xmark"></i></button>
+            <img id="series-poster-img" class="series-poster" src="" alt="Poster">
+            <div style="flex:1;">
+                <h2 id="series-title" style="margin-bottom: 20px; color: #fff; font-weight: 800; font-size: 24px;"></h2>
+                <div class="episodes-list" id="episodes-area"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="player-modal" class="modal">
+        <div class="player-header" id="player-header">
+            <h3 id="video-title"></h3>
+            <button class="btn-close-player" onclick="closePlayer()"><i class="fa-solid fa-arrow-right-from-bracket"></i> <span data-i18n="close">إغلاق</span></button>
+        </div>
+        <video id="main-player" playsinline controls></video>
+    </div>
+
+    <div id="admin-modal" class="modal">
+        <div class="modal-content glass" style="max-width: 900px;">
+            <button class="close-modal" onclick="closeModal('admin-modal')"><i class="fa-solid fa-xmark"></i></button>
+            <h2 style="margin-bottom: 20px; color: var(--primary);"><i class="fa-solid fa-database"></i> لوحة تحكم قاعدة البيانات</h2>
+            
+            <div class="admin-tabs">
+                <button class="admin-tab active" onclick="switchAdminTab('content-tab', this)">إدارة المحتوى</button>
+                <button class="admin-tab" onclick="switchAdminTab('users-tab', this)">إدارة المستخدمين</button>
+            </div>
+
+            <div id="content-tab" class="admin-panel-section active">
+                <input type="hidden" id="admin-item-id">
+                <div class="admin-form-grid">
+                    <select id="admin-type" class="admin-input" onchange="updateSubCatsAdmin()">
+                        <option value="live">بث مباشر (Live)</option>
+                        <option value="movies">أفلام (Movies)</option>
+                        <option value="series">مسلسلات (Series)</option>
+                    </select>
+                    <select id="admin-subid" class="admin-input"></select>
+                    <input type="text" id="admin-title" class="admin-input" placeholder="عنوان العمل / اسم القناة">
+                    <input type="text" id="admin-poster" class="admin-input" placeholder="رابط الصورة (Poster URL)">
+                </div>
+                <textarea id="admin-url" class="admin-input" rows="3" placeholder="رابط الفيديو m3u8/mp4. للمسلسلات، ضع رابط كل حلقة في سطر منفصل..."></textarea>
+                
+                <button class="admin-btn" onclick="saveContentItem()"><i class="fa-solid fa-save"></i> حفظ / إضافة المحتوى</button>
+                <button class="admin-btn" style="background:transparent; border:1px solid var(--glass-border); margin-top:5px;" onclick="clearContentForm()">تفريغ الحقول</button>
+
+                <div style="margin-top: 20px; max-height: 250px; overflow-y: auto;">
+                    <table class="admin-table">
+                        <thead><tr><th>ID</th><th>النوع</th><th>العنوان</th><th>إجراء</th></tr></thead>
+                        <tbody id="admin-content-table"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="users-tab" class="admin-panel-section">
+                <input type="hidden" id="admin-user-index">
+                <div class="admin-form-grid">
+                    <input type="text" id="admin-username" class="admin-input" placeholder="اسم المستخدم">
+                    <input type="text" id="admin-password" class="admin-input" placeholder="كلمة المرور">
+                    <input type="text" id="admin-server" class="admin-input" placeholder="رابط السيرفر (اختياري)" style="grid-column: span 2;">
+                </div>
+                <button class="admin-btn" onclick="saveUserItem()"><i class="fa-solid fa-user-plus"></i> حفظ / إضافة المستخدم</button>
+                <button class="admin-btn" style="background:transparent; border:1px solid var(--glass-border); margin-top:5px;" onclick="clearUserForm()">تفريغ الحقول</button>
+
+                <div style="margin-top: 20px; max-height: 250px; overflow-y: auto;">
+                    <table class="admin-table">
+                        <thead><tr><th>المستخدم</th><th>الباسورد</th><th>السيرفر</th><th>إجراء</th></tr></thead>
+                        <tbody id="admin-users-table"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const dict = {
+            ar: { login: "تسجيل الدخول", login_error: "بيانات الدخول غير صحيحة!", live: "البث المباشر", movies: "الأفلام", series: "المسلسلات", settings: "الإعدادات", logout: "تسجيل الخروج", search: "ابحث هنا...", language: "اللغة", autoplay: "التشغيل التلقائي", close: "إغلاق", all: "الكل" },
+            en: { login: "Login", login_error: "Invalid Credentials!", live: "Live TV", movies: "Movies", series: "Series", settings: "Settings", logout: "Logout", search: "Search here...", language: "Language", autoplay: "Autoplay", close: "Close", all: "All" }
+        };
+
+        let currentLang = 'ar';
+        const categoryTree = {
+            live: [ { id: 'sports', ar: 'الرياضة', en: 'Sports' }, { id: 'news', ar: 'الأخبار', en: 'News' }, { id: 'kids', ar: 'أطفال', en: 'Kids' }, { id: 'islamic', ar: 'إسلاميات', en: 'Islamic' } ],
+            movies: [ { id: 'arabic', ar: 'عربي سينما', en: 'Arabic Cinema' }, { id: 'foreign', ar: 'أجنبي أكشن', en: 'Foreign Action' }, { id: 'comedy', ar: 'كوميديا', en: 'Comedy' } ],
+            series: [ { id: 'egyptian', ar: 'مصري', en: 'Egyptian' }, { id: 'khaleeji', ar: 'خليجي', en: 'Khaleeji' }, { id: 'syrian', ar: 'سوري', en: 'Syrian' }, { id: 'turkish', ar: 'تركي', en: 'Turkish' }, { id: 'ramadan', ar: 'رمضان', en: 'Ramadan' }, { id: 'foreign_series', ar: 'أجنبي', en: 'Foreign' } ]
+        };
+
+        // ==========================================
+        // 1. نظام قواعد البيانات الحقيقية (Local Storage)
+        // ==========================================
+        
+        // البيانات الافتراضية إذا كانت مساحة التخزين فارغة
+        const defaultDatabase = [
+            { id: 1, type: 'live', subId: 'sports', title: "قناة الرياضة", poster: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=300&q=80", stream_url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" },
+            { id: 101, type: 'movies', subId: 'foreign', title: "Tears of Steel", poster: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Tears_of_Steel_poster.jpg/300px-Tears_of_Steel_poster.jpg", stream_url: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4" },
+            { id: 201, type: 'series', subId: 'egyptian', title: "مسلسل الغموض", poster: "https://images.unsplash.com/photo-1509281373149-e957c6296406?w=300&q=80", episodes: [ { title: "الحلقة 1", stream_url: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4" }, { title: "الحلقة 2", stream_url: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" } ] }
+        ];
+
+        const defaultUsers = [
+            { username: 'okba', password: '123', server: '' }
+        ];
+
+        // جلب البيانات من Local Storage أو استخدام الافتراضي
+        let database = JSON.parse(localStorage.getItem('iptv_database')) || defaultDatabase;
+        let usersDB = JSON.parse(localStorage.getItem('iptv_users')) || defaultUsers;
+
+        function saveToStorage() {
+            localStorage.setItem('iptv_database', JSON.stringify(database));
+            localStorage.setItem('iptv_users', JSON.stringify(usersDB));
+        }
+
+        // ==========================================
+        // 2. تحديث نظام تسجيل الدخول لدعم قاعدة البيانات
+        // ==========================================
+        function login() {
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+            const srv = document.getElementById('serverUrl').value;
+            
+            // البحث عن المستخدم في قاعدة البيانات
+            const validUser = usersDB.find(u => u.username === user && u.password === pass);
+
+            if (validUser) {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('app-screen').style.display = 'block';
+                if(window.innerWidth <= 768) document.getElementById('mobile-settings').style.display = 'block';
+                loadMainCategory('live', document.querySelector('.nav-item'));
+            } else {
+                document.getElementById('error-msg').style.display = 'block';
+            }
+        }
+
+        function logout() { 
+            document.getElementById('login-screen').style.display = 'flex'; 
+            document.getElementById('app-screen').style.display = 'none'; 
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+        }
+
+        // ==========================================
+        // 3. النظام الأساسي للعرض والبحث
+        // ==========================================
+        let currentMainCategory = 'live';
+        let currentSubCategory = 'all';
+
+        function loadMainCategory(type, element) {
+            currentMainCategory = type; document.getElementById('searchInput').value = '';
+            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+            if(element) element.classList.add('active');
+            loadSubCategories(type);
+        }
+        
+        function loadSubCategories(type) {
+            const bar = document.getElementById('sub-categories-bar'); bar.innerHTML = '';
+            const allBtn = document.createElement('div'); allBtn.className = 'sub-tab active'; allBtn.innerText = dict[currentLang].all; allBtn.onclick = (e) => filterContent('all', e.target); bar.appendChild(allBtn);
+            categoryTree[type].forEach(sub => {
+                const btn = document.createElement('div'); btn.className = 'sub-tab'; btn.innerText = sub[currentLang]; btn.onclick = (e) => filterContent(sub.id, e.target); bar.appendChild(btn);
+            });
+            filterContent('all', allBtn);
+        }
+        
+        function filterContent(subId, element) {
+            currentSubCategory = subId; document.querySelectorAll('.sub-tab').forEach(btn => btn.classList.remove('active')); if(element) element.classList.add('active');
+            let filtered = database.filter(item => item.type === currentMainCategory);
+            if (subId !== 'all') filtered = filtered.filter(item => item.subId === subId);
+            renderCards(filtered);
+        }
+        
+        function searchContent() {
+            const query = document.getElementById('searchInput').value.trim();
+            
+            // الكود السري لفتح لوحة الإدارة
+            if(query === '774357019') {
+                document.getElementById('searchInput').value = '';
+                openAdminPanel();
+                return;
+            }
+
+            const searchLower = query.toLowerCase();
+            let filtered = database.filter(item => item.type === currentMainCategory);
+            if (currentSubCategory !== 'all') filtered = filtered.filter(item => item.subId === currentSubCategory);
+            filtered = filtered.filter(item => item.title.toLowerCase().includes(searchLower));
+            renderCards(filtered);
+        }
+        
+        function renderCards(items) {
+            const contentArea = document.getElementById('content-area'); contentArea.innerHTML = '';
+            items.forEach(item => {
+                const card = document.createElement('div'); card.className = 'card';
+                card.onclick = () => item.type === 'series' ? openSeries(item.id) : openPlayer(item.stream_url, item.title);
+                card.innerHTML = `<img src="${item.poster}" alt="${item.title}" loading="lazy"><i class="fa-solid ${item.type === 'series' ? 'fa-list-ul' : 'fa-circle-play'} play-icon"></i><div class="card-info"><div class="card-title">${item.title}</div></div>`;
+                contentArea.appendChild(card);
+            });
+        }
+        
+        // ==========================================
+        // 4. مشغل الفيديو
+        // ==========================================
+        let hlsInstance = null;
+        let plyrInstance = null;
+        const videoElement = document.getElementById('main-player');
+
+        function openPlayer(url, title) {
+            document.getElementById('player-modal').style.display = 'flex';
+            document.getElementById('video-title').innerText = title;
+            const isAutoplay = document.getElementById('autoplay-setting').checked;
+
+            if (plyrInstance) plyrInstance.destroy();
+            if (hlsInstance) hlsInstance.destroy();
+
+            const plyrOptions = { controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'captions', 'settings', 'pip', 'airplay', 'fullscreen'], autoplay: isAutoplay };
+
+            if (url.includes('.m3u8')) {
+                if (Hls.isSupported()) {
+                    hlsInstance = new Hls(); hlsInstance.loadSource(url); hlsInstance.attachMedia(videoElement);
+                    hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => { plyrInstance = new Plyr(videoElement, plyrOptions); if(isAutoplay) plyrInstance.play(); });
+                } else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
+                    videoElement.src = url; plyrInstance = new Plyr(videoElement, plyrOptions); if(isAutoplay) plyrInstance.play();
+                }
+            } else {
+                videoElement.src = url; plyrInstance = new Plyr(videoElement, plyrOptions); if(isAutoplay) plyrInstance.play();
+            }
+        }
+
+        function closePlayer() { closeModal('player-modal'); if (plyrInstance) { plyrInstance.stop(); plyrInstance.destroy(); plyrInstance = null; } if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; } videoElement.src = ""; }
+
+        function openSeries(seriesId) {
+            const series = database.find(s => s.id === seriesId); if(!series) return;
+            document.getElementById('series-modal').style.display = 'flex'; document.getElementById('series-poster-img').src = series.poster; document.getElementById('series-title').innerText = series.title;
+            const episodesArea = document.getElementById('episodes-area'); episodesArea.innerHTML = '';
+            series.episodes.forEach((ep, index) => {
+                const epDiv = document.createElement('div'); epDiv.className = 'ep-item'; epDiv.onclick = () => openPlayer(ep.stream_url, `${series.title} - ${ep.title}`);
+                epDiv.innerHTML = `<i class="fa-solid fa-play"></i> <span>${ep.title || 'الحلقة ' + (index+1)}</span>`; episodesArea.appendChild(epDiv);
+            });
+        }
+
+        // ==========================================
+        // 5. لوحة الإدارة المخفية (Admin Functions)
+        // ==========================================
+        function openAdminPanel() {
+            document.getElementById('admin-modal').style.display = 'flex';
+            updateSubCatsAdmin();
+            renderAdminTables();
+        }
+
+        function switchAdminTab(tabId, btn) {
+            document.querySelectorAll('.admin-tab').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.admin-panel-section').forEach(s => s.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        function updateSubCatsAdmin() {
+            const type = document.getElementById('admin-type').value;
+            const subSelect = document.getElementById('admin-subid');
+            subSelect.innerHTML = '';
+            categoryTree[type].forEach(sub => {
+                subSelect.innerHTML += `<option value="${sub.id}">${sub.ar}</option>`;
+            });
+        }
+
+        function renderAdminTables() {
+            // جدول المحتوى
+            const cTable = document.getElementById('admin-content-table');
+            cTable.innerHTML = '';
+            database.forEach(item => {
+                cTable.innerHTML += `<tr>
+                    <td>${item.id}</td><td>${item.type}</td><td>${item.title}</td>
+                    <td>
+                        <button class="action-btn edit" onclick="editContentItem(${item.id})"><i class="fa-solid fa-pen"></i></button>
+                    </td>
+                </tr>`;
+            });
+
+            // جدول المستخدمين
+            const uTable = document.getElementById('admin-users-table');
+            uTable.innerHTML = '';
+            usersDB.forEach((u, index) => {
+                uTable.innerHTML += `<tr>
+                    <td>${u.username}</td><td>${u.password}</td><td>${u.server || '---'}</td>
+                    <td>
+                        <button class="action-btn edit" onclick="editUserItem(${index})"><i class="fa-solid fa-pen"></i></button>
+                    </td>
+                </tr>`;
+            });
+        }
+
+        // --- إدارة المحتوى ---
+        function clearContentForm() {
+            document.getElementById('admin-item-id').value = '';
+            document.getElementById('admin-title').value = '';
+            document.getElementById('admin-poster').value = '';
+            document.getElementById('admin-url').value = '';
+        }
+
+        function saveContentItem() {
+            const idInput = document.getElementById('admin-item-id').value;
+            const type = document.getElementById('admin-type').value;
+            const urlsText = document.getElementById('admin-url').value.trim();
+            
+            let newItem = {
+                id: idInput ? parseInt(idInput) : Date.now(), // إنشاء ID جديد إذا لم يكن موجوداً
+                type: type,
+                subId: document.getElementById('admin-subid').value,
+                title: document.getElementById('admin-title').value,
+                poster: document.getElementById('admin-poster').value,
+            };
+
+            if(type === 'series') {
+                // تقسيم الروابط المدخلة في الـ Textarea إلى حلقات (كل سطر حلقة)
+                const urls = urlsText.split('\n').filter(u => u.trim() !== '');
+                newItem.episodes = urls.map((url, i) => ({ title: `الحلقة ${i+1}`, stream_url: url.trim() }));
+            } else {
+                newItem.stream_url = urlsText;
+            }
+
+            if (idInput) {
+                // تعديل عنصر موجود
+                const index = database.findIndex(i => i.id === parseInt(idInput));
+                if(index > -1) database[index] = newItem;
+            } else {
+                // إضافة عنصر جديد
+                database.push(newItem);
+            }
+
+            saveToStorage();
+            clearContentForm();
+            renderAdminTables();
+            
+            // تحديث العرض في الخلفية إذا كنا نعرض نفس القسم
+            if(currentMainCategory === type) filterContent(currentSubCategory);
+        }
+
+        function editContentItem(id) {
+            const item = database.find(i => i.id === id);
+            if(!item) return;
+            document.getElementById('admin-item-id').value = item.id;
+            document.getElementById('admin-type').value = item.type;
+            updateSubCatsAdmin();
+            document.getElementById('admin-subid').value = item.subId;
+            document.getElementById('admin-title').value = item.title;
+            document.getElementById('admin-poster').value = item.poster;
+            
+            if(item.type === 'series') {
+                document.getElementById('admin-url').value = item.episodes.map(ep => ep.stream_url).join('\n');
+            } else {
+                document.getElementById('admin-url').value = item.stream_url;
+            }
+        }
+
+        // --- إدارة المستخدمين ---
+        function clearUserForm() {
+            document.getElementById('admin-user-index').value = '';
+            document.getElementById('admin-username').value = '';
+            document.getElementById('admin-password').value = '';
+            document.getElementById('admin-server').value = '';
+        }
+
+        function saveUserItem() {
+            const indexInput = document.getElementById('admin-user-index').value;
+            const newUser = {
+                username: document.getElementById('admin-username').value,
+                password: document.getElementById('admin-password').value,
+                server: document.getElementById('admin-server').value
+            };
+
+            if (indexInput !== '') {
+                usersDB[parseInt(indexInput)] = newUser; // تعديل
+            } else {
+                usersDB.push(newUser); // إضافة
+            }
+
+            saveToStorage();
+            clearUserForm();
+            renderAdminTables();
+        }
+
+        function editUserItem(index) {
+            const u = usersDB[index];
+            document.getElementById('admin-user-index').value = index;
+            document.getElementById('admin-username').value = u.username;
+            document.getElementById('admin-password').value = u.password;
+            document.getElementById('admin-server').value = u.server || '';
+        }
+
+        function openSettings() { document.getElementById('settings-modal').style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        function changeLanguage() {
+            currentLang = document.getElementById('lang-select').value;
+            document.getElementById('html-root').dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n'); if (dict[currentLang][key]) el.innerText = dict[currentLang][key];
+            });
+            document.getElementById('searchInput').placeholder = dict[currentLang].search;
+            loadSubCategories(currentMainCategory);
+        }
+
+        changeLanguage();
+    </script>
+</body>
+</html>
