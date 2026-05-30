@@ -360,8 +360,8 @@
             series: [ { id: 'egyptian', ar: 'مصري', en: 'Egyptian' }, { id: 'khaleeji', ar: 'خليجي', en: 'Khaleeji' }, { id: 'syrian', ar: 'سوري', en: 'Syrian' }, { id: 'turkish', ar: 'تركي', en: 'Turkish' }, { id: 'ramadan', ar: 'رمضان', en: 'Ramadan' }, { id: 'foreign_series', ar: 'أجنبي', en: 'Foreign' } ]
         };
 
-        const defaultDatabase = [
-    [span_0](start_span){ id: 1, type: 'live', subId: 'news', title: "Kanali 7 Ⓢ", poster: "https://i.imgur.com/rL2v9pM.png", stream_url: "https://fe.tring.al/delta/105/out/u/1200_1.m3u8" }, //[span_0](end_span)
+        const defaultDatabase = {
+   live: [span_0](start_span){ id: 1, type: 'live', subId: 'news', title: "Kanali 7 Ⓢ", poster: "https://i.imgur.com/rL2v9pM.png", stream_url: "https://fe.tring.al/delta/105/out/u/1200_1.m3u8" }, //[span_0](end_span)
     [span_1](start_span){ id: 2, type: 'live', subId: 'news', title: "A2 CNN Albania", poster: "https://i.imgur.com/TgO3Lzi.png", stream_url: "https://tv.a2news.com/live/smil:a2cnnweb.stream.smil/playlist.m3u8" }, //[span_1](end_span)
     [span_2](start_span){ id: 3, type: 'live', subId: 'news', title: "ABC News Albania Ⓣ", poster: "https://i.imgur.com/aObcudw.png", stream_url: "https://www.twitch.tv/abcnewsal" }, //[span_2](end_span)
     [span_3](start_span){ id: 4, type: 'live', subId: 'news', title: "AlbKanale Music TV Ⓢ", poster: "https://i.imgur.com/JdKxscs.png", stream_url: "https://albportal.net/albkanalemusic.m3u8" }, //[span_3](end_span)
@@ -396,7 +396,13 @@
     [span_32](start_span){ id: 33, type: 'live', subId: 'news', title: "TV Universidad", poster: "https://i.imgur.com/tvLHiAT.png", stream_url: "https://stratus.stream.cespi.unlp.edu.ar/hls/tvunlp.m3u8" }, //[span_32](end_span)
     [span_33](start_span){ id: 34, type: 'live', subId: 'news', title: "Barricada TV", poster: "https://www.barricadatv.org/?p=23082", stream_url: "https://live-ak.vimeocdn.com/exp=1696402364~acl=%2F9f41e203-241b-4eb7-b0b5-b1839903408f%2F%2A~hmac=d4819f301510676a986bfe610b664765ee2b1a23e1e1ca3214398f949a0b2778/9f41e203-241b-4eb7-b0b5-b1839903408f/hls.m3u8?min_seconds=30" }, //[span_33](end_span)
     [span_34](start_span){ id: 35, type: 'live', subId: 'news', title: "Urbana Tevé", poster: "https://yt3.ggpht.com/ytc/AKedOLQLeFMWMeoumi-o24ohLPXSEdNL5-oJ9W5oP5KnnA=s900-c-k-c0x00ffffff-no-rj", stream_url: "https://cdnhd.iblups.com/hls/DD3nXkAkWk.m3u8" } //[span_34](end_span)
-];
+
+        
+        ],
+            movies: [ { id: 'arabic', ar: 'عربي سينما', en: 'Arabic Cinema' }, { id: 'foreign', ar: 'أجنبي أكشن', en: 'Foreign Action' }, { id: 'comedy', ar: 'كوميديا', en: 'Comedy' } ],
+            series: [ { id: 'egyptian', ar: 'مصري', en: 'Egyptian' }, { id: 'khaleeji', ar: 'خليجي', en: 'Khaleeji' }, { id: 'syrian', ar: 'سوري', en: 'Syrian' }, { id: 'turkish', ar: 'تركي', en: 'Turkish' }, { id: 'ramadan', ar: 'رمضان', en: 'Ramadan' }, { id: 'foreign_series', ar: 'أجنبي', en: 'Foreign' } ]
+        };
+        
 
 
         let categoryTree = JSON.parse(localStorage.getItem('iptv_categories')) || defaultCategoryTree;
