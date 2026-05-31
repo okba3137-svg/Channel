@@ -78,7 +78,7 @@
         .content-area { flex: 1; display: flex; flex-direction: row; height: 100vh; overflow: hidden; }
         
         /* الأقسام */
-        .col-cats { width: 220px; min-width: 220px; background: var(--bg-panel); border-inline-end: 1px solid var(--glass-border); padding: 20px; overflow-y: auto; }
+        .col-cats { width: 25%; max-width: 220px; min-width: 140px; background: var(--bg-panel); border-inline-end: 1px solid var(--glass-border); padding: 15px; overflow-y: auto; }
         .col-header { font-size: 20px; font-weight: 800; margin-bottom: 20px; color: var(--primary); display: flex; justify-content: space-between; }
         .cat-item {
             padding: 12px 15px; border-radius: var(--radius); cursor: pointer; transition: 0.3s;
@@ -89,8 +89,8 @@
         .cat-item.active { background: var(--primary); color: #000; }
 
         /* البث المباشر */
-        .col-items-live { width: 280px; min-width: 280px; background: #0d0d0d; padding: 20px; overflow-y: auto; border-inline-end: 1px solid var(--glass-border); }
-        .col-player-live { flex: 1; padding: 20px; background: #000; display: flex; flex-direction: column; overflow-y: auto; }
+        .col-items-live { width: 35%; max-width: 280px; min-width: 180px; background: #0d0d0d; padding: 15px; overflow-y: auto; border-inline-end: 1px solid var(--glass-border); }
+        .col-player-live { flex: 1; min-width: 0; padding: 15px; background: #000; display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden; }
         .search-bar { position: sticky; top: 0; background: #0d0d0d; padding-bottom: 15px; z-index: 5; }
         .search-bar input { width: 100%; padding: 12px 15px; border-radius: 20px; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.05); color: white; outline: none; }
         .channel-card {
@@ -117,7 +117,7 @@
         .plyr__control:hover { background: var(--primary) !important; color: #000 !important; }
         
         .media-details { margin-top: 20px; padding: 20px; background: var(--bg-panel); border-radius: 16px; }
-        .media-title { font-size: 24px; font-weight: 800; margin-bottom: 15px; color: var(--primary); }
+        .media-title { font-size: 24px; font-weight: 800; margin-bottom: 15px; color: var(--primary); word-break: break-word; }
         .badge-container { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
         .badge-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: #fff; padding: 8px 20px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 700; transition: 0.3s; }
         .badge-btn:hover, .badge-btn.active { background: var(--primary); color: #000; border-color: var(--primary); }
