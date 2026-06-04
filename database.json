@@ -42,6 +42,22 @@
           ]
         }
       ]
+    },
+    {
+      "id": 1780563081680,
+      "type": "series",
+      "subId": "انمي",
+      "title": "سلايم",
+      "poster": "",
+      "season": 4,
+      "episodes": [
+        {
+          "title": "الحلقة 8",
+          "urls": [
+            "https://pixeldrain.com/u/t4krxDzc"
+          ]
+        }
+      ]
     }
   ],
   "usersDB": [
