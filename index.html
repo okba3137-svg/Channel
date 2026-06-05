@@ -11,61 +11,20 @@
 
     <style>
         /* --- الإعدادات الأساسية --- */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            user-select: none;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; user-select: none; }
+        body, html { width: 100%; height: 100%; overflow: hidden; background-color: #111111; color: #ffffff; }
 
-        body, html {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background-color: #111111; 
-            color: #ffffff;
-        }
-
-        .app-wrapper {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: #1e1e1e;
-        }
-
+        .app-wrapper { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #1e1e1e; }
         @media screen and (orientation: portrait) {
-            .app-wrapper {
-                width: 100vh;
-                height: 100vw;
-                top: 100%;
-                left: 0;
-                transform-origin: 0 0;
-                transform: rotate(-90deg);
-            }
+            .app-wrapper { width: 100vh; height: 100vw; top: 100%; left: 0; transform-origin: 0 0; transform: rotate(-90deg); }
         }
 
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
 
-        .view {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
-            display: none;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .view.active {
-            opacity: 1;
-            display: block;
-        }
+        .view { width: 100%; height: 100%; position: absolute; top: 0; left: 0; display: none; opacity: 0; transition: opacity 0.3s ease; }
+        .view.active { opacity: 1; display: block; }
 
         /* =========================================
            شاشات البداية (Home & Add)
@@ -90,8 +49,9 @@
         .form-box { width: 85%; max-width: 800px; background: rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 15px 25px; display: flex; flex-direction: column; gap: 15px; }
         .inputs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 25px; }
         .input-group { display: flex; flex-direction: column; gap: 6px; }
-        .input-group input { background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; padding: 8px 12px; color: #ffffff; outline: none; }
-        .submit-btn { background-color: #d32f2f; color: #ffffff; border: none; border-radius: 4px; padding: 10px 35px; font-weight: bold; cursor: pointer; }
+        .input-group input, .input-group select { background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; padding: 8px 12px; color: #ffffff; outline: none; }
+        .submit-btn { background-color: #d32f2f; color: #ffffff; border: none; border-radius: 4px; padding: 10px 35px; font-weight: bold; cursor: pointer; transition: 0.2s;}
+        .submit-btn:hover { background-color: #b71c1c; }
         
         /* =========================================
            لوحة التحكم الرئيسية (Dashboard)
@@ -120,10 +80,18 @@
         .dash-btn-outline span { font-size: 13px; color: #ccc; }
 
         /* =========================================
+           شاشة الإعدادات
+           ========================================= */
+        #settings-view.active { display: flex; flex-direction: column; background: radial-gradient(circle at center, #3a2e31 0%, #1a1a24 60%, #0d0d12 100%); }
+        .settings-container { max-width: 600px; width: 90%; margin: 70px auto; display: flex; flex-direction: column; gap: 20px; direction: rtl; text-align: right;}
+        .settings-section-title { color:#f39c12; font-size: 18px; margin-bottom:10px; border-bottom:1px solid #333; padding-bottom:10px; }
+        .settings-card { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; gap: 15px; }
+        .toggle-row { display: flex; justify-content: space-between; align-items: center; }
+
+        /* =========================================
            شاشات المحتوى المشتركة
            ========================================= */
         .media-app-container { display: flex; flex-direction: column; width: 100%; height: 100%; background-color: #222222; }
-        
         .top-navbar { display: flex; align-items: center; justify-content: space-between; height: 60px; padding: 0 30px; border-bottom: 1px solid #333; background-color: #1a1a1a; }
         .nav-links { display: flex; align-items: center; gap: 20px; }
         .nav-item { font-size: 15px; color: #aaa; cursor: pointer; padding: 10px 5px; position: relative; font-weight: 500; }
@@ -136,54 +104,39 @@
         .search-box-top input { background: transparent; border: none; color: #fff; outline: none; width: 100%; font-size: 13px; }
         .app-logo-small { display: flex; align-items: center; gap: 5px; font-weight: bold; font-size: 16px; }
         .app-logo-small svg { width: 20px; height: 20px; fill: #e53935; }
-
         .media-content-area { display: flex; height: calc(100% - 60px); width: 100%; }
 
-        /* =========================================
-           شاشة Live
-           ========================================= */
+        /* شاشة Live والمشغلات */
         .live-pane-1 { width: 22%; border-right: 1px solid #333; overflow-y: auto; background-color: #1a1a1a; direction: rtl; }
         .live-pane-2 { width: 28%; border-right: 1px solid #333; overflow-y: auto; background-color: #1e1e1e; direction: rtl;}
         .live-pane-3 { width: 50%; padding: 20px; display: flex; flex-direction: column; background-color: #222; }
-
         .list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; cursor: pointer; border-bottom: 1px solid #2a2a2a; font-size: 13px; color: #ccc; }
         .list-item:hover { background-color: #2a2a2a; }
         .list-item.active { border: 1px solid #f39c12; color: #fff; background-color: #2a2a2a; }
         .list-item .count { font-size: 12px; color: #888; background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px;}
-
         .channel-item { justify-content: flex-start; gap: 15px; }
         .channel-num { color: #888; font-size: 12px; width: 35px; }
         .channel-icon { width: 30px; height: 20px; border-radius: 2px; object-fit: cover; }
-
         .video-player-mock { width: 100%; height: 55%; background: #000; border-radius: 4px; position: relative; display: flex; justify-content: center; align-items: center; overflow: hidden; }
         .live-info { margin-top: 15px; font-size: 14px; font-weight: bold; }
         .live-servers { margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap;}
-        .live-actions { margin-top: auto; display: flex; gap: 15px; justify-content: flex-end; }
-        .action-btn { background-color: #4b367c; color: #fff; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-size: 13px; }
         .server-btn { background: rgba(255,255,255,0.1); border: 1px solid #555; color: #fff; padding: 5px 15px; border-radius: 4px; cursor: pointer; font-size: 12px; }
         .server-btn.active { background: #f39c12; border-color: #f39c12; color: #000; font-weight: bold; }
 
-        /* =========================================
-           شاشات Movies & Series
-           ========================================= */
+        /* شاشات VOD */
         .vod-sidebar { width: 20%; border-right: 1px solid #333; display: flex; flex-direction: column; background-color: #1a1a1a; direction: rtl;}
         .vod-sidebar-header { padding: 20px; display: flex; flex-direction: column; align-items: center; border-bottom: 1px solid #333; }
         .vod-big-icon { width: 80px; height: 80px; border: 3px solid #fff; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-bottom: 20px; }
         .vod-big-icon svg { width: 40px; height: 40px; fill: #fff; }
         .series-icon { border: none; border-radius: 0; }
         .series-icon svg { width: 60px; height: 60px; }
-
         .vod-sidebar-tools { display: flex; width: 100%; justify-content: space-between; color: #aaa; font-size: 13px; cursor: pointer; direction: ltr;}
         .vod-sidebar-tools div { display: flex; align-items: center; gap: 5px; }
         .vod-sidebar-tools svg { width: 16px; height: 16px; fill: #aaa; }
-
         .vod-categories { flex: 1; overflow-y: auto; }
-        
         .vod-main { width: 80%; display: flex; flex-direction: column; background-color: #222; }
         .vod-toolbar { padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; }
         .sort-dropdown { background: #4b367c; color: #fff; border: none; padding: 5px 10px; border-radius: 4px; font-size: 13px; }
-        .total-count { font-size: 14px; font-weight: bold; }
-
         .posters-grid { padding: 20px 30px; display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; overflow-y: auto; flex: 1; direction: rtl;}
         .poster-card { display: flex; flex-direction: column; cursor: pointer; position: relative; transition: transform 0.2s; }
         .poster-card:hover { transform: scale(1.05); }
@@ -191,9 +144,7 @@
         .poster-title { margin-top: 8px; font-size: 12px; color: #ddd; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .rating-badge { position: absolute; bottom: 30px; left: 5px; background-color: #0078d7; color: #fff; font-size: 11px; padding: 2px 5px; border-radius: 3px; font-weight: bold; }
 
-        /* =========================================
-           شاشة التفاصيل والمشغل المنبثق (VOD Player)
-           ========================================= */
+        /* شاشة التفاصيل (التمهيدية قبل المشغل) */
         #details-view .media-app-container { position: relative; }
         .details-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; filter: blur(8px) brightness(0.25); z-index: 1; }
         .details-back-btn { position: absolute; top: 30px; left: 30px; cursor: pointer; z-index: 10; background: rgba(0,0,0,0.6); width: 45px; height: 45px; border-radius: 50%; display: flex; justify-content: center; align-items: center; transition: 0.2s; }
@@ -233,7 +184,7 @@
         .plyr { width: 100%; height: 100%; --plyr-color-main: #f39c12; }
 
         /* =========================================
-           شاشة الإدارة (المستوردة من 888.html ومحسنة)
+           شاشة الإدارة (لوحة تحكم الأدمن السرية)
            ========================================= */
         #admin-view .media-app-container { background-color: #181818; }
         .admin-sidebar { width: 20%; background-color: #111; border-left: 1px solid #333; display: flex; flex-direction: column; direction: rtl; }
@@ -281,12 +232,12 @@
 
         <div id="add-view" class="view">
             <div class="top-bar-add"><div class="back-btn" onclick="showView('home-view')"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></div><div style="font-weight: 500;">تسجيل الدخول</div></div>
-            <div class="form-box" style="max-width: 400px; align-items: center;">
+            <div class="form-box" style="max-width: 400px; align-items: center; margin: auto; transform: translateY(10%);">
                 <div class="input-group" style="width: 100%;"><label>اسم المستخدم</label><input type="text" id="play-user"></div>
                 <div class="input-group" style="width: 100%;"><label>كلمة المرور</label><input type="password" id="play-pass"></div>
-                <div id="login-error" style="color: #ff4757; font-size: 12px; display: none;">بيانات غير صحيحة!</div>
+                <div id="login-error" style="color: #ff4757; font-size: 13px; font-weight: bold; display: none; text-align: center;">بيانات غير صحيحة!</div>
+                <button class="submit-btn" style="width: 100%; margin-top: 10px;" id="submit-playlist" onclick="login()">دخول الآن</button>
             </div>
-            <button class="submit-btn" id="submit-playlist" onclick="login()">LOGIN</button>
         </div>
 
         <div id="dashboard-view" class="view">
@@ -312,14 +263,46 @@
                     </div>
                 </div>
                 <div class="dash-col">
-                    <div class="dash-card" onclick="document.getElementById('secret-live-search').value='774357019'; checkSearchSecret(document.getElementById('secret-live-search'));">
-                        <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-                        <span>الإدارة (سري)</span>
+                    <div class="dash-card" onclick="showView('settings-view')">
+                        <svg viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.73,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.43-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
+                        <span>الإعدادات</span>
                     </div>
                 </div>
                 <div class="dash-col-right">
-                    <div class="dash-btn-outline" onclick="location.reload()"><svg viewBox="0 0 24 24"><path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5c-1.11 0-2 .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg><span>خروج</span></div>
+                    <div class="dash-btn-outline" onclick="logout()"><svg viewBox="0 0 24 24"><path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5c-1.11 0-2 .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg><span>خروج</span></div>
                 </div>
+            </div>
+        </div>
+
+        <div id="settings-view" class="view">
+            <div class="top-bar-add"><div class="back-btn" onclick="showView('dashboard-view')"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></div><div style="font-weight: 500;">الإعدادات</div></div>
+            <div class="settings-container">
+                
+                <div class="settings-card">
+                    <h3 class="settings-section-title">إعدادات التطبيق</h3>
+                    <div class="input-group">
+                        <label>لغة التطبيق (مظهر فقط)</label>
+                        <select class="admin-input">
+                            <option value="ar">العربية (Arabic)</option>
+                            <option value="en">English (الإنجليزية)</option>
+                        </select>
+                    </div>
+                    <div class="toggle-row">
+                        <label style="font-size:14px; font-weight:bold;">تحديث تلقائي كل يوم</label>
+                        <input type="checkbox" id="auto-update-toggle" style="width:20px; height:20px; accent-color:#f39c12; cursor:pointer;" onchange="toggleAutoUpdate()">
+                    </div>
+                    <button class="submit-btn" style="background-color: #4b367c; margin-top: 10px;" onclick="location.reload(true)">تحديث الصفحة بالكامل (الآن)</button>
+                </div>
+
+                <div class="settings-card">
+                    <h3 class="settings-section-title">حالة الحساب (معلومات الجلسة)</h3>
+                    <div style="display:flex; flex-direction:column; gap:12px; font-size:15px; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 6px;">
+                        <div><span style="color:#aaa;">اسم المستخدم:</span> <strong id="st-username" style="color:#fff;">---</strong></div>
+                        <div><span style="color:#aaa;">تاريخ الانتهاء:</span> <strong id="st-expiry" style="color:#2ea44f;">---</strong></div>
+                        <div><span style="color:#aaa;">تفعيل الأجهزة (مستخدم/مسموح):</span> <strong id="st-devices" style="color:#f39c12;">---</strong></div>
+                    </div>
+                </div>
+
             </div>
         </div>
 
@@ -441,8 +424,8 @@
                 <div class="admin-sidebar">
                     <div class="admin-header">لوحة الإدارة المتقدمة</div>
                     <div class="admin-nav-item active" onclick="switchAdminTab('content-tab', this)">إدارة المحتوى</div>
-                    <div class="admin-nav-item" onclick="switchAdminTab('users-tab', this)">إدارة المستخدمين</div>
-                    <div style="margin-top: auto; border-top: 1px solid #333;" class="admin-nav-item" onclick="showView('dashboard-view'); openAdminPanel(false);">خروج والعودة للرئيسية</div>
+                    <div class="admin-nav-item" onclick="switchAdminTab('users-tab', this)">إدارة المستخدمين والحماية</div>
+                    <div style="margin-top: auto; border-top: 1px solid #333;" class="admin-nav-item" onclick="showView('dashboard-view'); openAdminPanel(false);">العودة للرئيسية</div>
                 </div>
                 
                 <div class="admin-main">
@@ -517,17 +500,30 @@
                     </div>
 
                     <div id="users-tab" class="admin-panel-section">
-                        <h2 class="admin-title">إدارة المستخدمين</h2>
-                        <input type="hidden" id="admin-user-index">
-                        <div class="admin-form-grid">
-                            <input type="text" id="admin-username" class="admin-input" placeholder="اسم المستخدم">
-                            <input type="text" id="admin-password" class="admin-input" placeholder="كلمة المرور">
+                        <h2 class="admin-title">إدارة المستخدمين والحماية (صلاحيات وأجهزة)</h2>
+                        <div class="admin-form-grid" style="align-items: center;">
+                            <div class="admin-form-group">
+                                <label>اسم المستخدم</label>
+                                <input type="text" id="admin-username" class="admin-input">
+                            </div>
+                            <div class="admin-form-group">
+                                <label>كلمة المرور</label>
+                                <input type="text" id="admin-password" class="admin-input">
+                            </div>
+                            <div class="admin-form-group">
+                                <label style="color:#f39c12;">تاريخ انتهاء الحساب (اتركه فارغاً لحساب مفتوح)</label>
+                                <input type="date" id="admin-expiry" class="admin-input">
+                            </div>
+                            <div class="admin-form-group">
+                                <label style="color:#f39c12;">الحد الأقصى المسموح للأجهزة</label>
+                                <input type="number" id="admin-max-devices" class="admin-input" value="1" min="1">
+                            </div>
                         </div>
-                        <button class="admin-btn" onclick="saveUserItem()">حفظ الحساب</button>
+                        <button class="admin-btn" style="width: 100%;" onclick="saveUserItem()">حفظ / تحديث الحساب</button>
 
                         <div style="margin-top: 20px; max-height: 220px; overflow-y: auto;">
                             <table class="admin-table">
-                                <thead><tr><th>اسم المستخدم</th><th>كلمة المرور</th><th>إجراءات</th></tr></thead>
+                                <thead><tr><th>المستخدم</th><th>المرور</th><th>الانتهاء</th><th>الأجهزة المسموحة</th><th>إجراءات</th></tr></thead>
                                 <tbody id="admin-users-table"></tbody>
                             </table>
                         </div>
@@ -571,27 +567,46 @@
             }
         }, { once: true });
 
-        // --- قاعدة البيانات والتهيئة من 888.html ---
+        // --- قاعدة البيانات والتهيئة ---
         const defaultDatabase = [
             { id: 1, type: 'live', subId: 'قنوات رياضية', title: "بي إن سبورت 1", poster: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=200&q=80", urls: ["https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"], isIframe: false },
             { id: 2, type: 'movies', subId: 'أفلام أكشن', title: "فيلم الأكشن المفتوح", poster: "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?w=300&q=80", season: 1, urls: ["http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4"], isIframe: false }
         ];
 
-        let database = JSON.parse(localStorage.getItem('iqab_db_v4')) || defaultDatabase;
-        let usersDB = JSON.parse(localStorage.getItem('iqab_users_v4')) || [{ username: 'okba', password: '123' }];
+        let database = JSON.parse(localStorage.getItem('iqab_db_v5')) || defaultDatabase;
+        let usersDB = JSON.parse(localStorage.getItem('iqab_users_v5')) || [{ username: 'okba', password: '123', maxDevices: 1, activeDevices: 0 }];
         let m3uChannels = []; 
         let plyrLive = null, plyrVod = null, hlsLive = null, hlsVod = null;
         let currentType = 'live', currentSubId = 'all';
         let currentMediaObj = null;
 
         function saveToStorage() {
-            localStorage.setItem('iqab_db_v4', JSON.stringify(database));
-            localStorage.setItem('iqab_users_v4', JSON.stringify(usersDB));
+            localStorage.setItem('iqab_db_v5', JSON.stringify(database));
+            localStorage.setItem('iqab_users_v5', JSON.stringify(usersDB));
         }
 
-        const m3uPlaylists = [
-            { url: 'ae.m3u', subId: 'الإمارات' }, { url: 'al.m3u', subId: 'ألبانيا' }
-        ];
+        // --- نظام التحديث التلقائي اليومي ---
+        function toggleAutoUpdate() {
+            let isEnabled = document.getElementById('auto-update-toggle').checked;
+            localStorage.setItem('iqab_auto_update', isEnabled);
+        }
+
+        window.onload = function() {
+            let autoUpdate = localStorage.getItem('iqab_auto_update') === 'true';
+            let toggleElement = document.getElementById('auto-update-toggle');
+            if (toggleElement) toggleElement.checked = autoUpdate;
+            
+            if(autoUpdate) {
+                let lastUpdate = localStorage.getItem('iqab_last_update');
+                let now = Date.now();
+                if(!lastUpdate || now - parseInt(lastUpdate) > 86400000) { // 24 hours (86,400,000 ms)
+                    localStorage.setItem('iqab_last_update', now);
+                    location.reload(true);
+                }
+            }
+        };
+
+        const m3uPlaylists = [ { url: 'ae.m3u', subId: 'الإمارات' } ];
 
         async function fetchM3UFiles() {
             m3uChannels = []; 
@@ -618,91 +633,124 @@
                             currentChannel = {}; 
                         }
                     }
-                } catch (error) { console.error('Error fetching M3U:', playlist.url); }
+                } catch (error) {}
             }
             if(document.getElementById('live-view').classList.contains('active')){ loadCategories(); renderContent(); }
         }
 
-        // --- نظام تسجيل الدخول ---
+        function showLoginError(msg) {
+            const err = document.getElementById('login-error');
+            err.innerText = msg;
+            err.style.display = 'block';
+        }
+
+        // --- نظام تسجيل الدخول والحماية من الأجهزة والتواريخ ---
         function login() {
             const user = document.getElementById('play-user').value.trim();
             const pass = document.getElementById('play-pass').value.trim();
-            if (usersDB.find(u => u.username === user && u.password === pass)) {
+            
+            let foundUser = usersDB.find(u => u.username === user && u.password === pass);
+            
+            if (foundUser) {
+                // فحص تاريخ الانتهاء
+                if(foundUser.expiryDate) {
+                    let expDate = new Date(foundUser.expiryDate);
+                    if(new Date() > expDate) {
+                        showLoginError("عذراً، لقد انتهت صلاحية هذا الحساب!");
+                        return;
+                    }
+                }
+
+                // فحص الأجهزة المتصلة
+                let max = foundUser.maxDevices || 1;
+                let active = foundUser.activeDevices || 0;
+                
+                if(active >= max) {
+                    showLoginError("عذراً، الحساب شغال في جهاز آخر حالياً!");
+                    return;
+                }
+
+                // الدخول ناجح: تحديث عدد الأجهزة وتخزين الجلسة
+                foundUser.activeDevices = active + 1;
+                saveToStorage();
+                sessionStorage.setItem('loggedInUser', foundUser.username);
+                
+                // ملء بيانات الإعدادات
+                document.getElementById('st-username').innerText = foundUser.username;
+                document.getElementById('st-expiry').innerText = foundUser.expiryDate || 'مفتوح (بدون تاريخ)';
+                document.getElementById('st-devices').innerText = `${foundUser.activeDevices} من ${max}`;
+                
+                document.getElementById('login-error').style.display = 'none';
                 fetchM3UFiles();
                 showMediaView('live');
             } else {
-                document.getElementById('login-error').style.display = 'block';
+                showLoginError("البيانات المدخلة غير صحيحة!");
             }
         }
 
+        // --- نظام تسجيل الخروج وإنقاص الأجهزة ---
+        function logout() {
+            let sessionUser = sessionStorage.getItem('loggedInUser');
+            if(sessionUser) {
+               let dbUser = usersDB.find(x => x.username === sessionUser);
+               if(dbUser && dbUser.activeDevices > 0) {
+                   dbUser.activeDevices--;
+               }
+               saveToStorage();
+            }
+            sessionStorage.removeItem('loggedInUser');
+            location.reload();
+        }
+
+        // معالجة الخروج المفاجئ (إغلاق المتصفح) لإنقاص جهاز المستخدم (محاكاة الحماية محلياً)
+        window.addEventListener('beforeunload', () => {
+            let sessionUser = sessionStorage.getItem('loggedInUser');
+            if(sessionUser) {
+               let dbUser = usersDB.find(x => x.username === sessionUser);
+               if(dbUser && dbUser.activeDevices > 0) {
+                   dbUser.activeDevices--;
+                   localStorage.setItem('iqab_users_v5', JSON.stringify(usersDB));
+               }
+            }
+        });
+
         // --- التحكم بالشاشات ---
-        function hideAllViews() {
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-        }
-
-        function showView(viewId) {
-            hideAllViews();
-            document.getElementById(viewId).classList.add('active');
-            stopAllPlayers();
-        }
-
+        function hideAllViews() { document.querySelectorAll('.view').forEach(v => v.classList.remove('active')); }
+        function showView(viewId) { hideAllViews(); document.getElementById(viewId).classList.add('active'); stopAllPlayers(); }
         function showMediaView(type) {
-            hideAllViews();
-            currentType = type;
-            currentSubId = 'all';
-            
+            hideAllViews(); currentType = type; currentSubId = 'all';
             if(type === 'live') document.getElementById('live-view').classList.add('active');
             if(type === 'movies') document.getElementById('movies-view').classList.add('active');
             if(type === 'series') document.getElementById('series-view').classList.add('active');
-            
-            loadCategories();
-            stopAllPlayers();
+            loadCategories(); stopAllPlayers();
         }
 
-        // --- ريندر الأقسام والمحتوى (الدمج مع تصاميم index.html) ---
         function loadCategories() {
             let listId = currentType === 'live' ? 'live-categories' : (currentType === 'movies' ? 'movies-categories' : 'series-categories');
-            const list = document.getElementById(listId);
-            list.innerHTML = '';
-            
-            const allBtn = document.createElement('div');
-            allBtn.className = 'list-item active'; 
-            allBtn.innerHTML = `<span>الكل</span>`;
-            allBtn.onclick = (e) => selectCategory('all', e.currentTarget, listId);
-            list.appendChild(allBtn);
-
-            const combinedDB = [...database, ...m3uChannels];
-            const typeItems = combinedDB.filter(i => i.type === currentType);
+            const list = document.getElementById(listId); list.innerHTML = '';
+            const allBtn = document.createElement('div'); allBtn.className = 'list-item active'; allBtn.innerHTML = `<span>الكل</span>`;
+            allBtn.onclick = (e) => selectCategory('all', e.currentTarget, listId); list.appendChild(allBtn);
+            const combinedDB = [...database, ...m3uChannels]; const typeItems = combinedDB.filter(i => i.type === currentType);
             const uniqueSubs = [...new Set(typeItems.map(i => i.subId))];
-
             uniqueSubs.forEach(sub => {
-                if(!sub) return;
-                const btn = document.createElement('div');
-                btn.className = 'list-item'; 
+                if(!sub) return; const btn = document.createElement('div'); btn.className = 'list-item'; 
                 let subCount = typeItems.filter(i => i.subId === sub).length;
                 btn.innerHTML = `<span>${sub}</span> <span class="count">${subCount}</span>`; 
-                btn.onclick = (e) => selectCategory(sub, e.currentTarget, listId);
-                list.appendChild(btn);
+                btn.onclick = (e) => selectCategory(sub, e.currentTarget, listId); list.appendChild(btn);
             });
             selectCategory('all', allBtn, listId);
         }
 
         function selectCategory(subId, element, listId) {
-            currentSubId = subId;
-            document.querySelectorAll(`#${listId} .list-item`).forEach(el => el.classList.remove('active'));
-            element.classList.add('active'); 
-            renderContent();
+            currentSubId = subId; document.querySelectorAll(`#${listId} .list-item`).forEach(el => el.classList.remove('active'));
+            element.classList.add('active'); renderContent();
         }
 
         function renderContent(searchQuery = '') {
-            const combinedDB = [...database, ...m3uChannels];
-            let filtered = combinedDB.filter(item => item.type === currentType);
-
+            const combinedDB = [...database, ...m3uChannels]; let filtered = combinedDB.filter(item => item.type === currentType);
             if (currentSubId !== 'all') filtered = filtered.filter(item => item.subId === currentSubId);
             if (searchQuery) filtered = filtered.filter(item => item.title.toLowerCase().includes(searchQuery.toLowerCase()));
-            
-            let uniqueItems = [];
-            filtered.forEach(item => { if(!uniqueItems.find(u => u.title.trim().toLowerCase() === item.title.trim().toLowerCase())) uniqueItems.push(item); });
+            let uniqueItems = []; filtered.forEach(item => { if(!uniqueItems.find(u => u.title.trim().toLowerCase() === item.title.trim().toLowerCase())) uniqueItems.push(item); });
 
             if(currentType === 'live') {
                 const list = document.getElementById('live-channels-list'); list.innerHTML = '';
@@ -718,284 +766,147 @@
                 uniqueItems.forEach(item => {
                     const card = document.createElement('div'); card.className = 'poster-card';
                     card.innerHTML = `<img class="poster-img" src="${item.poster}"><span class="rating-badge">${item.season ? 'S'+item.season : 'HD'}</span><div class="poster-title">${item.title}</div>`;
-                    card.onclick = () => openDetailsScreen(item);
-                    grid.appendChild(card);
+                    card.onclick = () => openDetailsScreen(item); grid.appendChild(card);
                 });
             }
         }
 
         function openDetailsScreen(item) {
-            currentMediaObj = item;
-            document.getElementById('detail-title').innerText = item.title;
+            currentMediaObj = item; document.getElementById('detail-title').innerText = item.title;
             document.getElementById('detail-desc').innerText = item.type === 'movies' ? 'فيلم سينمائي مميز' : 'مسلسل درامي ممتع';
-            document.getElementById('detail-img').src = item.poster;
-            document.getElementById('detail-bg-img').style.backgroundImage = `url('${item.poster}')`;
+            document.getElementById('detail-img').src = item.poster; document.getElementById('detail-bg-img').style.backgroundImage = `url('${item.poster}')`;
             showView('details-view');
         }
 
-        function goBackFromDetails() {
-            if(currentMediaObj && currentMediaObj.type === 'movies') showView('movies-view');
-            else showView('series-view');
-        }
+        function goBackFromDetails() { if(currentMediaObj && currentMediaObj.type === 'movies') showView('movies-view'); else showView('series-view'); }
 
         // --- مشغلات الفيديو (Plyr & Hls & Iframe) ---
-        const plyrOptions = {
-            controls: ['play-large', 'restart', 'rewind', 'play', 'fast-forward', 'progress', 'current-time', 'duration', 'mute', 'volume', 'fullscreen'],
-            autoplay: true
-        };
-
+        const plyrOptions = { controls: ['play-large', 'restart', 'rewind', 'play', 'fast-forward', 'progress', 'current-time', 'duration', 'mute', 'volume', 'fullscreen'], autoplay: true };
         function processUrl(url, isIframe) {
-            if (!url) return "";
-            if (isIframe) {
-                if (url.includes('pixeldrain.com/u/')) return url.replace('/u/', '/e/');
-                if (url.includes('pixeldrain.com/api/file/')) return url.replace('/api/file/', '/e/');
-                return url.trim();
-            } else {
-                if (url.includes('pixeldrain.com/u/')) return url.replace('/u/', '/api/file/');
-                return url.trim();
-            }
+            if (!url) return ""; if (isIframe) { if (url.includes('pixeldrain.com/u/')) return url.replace('/u/', '/e/'); if (url.includes('pixeldrain.com/api/file/')) return url.replace('/api/file/', '/e/'); return url.trim(); } else { if (url.includes('pixeldrain.com/u/')) return url.replace('/u/', '/api/file/'); return url.trim(); }
         }
 
         function initPlayer(elementId, originalUrl, context, isIframe = false) {
-            const url = processUrl(originalUrl, isIframe);
-            const video = document.getElementById(elementId);
+            const url = processUrl(originalUrl, isIframe); const video = document.getElementById(elementId);
             const videoContainer = document.getElementById(context === 'live' ? 'live-video-container' : 'vod-video-container');
             const iframeContainer = document.getElementById(context === 'live' ? 'live-iframe-container' : 'vod-iframe-container');
             const iframe = document.getElementById(context === 'live' ? 'live-iframe' : 'vod-iframe');
-
             if(context === 'live') { if(plyrLive) plyrLive.destroy(); if(hlsLive) hlsLive.destroy(); } else { if(plyrVod) plyrVod.destroy(); if(hlsVod) hlsVod.destroy(); }
-            
-            if (isIframe) {
-                videoContainer.style.display = 'none'; iframeContainer.style.display = 'block'; iframe.src = url;
-            } else {
+            if (isIframe) { videoContainer.style.display = 'none'; iframeContainer.style.display = 'block'; iframe.src = url; } else {
                 iframeContainer.style.display = 'none'; iframe.src = ""; videoContainer.style.display = 'block';
                 if(url.includes('.m3u8') && Hls.isSupported()) {
                     const hls = new Hls(); hls.loadSource(url); hls.attachMedia(video);
                     hls.on(Hls.Events.MANIFEST_PARSED, () => { const plyr = new Plyr(video, plyrOptions); if(context === 'live') { hlsLive = hls; plyrLive = plyr; } else { hlsVod = hls; plyrVod = plyr; } });
-                } else { 
-                    video.src = url; const plyr = new Plyr(video, plyrOptions); 
-                    if(context === 'live') plyrLive = plyr; else plyrVod = plyr; 
-                }
+                } else { video.src = url; const plyr = new Plyr(video, plyrOptions); if(context === 'live') plyrLive = plyr; else plyrVod = plyr; }
             }
         }
 
         function playLive(item) {
-            document.getElementById('live-title-display').innerText = item.title;
-            const serversDiv = document.getElementById('live-servers-btns'); serversDiv.innerHTML = '';
-            if(item.urls && item.urls.length > 0) {
-                item.urls.forEach((url, idx) => {
-                    const btn = document.createElement('button'); btn.className = 'server-btn' + (idx === 0 ? ' active' : ''); btn.innerText = `سيرفر ${idx + 1}`;
-                    btn.onclick = () => { document.querySelectorAll('#live-servers-btns .server-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); initPlayer('live-player', url, 'live', item.isIframe); };
-                    serversDiv.appendChild(btn);
-                });
-                initPlayer('live-player', item.urls[0], 'live', item.isIframe);
-            }
+            document.getElementById('live-title-display').innerText = item.title; const serversDiv = document.getElementById('live-servers-btns'); serversDiv.innerHTML = '';
+            if(item.urls && item.urls.length > 0) { item.urls.forEach((url, idx) => { const btn = document.createElement('button'); btn.className = 'server-btn' + (idx === 0 ? ' active' : ''); btn.innerText = `سيرفر ${idx + 1}`; btn.onclick = () => { document.querySelectorAll('#live-servers-btns .server-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); initPlayer('live-player', url, 'live', item.isIframe); }; serversDiv.appendChild(btn); }); initPlayer('live-player', item.urls[0], 'live', item.isIframe); }
         }
 
         function openVodModal() {
-            if(!currentMediaObj) return;
-            let baseItem = currentMediaObj;
-            document.getElementById('vod-modal').style.display = 'flex';
-            document.getElementById('vod-title-display').innerText = baseItem.title;
-            
+            if(!currentMediaObj) return; let baseItem = currentMediaObj; document.getElementById('vod-modal').style.display = 'flex'; document.getElementById('vod-title-display').innerText = baseItem.title;
             const allParts = database.filter(i => i.title.trim().toLowerCase() === baseItem.title.trim().toLowerCase() && i.type === baseItem.type).sort((a, b) => (a.season || 1) - (b.season || 1));
             const sidebar = document.getElementById('vod-sidebar');
-            
-            if ((baseItem.type === 'series' || baseItem.type === 'movies') && allParts.length > 0 && (allParts.length > 1 || baseItem.episodes)) {
-                sidebar.style.display = 'flex'; renderSeasonsTabs(allParts);
-            } else { sidebar.style.display = 'none'; renderVodServers(baseItem.urls, baseItem.isIframe); }
+            if ((baseItem.type === 'series' || baseItem.type === 'movies') && allParts.length > 0 && (allParts.length > 1 || baseItem.episodes)) { sidebar.style.display = 'flex'; renderSeasonsTabs(allParts); } else { sidebar.style.display = 'none'; renderVodServers(baseItem.urls, baseItem.isIframe); }
         }
 
         function renderSeasonsTabs(allParts) {
             const tabsDiv = document.getElementById('season-tabs-container'); tabsDiv.innerHTML = '';
-            allParts.forEach((part, index) => {
-                const tab = document.createElement('div'); tab.className = 'season-tab' + (index === 0 ? ' active' : '');
-                tab.innerText = part.type === 'series' ? `موسم ${part.season || index+1}` : `جزء ${part.season || index+1}`;
-                tab.onclick = () => { document.querySelectorAll('.season-tab').forEach(t => t.classList.remove('active')); tab.classList.add('active'); if(part.type === 'series') renderEpisodesList(part); else renderVodServers(part.urls, part.isIframe); };
-                tabsDiv.appendChild(tab);
-            });
+            allParts.forEach((part, index) => { const tab = document.createElement('div'); tab.className = 'season-tab' + (index === 0 ? ' active' : ''); tab.innerText = part.type === 'series' ? `موسم ${part.season || index+1}` : `جزء ${part.season || index+1}`; tab.onclick = () => { document.querySelectorAll('.season-tab').forEach(t => t.classList.remove('active')); tab.classList.add('active'); if(part.type === 'series') renderEpisodesList(part); else renderVodServers(part.urls, part.isIframe); }; tabsDiv.appendChild(tab); });
             if(allParts[0].type === 'series') renderEpisodesList(allParts[0]); else renderVodServers(allParts[0].urls, allParts[0].isIframe);
         }
 
         function renderEpisodesList(seasonPart) {
-            const listDiv = document.getElementById('episodes-list-container'); listDiv.innerHTML = '';
-            if(!seasonPart.episodes) return;
-            seasonPart.episodes.forEach((ep, index) => {
-                const btn = document.createElement('div'); btn.className = 'ep-btn' + (index === 0 ? ' active' : '');
-                btn.innerHTML = `<span>${ep.title}</span><i class="fa-solid fa-play"></i>`;
-                btn.onclick = () => { document.querySelectorAll('.ep-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); document.getElementById('vod-title-display').innerText = `${seasonPart.title} - ${ep.title}`; renderVodServers(ep.urls, seasonPart.isIframe); };
-                listDiv.appendChild(btn);
-            });
-            document.getElementById('vod-title-display').innerText = `${seasonPart.title} - ${seasonPart.episodes[0].title}`;
-            renderVodServers(seasonPart.episodes[0].urls, seasonPart.isIframe);
+            const listDiv = document.getElementById('episodes-list-container'); listDiv.innerHTML = ''; if(!seasonPart.episodes) return;
+            seasonPart.episodes.forEach((ep, index) => { const btn = document.createElement('div'); btn.className = 'ep-btn' + (index === 0 ? ' active' : ''); btn.innerHTML = `<span>${ep.title}</span><i class="fa-solid fa-play"></i>`; btn.onclick = () => { document.querySelectorAll('.ep-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); document.getElementById('vod-title-display').innerText = `${seasonPart.title} - ${ep.title}`; renderVodServers(ep.urls, seasonPart.isIframe); }; listDiv.appendChild(btn); });
+            document.getElementById('vod-title-display').innerText = `${seasonPart.title} - ${seasonPart.episodes[0].title}`; renderVodServers(seasonPart.episodes[0].urls, seasonPart.isIframe);
         }
 
         function renderVodServers(urls, isIframe) {
-            const serversDiv = document.getElementById('vod-servers-btns'); serversDiv.innerHTML = '';
-            if(!urls) return;
-            urls.forEach((url, idx) => {
-                const btn = document.createElement('button'); btn.className = 'server-btn' + (idx === 0 ? ' active' : ''); btn.innerText = `سيرفر ${idx + 1}`;
-                btn.onclick = () => { document.querySelectorAll('#vod-servers-btns .server-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); initPlayer('vod-player', url, 'vod', isIframe); };
-                serversDiv.appendChild(btn);
-            });
+            const serversDiv = document.getElementById('vod-servers-btns'); serversDiv.innerHTML = ''; if(!urls) return;
+            urls.forEach((url, idx) => { const btn = document.createElement('button'); btn.className = 'server-btn' + (idx === 0 ? ' active' : ''); btn.innerText = `سيرفر ${idx + 1}`; btn.onclick = () => { document.querySelectorAll('#vod-servers-btns .server-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); initPlayer('vod-player', url, 'vod', isIframe); }; serversDiv.appendChild(btn); });
             initPlayer('vod-player', urls[0], 'vod', isIframe);
         }
 
-        function stopAllPlayers() { 
-            if(plyrLive) { plyrLive.destroy(); plyrLive = null; } 
-            if(hlsLive) { hlsLive.destroy(); hlsLive = null; } 
-            let lp = document.getElementById('live-player'); if(lp) lp.src = ""; 
-            let li = document.getElementById('live-iframe'); if(li) li.src = "";
-            closeModal('vod-modal'); 
-        }
-
-        function closeModal(id) { 
-            document.getElementById(id).style.display = 'none'; 
-            if(id === 'vod-modal') { 
-                if(plyrVod) { plyrVod.destroy(); plyrVod = null; } 
-                if(hlsVod) { hlsVod.destroy(); hlsVod = null; } 
-                document.getElementById('vod-player').src = ""; 
-                document.getElementById('vod-iframe').src = "";
-            } 
-        }
+        function stopAllPlayers() { if(plyrLive) { plyrLive.destroy(); plyrLive = null; } if(hlsLive) { hlsLive.destroy(); hlsLive = null; } let lp = document.getElementById('live-player'); if(lp) lp.src = ""; let li = document.getElementById('live-iframe'); if(li) li.src = ""; closeModal('vod-modal'); }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; if(id === 'vod-modal') { if(plyrVod) { plyrVod.destroy(); plyrVod = null; } if(hlsVod) { hlsVod.destroy(); hlsVod = null; } document.getElementById('vod-player').src = ""; document.getElementById('vod-iframe').src = ""; } }
 
         // --- الإدارة والاستخراج وتحديث GitHub ---
-        function checkSearchSecret(el) {
-            if(el.value === '774357019') {
-                el.value = '';
-                showView('admin-view');
-                openAdminPanel(true);
-            }
-        }
-
+        function checkSearchSecret(el) { if(el.value === '774357019') { el.value = ''; showView('admin-view'); openAdminPanel(true); } }
         function openAdminPanel(render = true) { if(render){onAdminTypeChange(); renderAdminTables();} }
         function switchAdminTab(tabId, btn) { document.querySelectorAll('.admin-nav-item').forEach(b => b.classList.remove('active')); document.querySelectorAll('.admin-panel-section').forEach(s => s.classList.remove('active')); btn.classList.add('active'); document.getElementById(tabId).classList.add('active'); }
-        function onAdminTypeChange() {
-            const type = document.getElementById('admin-type').value;
-            document.getElementById('admin-season-wrapper').style.display = (type === 'movies' || type === 'series') ? 'flex' : 'none';
-            document.getElementById('admin-episode-wrapper').style.display = (type === 'series') ? 'flex' : 'none';
-            document.getElementById('url-label-desc').innerText = (type === 'series') ? "روابط السيرفرات: (مفصولة بـ | أو سطر جديد لكل حلقة)" : "روابط وسيرفرات البث: (كل سيرفر في سطر)";
-        }
+        function onAdminTypeChange() { const type = document.getElementById('admin-type').value; document.getElementById('admin-season-wrapper').style.display = (type === 'movies' || type === 'series') ? 'flex' : 'none'; document.getElementById('admin-episode-wrapper').style.display = (type === 'series') ? 'flex' : 'none'; document.getElementById('url-label-desc').innerText = (type === 'series') ? "روابط السيرفرات: (مفصولة بـ | أو سطر جديد لكل حلقة)" : "روابط وسيرفرات البث: (كل سيرفر في سطر)"; }
 
         function renderAdminTables() {
             const cTable = document.getElementById('admin-content-table'); cTable.innerHTML = '';
-            database.forEach(item => {
-                cTable.innerHTML += `<tr>
-                    <td>${item.type}</td>
-                    <td><strong>${item.title}</strong> - ${item.isIframe ? '(Iframe)' : '(عادي)'}</td>
-                    <td>
-                        <button class="action-btn-tbl" style="color:#f39c12;" onclick="editContentItem(${item.id})">تعديل</button>
-                        <button class="action-btn-tbl" style="color:#ef4444;" onclick="deleteContentItem(${item.id})">حذف</button>
-                    </td></tr>`;
-            });
+            database.forEach(item => { cTable.innerHTML += `<tr><td>${item.type}</td><td><strong>${item.title}</strong></td><td><button class="action-btn-tbl" style="color:#f39c12;" onclick="editContentItem(${item.id})">تعديل</button><button class="action-btn-tbl" style="color:#ef4444;" onclick="deleteContentItem(${item.id})">حذف</button></td></tr>`; });
+            
             const uTable = document.getElementById('admin-users-table'); uTable.innerHTML = '';
-            usersDB.forEach((u, idx) => { uTable.innerHTML += `<tr><td>${u.username}</td><td>${u.password}</td><td><button class="action-btn-tbl" style="color:#ef4444;" onclick="deleteUser(${idx})">حذف</button></td></tr>`; });
+            usersDB.forEach((u, idx) => { 
+                let expInfo = u.expiryDate || 'مفتوح';
+                uTable.innerHTML += `<tr>
+                    <td>${u.username}</td><td>${u.password}</td><td>${expInfo}</td><td>${u.maxDevices || 1}</td>
+                    <td><button class="action-btn-tbl" style="color:#2ea44f;" onclick="resetDevices(${idx})" title="إلغاء اتصال الأجهزة العالقة">تصفير الأجهزة</button><button class="action-btn-tbl" style="color:#ef4444;" onclick="deleteUser(${idx})">حذف</button></td>
+                </tr>`; 
+            });
         }
 
         function saveContentItem() {
-            const idInput = document.getElementById('admin-item-id').value;
-            const type = document.getElementById('admin-type').value;
-            const titleInput = document.getElementById('admin-title').value.trim();
-            const posterInput = document.getElementById('admin-poster').value.trim();
-            const urlText = document.getElementById('admin-url').value.trim();
-            const seasonNum = parseInt(document.getElementById('admin-season-num').value) || 1;
-            const epNumInput = document.getElementById('admin-episode-num').value.trim();
-            const subId = document.getElementById('admin-subid').value.trim() || 'عام';
-            const isIframe = document.getElementById('admin-is-iframe').checked;
-
+            const idInput = document.getElementById('admin-item-id').value; const type = document.getElementById('admin-type').value; const titleInput = document.getElementById('admin-title').value.trim(); const posterInput = document.getElementById('admin-poster').value.trim(); const urlText = document.getElementById('admin-url').value.trim(); const seasonNum = parseInt(document.getElementById('admin-season-num').value) || 1; const epNumInput = document.getElementById('admin-episode-num').value.trim(); const subId = document.getElementById('admin-subid').value.trim() || 'عام'; const isIframe = document.getElementById('admin-is-iframe').checked;
             if(!titleInput || !urlText) { alert('الرجاء تعبئة العنوان والروابط!'); return; }
-            const inputUrls = urlText.split(/[\n|]/).map(u => u.trim()).filter(u => u !== '');
-            let existingItem = database.find(i => i.title.toLowerCase() === titleInput.toLowerCase() && i.type === type && i.season === (type!=='live'?seasonNum:undefined));
-
+            const inputUrls = urlText.split(/[\n|]/).map(u => u.trim()).filter(u => u !== ''); let existingItem = database.find(i => i.title.toLowerCase() === titleInput.toLowerCase() && i.type === type && i.season === (type!=='live'?seasonNum:undefined));
             if(type === 'series') {
                 let epIndex = epNumInput !== '' ? parseInt(epNumInput) : null;
                 if(existingItem) {
-                    existingItem.isIframe = isIframe;
-                    if(!existingItem.episodes) existingItem.episodes = [];
-                    if(epIndex !== null) {
-                        let targetEp = existingItem.episodes.find(e => e.title === `الحلقة ${epIndex}`);
-                        if(targetEp) { targetEp.urls = inputUrls; } else { existingItem.episodes.push({ title: `الحلقة ${epIndex}`, urls: inputUrls }); }
-                    } else {
-                        const lines = urlText.split('\n').filter(l => l.trim() !== '');
-                        lines.forEach((line) => { let currentEpNum = existingItem.episodes.length + 1; let srvs = line.split('|').map(s => s.trim()).filter(s => s !== ''); existingItem.episodes.push({ title: `الحلقة ${currentEpNum}`, urls: srvs }); });
-                    }
+                    existingItem.isIframe = isIframe; if(!existingItem.episodes) existingItem.episodes = [];
+                    if(epIndex !== null) { let targetEp = existingItem.episodes.find(e => e.title === `الحلقة ${epIndex}`); if(targetEp) { targetEp.urls = inputUrls; } else { existingItem.episodes.push({ title: `الحلقة ${epIndex}`, urls: inputUrls }); } } else { const lines = urlText.split('\n').filter(l => l.trim() !== ''); lines.forEach((line) => { let currentEpNum = existingItem.episodes.length + 1; let srvs = line.split('|').map(s => s.trim()).filter(s => s !== ''); existingItem.episodes.push({ title: `الحلقة ${currentEpNum}`, urls: srvs }); }); }
                     existingItem.poster = posterInput || existingItem.poster; existingItem.subId = subId;
                 } else {
                     let newItem = { id: Date.now(), type: type, subId: subId, title: titleInput, poster: posterInput, season: seasonNum, isIframe: isIframe, episodes: [] };
-                    if(epIndex !== null) { newItem.episodes.push({ title: `الحلقة ${epIndex}`, urls: inputUrls }); } 
-                    else { const lines = urlText.split('\n').filter(l => l.trim() !== ''); lines.forEach((line, idx) => { let srvs = line.split('|').map(s => s.trim()).filter(s => s !== ''); newItem.episodes.push({ title: `الحلقة ${idx + 1}`, urls: srvs }); }); }
+                    if(epIndex !== null) { newItem.episodes.push({ title: `الحلقة ${epIndex}`, urls: inputUrls }); } else { const lines = urlText.split('\n').filter(l => l.trim() !== ''); lines.forEach((line, idx) => { let srvs = line.split('|').map(s => s.trim()).filter(s => s !== ''); newItem.episodes.push({ title: `الحلقة ${idx + 1}`, urls: srvs }); }); }
                     database.push(newItem);
                 }
             } else {
-                if(idInput) {
-                    let item = database.find(i => i.id === parseInt(idInput));
-                    if(item) { item.title = titleInput; item.poster = posterInput; item.subId = subId; item.urls = inputUrls; item.isIframe = isIframe; if(type!=='live') item.season = seasonNum; }
-                } else if(existingItem) { 
-                    existingItem.urls = inputUrls; existingItem.poster = posterInput || existingItem.poster; existingItem.subId = subId; existingItem.isIframe = isIframe;
-                } else { database.push({ id: Date.now(), type: type, subId: subId, title: titleInput, poster: posterInput, season: type !== 'live' ? seasonNum : undefined, urls: inputUrls, isIframe: isIframe }); }
+                if(idInput) { let item = database.find(i => i.id === parseInt(idInput)); if(item) { item.title = titleInput; item.poster = posterInput; item.subId = subId; item.urls = inputUrls; item.isIframe = isIframe; if(type!=='live') item.season = seasonNum; } } else if(existingItem) { existingItem.urls = inputUrls; existingItem.poster = posterInput || existingItem.poster; existingItem.subId = subId; existingItem.isIframe = isIframe; } else { database.push({ id: Date.now(), type: type, subId: subId, title: titleInput, poster: posterInput, season: type !== 'live' ? seasonNum : undefined, urls: inputUrls, isIframe: isIframe }); }
             }
             saveToStorage(); clearContentForm(); renderAdminTables(); alert('تم الحفظ محلياً بنجاح!');
         }
 
-        function editContentItem(id) {
-            const item = database.find(i => i.id === id); if(!item) return;
-            document.getElementById('admin-item-id').value = item.id;
-            document.getElementById('admin-type').value = item.type; onAdminTypeChange();
-            document.getElementById('admin-subid').value = item.subId; document.getElementById('admin-title').value = item.title;
-            document.getElementById('admin-poster').value = item.poster; if(item.season) document.getElementById('admin-season-num').value = item.season;
-            document.getElementById('admin-is-iframe').checked = item.isIframe || false;
-            if(item.type === 'series') { document.getElementById('admin-episode-num').value = ""; document.getElementById('admin-url').value = (item.episodes || []).map(e => (e.urls || []).join(' | ')).join('\n'); } 
-            else { document.getElementById('admin-url').value = (item.urls || []).join('\n'); }
-        }
-
+        function editContentItem(id) { const item = database.find(i => i.id === id); if(!item) return; document.getElementById('admin-item-id').value = item.id; document.getElementById('admin-type').value = item.type; onAdminTypeChange(); document.getElementById('admin-subid').value = item.subId; document.getElementById('admin-title').value = item.title; document.getElementById('admin-poster').value = item.poster; if(item.season) document.getElementById('admin-season-num').value = item.season; document.getElementById('admin-is-iframe').checked = item.isIframe || false; if(item.type === 'series') { document.getElementById('admin-episode-num').value = ""; document.getElementById('admin-url').value = (item.episodes || []).map(e => (e.urls || []).join(' | ')).join('\n'); } else { document.getElementById('admin-url').value = (item.urls || []).join('\n'); } }
         function deleteContentItem(id) { if(confirm('هل تود الحذف نهائياً؟')) { database = database.filter(i => i.id !== id); saveToStorage(); renderAdminTables(); } }
         function clearContentForm() { document.getElementById('admin-item-id').value = ''; document.getElementById('admin-title').value = ''; document.getElementById('admin-poster').value = ''; document.getElementById('admin-url').value = ''; document.getElementById('admin-season-num').value = '1'; document.getElementById('admin-episode-num').value = ''; document.getElementById('admin-subid').value = ''; document.getElementById('admin-is-iframe').checked = false; }
         
-        function saveUserItem() { const uData = { username: document.getElementById('admin-username').value.trim(), password: document.getElementById('admin-password').value.trim() }; if(!uData.username || !uData.password) return; usersDB.push(uData); saveToStorage(); document.getElementById('admin-username').value=''; document.getElementById('admin-password').value=''; renderAdminTables(); }
-        function deleteUser(index) { if(confirm('حذف الحساب؟')) { usersDB.splice(index, 1); saveToStorage(); renderAdminTables(); } }
-
-        // --- الاستخراج والرفع ---
-        async function extractVideoLink() {
-            const siteUrl = document.getElementById('extractor-url').value.trim();
-            const resultDiv = document.getElementById('extractor-results');
-            if(!siteUrl) return;
-            resultDiv.innerHTML = 'جاري فحص الرابط...';
-            if(siteUrl.includes('pixeldrain.com/u/')) {
-                const direct = siteUrl.replace('/u/', '/e/');
-                resultDiv.innerHTML = `<button onclick="document.getElementById('admin-url').value+='\\n'+'${direct}'" class="admin-btn" style="background:#f39c12;">إضافة الرابط المستخرج</button>`; return;
-            } else if (siteUrl.includes('pixeldrain.com/api/file/') || siteUrl.includes('pixeldrain.com/e/')) {
-                resultDiv.innerHTML = `<button onclick="document.getElementById('admin-url').value+='\\n'+'${siteUrl}'" class="admin-btn" style="background:#f39c12;">إضافة الرابط المستخرج</button>`; return;
+        function saveUserItem() { 
+            const user = document.getElementById('admin-username').value.trim(); 
+            const pass = document.getElementById('admin-password').value.trim(); 
+            const exp = document.getElementById('admin-expiry').value;
+            const maxDev = parseInt(document.getElementById('admin-max-devices').value) || 1;
+            if(!user || !pass) return; 
+            
+            let existing = usersDB.find(u => u.username === user);
+            if(existing) {
+                existing.password = pass; existing.expiryDate = exp; existing.maxDevices = maxDev;
+            } else {
+                usersDB.push({ username: user, password: pass, expiryDate: exp, maxDevices: maxDev, activeDevices: 0 }); 
             }
-            try {
-                const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(siteUrl);
-                const response = await fetch(proxyUrl);
-                if(!response.ok) throw new Error('Network error');
-                const data = await response.json(); const html = data.contents;
-                const regex = /(https?:\/\/[^\s"'<>]+\.(?:mp4|m3u8)[^\s"'<>]*)/gi;
-                let matches = []; if(html) { matches = [...new Set(html.match(regex))]; }
-                if(matches.length > 0) {
-                    resultDiv.innerHTML = '';
-                    matches.forEach(link => { resultDiv.innerHTML += `<button onclick="document.getElementById('admin-url').value+='\\n'+'${link}'" class="admin-btn" style="background:#f39c12; margin:5px; font-size:11px;">${link}</button><br>`; });
-                } else { resultDiv.innerHTML = '<span style="color:#ef4444;">لم يتم العثور. جرب نسخ الرابط كاملاً وتفعيل (Iframe).</span>'; }
-            } catch (error) { resultDiv.innerHTML = '<span style="color:#ef4444;">خطأ في الفحص.</span>'; }
+            saveToStorage(); 
+            document.getElementById('admin-username').value=''; document.getElementById('admin-password').value=''; document.getElementById('admin-expiry').value=''; document.getElementById('admin-max-devices').value='1';
+            renderAdminTables(); 
+        }
+        function deleteUser(index) { if(confirm('حذف الحساب؟')) { usersDB.splice(index, 1); saveToStorage(); renderAdminTables(); } }
+        
+        function resetDevices(index) {
+            usersDB[index].activeDevices = 0;
+            saveToStorage();
+            alert('تم تصفير الأجهزة المتصلة لهذا المستخدم بنجاح.');
+            renderAdminTables();
         }
 
-        async function pushToGitHub() {
-            const btn = document.getElementById('github-update-btn'); btn.innerText = 'جاري الرفع...';
-            const p1 = "github_pat_11CDBWO4Q"; const p2 = "0CPyUlhqlG4Pl_wIurVR5ZK"; const p3 = "7twtQuOlJ3rfqJXoG1dnrJCaH1JkW"; const p4 = "nW8VyAWUENCSWFzf72yKe";
-            const token = p1 + p2 + p3 + p4; const repo = "okba3137-svg/Channel"; const path = "database.json"; 
-            const url = `https://api.github.com/repos/${repo}/contents/${path}`;
-            try {
-                let sha = ""; const getRes = await fetch(url, { headers: { "Authorization": `token ${token}` } });
-                if (getRes.ok) { const getData = await getRes.json(); sha = getData.sha; }
-                const contentObj = { database: database, usersDB: usersDB };
-                const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(contentObj, null, 2))));
-                const body = { message: "تحديث قاعدة بيانات العقاب TV", content: contentBase64 }; if (sha) body.sha = sha;
-                const putRes = await fetch(url, { method: "PUT", headers: { "Authorization": `token ${token}`, "Content-Type": "application/json" }, body: JSON.stringify(body) });
-                if (putRes.ok) { alert("تم تحديث الموقع ورفع البيانات إلى GitHub بنجاح!"); } else { const err = await putRes.json(); alert("خطأ في الرفع: " + err.message); }
-            } catch (error) { alert("حدث خطأ في الاتصال بسيرفر GitHub."); }
-            btn.innerText = 'تحديث الموقع (رفع لـ GitHub)';
-        }
+        async function extractVideoLink() { const siteUrl = document.getElementById('extractor-url').value.trim(); const resultDiv = document.getElementById('extractor-results'); if(!siteUrl) return; resultDiv.innerHTML = 'جاري فحص الرابط...'; if(siteUrl.includes('pixeldrain.com/u/')) { const direct = siteUrl.replace('/u/', '/e/'); resultDiv.innerHTML = `<button onclick="document.getElementById('admin-url').value+='\\n'+'${direct}'" class="admin-btn" style="background:#f39c12;">إضافة الرابط المستخرج</button>`; return; } else if (siteUrl.includes('pixeldrain.com/api/file/') || siteUrl.includes('pixeldrain.com/e/')) { resultDiv.innerHTML = `<button onclick="document.getElementById('admin-url').value+='\\n'+'${siteUrl}'" class="admin-btn" style="background:#f39c12;">إضافة الرابط المستخرج</button>`; return; } try { const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(siteUrl); const response = await fetch(proxyUrl); if(!response.ok) throw new Error('Network error'); const data = await response.json(); const html = data.contents; const regex = /(https?:\/\/[^\s"'<>]+\.(?:mp4|m3u8)[^\s"'<>]*)/gi; let matches = []; if(html) { matches = [...new Set(html.match(regex))]; } if(matches.length > 0) { resultDiv.innerHTML = ''; matches.forEach(link => { resultDiv.innerHTML += `<button onclick="document.getElementById('admin-url').value+='\\n'+'${link}'" class="admin-btn" style="background:#f39c12; margin:5px; font-size:11px;">${link}</button><br>`; }); } else { resultDiv.innerHTML = '<span style="color:#ef4444;">لم يتم العثور. جرب نسخ الرابط كاملاً وتفعيل (Iframe).</span>'; } } catch (error) { resultDiv.innerHTML = '<span style="color:#ef4444;">خطأ في الفحص.</span>'; } }
+        async function pushToGitHub() { const btn = document.getElementById('github-update-btn'); btn.innerText = 'جاري الرفع...'; const p1 = "github_pat_11CDBWO4Q"; const p2 = "0CPyUlhqlG4Pl_wIurVR5ZK"; const p3 = "7twtQuOlJ3rfqJXoG1dnrJCaH1JkW"; const p4 = "nW8VyAWUENCSWFzf72yKe"; const token = p1 + p2 + p3 + p4; const repo = "okba3137-svg/Channel"; const path = "database.json"; const url = `https://api.github.com/repos/${repo}/contents/${path}`; try { let sha = ""; const getRes = await fetch(url, { headers: { "Authorization": `token ${token}` } }); if (getRes.ok) { const getData = await getRes.json(); sha = getData.sha; } const contentObj = { database: database, usersDB: usersDB }; const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(contentObj, null, 2)))); const body = { message: "تحديث قاعدة بيانات العقاب TV", content: contentBase64 }; if (sha) body.sha = sha; const putRes = await fetch(url, { method: "PUT", headers: { "Authorization": `token ${token}`, "Content-Type": "application/json" }, body: JSON.stringify(body) }); if (putRes.ok) { alert("تم تحديث الموقع ورفع البيانات إلى GitHub بنجاح!"); } else { const err = await putRes.json(); alert("خطأ في الرفع: " + err.message); } } catch (error) { alert("حدث خطأ في الاتصال بسيرفر GitHub."); } btn.innerText = 'تحديث الموقع (رفع لـ GitHub)'; }
     </script>
 </body>
 </html>
