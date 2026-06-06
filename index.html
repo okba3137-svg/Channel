@@ -599,14 +599,14 @@
             if(autoUpdate) {
                 let lastUpdate = localStorage.getItem('iqab_last_update');
                 let now = Date.now();
-                if(!lastUpdate || now - parseInt(lastUpdate) > 86400000) { // 24 hours (86,400,000 ms)
+                if(!lastUpdate || now - parseInt(lastUpdate) > 86400000) { 
                     localStorage.setItem('iqab_last_update', now);
                     location.reload(true);
                 }
             }
         };
 
-        const m3uPlaylists = [ { url: 'o_all.m3u', subId: ' aa ' } ];
+        const m3uPlaylists = [ { url: 'o_all.m3u', subId: 'جميع القنوات' } ];
 
         async function fetchM3UFiles() {
             m3uChannels = []; 
@@ -615,21 +615,21 @@
                     const response = await fetch(playlist.url + '?t=' + new Date().getTime(), { cache: 'no-store' });
                     if (!response.ok) continue; 
                     const text = await response.text();
-                    const lines = text.split('\n');
+                    
+                    // استخدام تعبير منتظم لالتقاط الأسطر بشكل صحيح في جميع الأنظمة
+                    const lines = text.split(/\r?\n/);
                     let currentChannel = {};
-                    let currentGenre = playlist.subId; // القسم الافتراضي
+                    let currentGenre = playlist.subId; 
 
-                    for (let line of lines) {
-                        line = line.trim();
+                    for (let i = 0; i < lines.length; i++) {
+                        let line = lines[i].trim();
                         if (!line) continue;
 
-                        // قراءة الأقسام بالصيغة المخصصة: CategoryName,#genre#
                         if (line.includes(',#genre#')) {
                             currentGenre = line.split(',')[0].trim();
                             continue;
                         }
 
-                        // الصيغة التقليدية #EXTINF
                         if (line.startsWith('#EXTINF:')) {
                             const parts = line.split(',');
                             currentChannel.title = parts.length > 1 ? parts[1].trim() : 'قناة غير معروفة';
@@ -638,18 +638,16 @@
                             currentChannel.isIframe = false;
                             currentChannel.poster = 'https://images.unsplash.com/photo-1593784991095-a205069470b6?w=200&q=80'; 
                         } 
-                        // معالجة الرابط الخاص بالصيغة التقليدية
                         else if (line.startsWith('http') && currentChannel.title) {
                             currentChannel.urls = [line];
-                            currentChannel.id = 'm3u_' + Date.now() + Math.random().toString(36).substr(2, 5);
+                            currentChannel.id = 'm3u_' + Date.now() + '_' + i;
                             m3uChannels.push({...currentChannel});
                             currentChannel = {}; 
                         }
-                        // الصيغة المبسطة: اسم القناة,الرابط
                         else if (line.includes(',') && !line.startsWith('#')) {
-                            const parts = line.split(',');
-                            const possibleName = parts[0].trim();
-                            const possibleUrl = parts.slice(1).join(',').trim(); 
+                            const firstComma = line.indexOf(',');
+                            const possibleName = line.substring(0, firstComma).trim();
+                            const possibleUrl = line.substring(firstComma + 1).trim(); 
                             
                             if (possibleUrl.startsWith('http')) {
                                 m3uChannels.push({
@@ -659,12 +657,14 @@
                                     isIframe: false,
                                     poster: 'https://images.unsplash.com/photo-1593784991095-a205069470b6?w=200&q=80',
                                     urls: [possibleUrl],
-                                    id: 'm3u_' + Date.now() + Math.random().toString(36).substr(2, 5)
+                                    id: 'm3us_' + Date.now() + '_' + i
                                 });
                             }
                         }
                     }
-                } catch (error) {}
+                } catch (error) {
+                    console.error("M3U Fetch Error:", error);
+                }
             }
             if(document.getElementById('live-view').classList.contains('active')){ loadCategories(); renderContent(); }
         }
@@ -675,7 +675,7 @@
             err.style.display = 'block';
         }
 
-        // --- نظام تسجيل الدخول والحماية من الأجهزة والتواريخ ---
+        // --- نظام تسجيل الدخول ---
         function login() {
             const user = document.getElementById('play-user').value.trim();
             const pass = document.getElementById('play-pass').value.trim();
@@ -683,7 +683,6 @@
             let foundUser = usersDB.find(u => u.username === user && u.password === pass);
             
             if (foundUser) {
-                // فحص تاريخ الانتهاء
                 if(foundUser.expiryDate) {
                     let expDate = new Date(foundUser.expiryDate);
                     if(new Date() > expDate) {
@@ -692,7 +691,6 @@
                     }
                 }
 
-                // فحص الأجهزة المتصلة
                 let max = foundUser.maxDevices || 1;
                 let active = foundUser.activeDevices || 0;
                 
@@ -701,12 +699,10 @@
                     return;
                 }
 
-                // الدخول ناجح: تحديث عدد الأجهزة وتخزين الجلسة
                 foundUser.activeDevices = active + 1;
                 saveToStorage();
                 sessionStorage.setItem('loggedInUser', foundUser.username);
                 
-                // ملء بيانات الإعدادات
                 document.getElementById('st-username').innerText = foundUser.username;
                 document.getElementById('st-expiry').innerText = foundUser.expiryDate || 'مفتوح (بدون تاريخ)';
                 document.getElementById('st-devices').innerText = `${foundUser.activeDevices} من ${max}`;
@@ -719,7 +715,6 @@
             }
         }
 
-        // --- نظام تسجيل الخروج وإنقاص الأجهزة ---
         function logout() {
             let sessionUser = sessionStorage.getItem('loggedInUser');
             if(sessionUser) {
@@ -733,7 +728,6 @@
             location.reload();
         }
 
-        // معالجة الخروج المفاجئ (إغلاق المتصفح) لإنقاص جهاز المستخدم (محاكاة الحماية محلياً)
         window.addEventListener('beforeunload', () => {
             let sessionUser = sessionStorage.getItem('loggedInUser');
             if(sessionUser) {
@@ -772,16 +766,25 @@
             selectCategory('all', allBtn, listId);
         }
 
-        function selectCategory(subId, element, listId) {
-            currentSubId = subId; document.querySelectorAll(`#${listId} .list-item`).forEach(el => el.classList.remove('active'));
-            element.classList.add('active'); renderContent();
-        }
-
         function renderContent(searchQuery = '') {
-            const combinedDB = [...database, ...m3uChannels]; let filtered = combinedDB.filter(item => item.type === currentType);
+            const combinedDB = [...database, ...m3uChannels]; 
+            let filtered = combinedDB.filter(item => item.type === currentType);
+            
             if (currentSubId !== 'all') filtered = filtered.filter(item => item.subId === currentSubId);
-            if (searchQuery) filtered = filtered.filter(item => item.title.toLowerCase().includes(searchQuery.toLowerCase()));
-            let uniqueItems = []; filtered.forEach(item => { if(!uniqueItems.find(u => u.title.trim().toLowerCase() === item.title.trim().toLowerCase())) uniqueItems.push(item); });
+            if (searchQuery) {
+                const query = searchQuery.toLowerCase();
+                filtered = filtered.filter(item => item.title && item.title.toLowerCase().includes(query));
+            }
+
+            // --- الكود المعالج للتعليق (استخدام Map لتسريع التصفية O(N) بدلاً من O(N^2)) ---
+            let uniqueMap = new Map();
+            filtered.forEach(item => {
+                let key = item.title ? item.title.trim().toLowerCase() : 'unknown';
+                if (!uniqueMap.has(key)) {
+                    uniqueMap.set(key, item);
+                }
+            });
+            let uniqueItems = Array.from(uniqueMap.values());
 
             if(currentType === 'live') {
                 const list = document.getElementById('live-channels-list'); list.innerHTML = '';
