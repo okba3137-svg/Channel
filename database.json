@@ -7,7 +7,7 @@
       "title": "بي إن سبورت 1",
       "poster": "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=200&q=80",
       "urls": [
-        "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
+        "https://uvotv.com/live/sada-albalad-927/play?category=all&region=255"
       ],
       "isIframe": false
     },
@@ -19,7 +19,7 @@
       "poster": "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?w=300&q=80",
       "season": 1,
       "urls": [
-        "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4"
+        "https://uvotv.com/live/sada-albalad-927/play?category=all&region=255"
       ],
       "isIframe": false
     }
@@ -28,9 +28,10 @@
     {
       "username": "okba",
       "password": "1233",
-      "maxDevices": 1,
+      "expiryDate": "2027-10-31",
+      "maxDevices": 3,
       "connectedDevices": [
-        "DEV-RZ3JHDKOT"
+        "DEV-6OTKSRGYZ"
       ]
     }
   ],
@@ -40,12 +41,28 @@
       "subId": "جميع القنوات"
     },
     {
-      "url": "https://gist.githubusercontent.com/ItsRandall/3119615c8b4732d7b56e5217d66edbab/raw/7a89dbac3dfaa3425b2890cfb40c5d5dc5fbde15/playlist.m3u",
-      "subId": "11"
+      "url": "https://gist.github.com/icehack3/55a5c448261ccb20b1471c297713af7f.js",
+      "subId": "قنوات"
     },
     {
-      "url": "https://raw.githubusercontent.com/Free-TV/IPTV/refs/heads/master/playlist.m3u8",
-      "subId": "222"
+      "url": "https://gist.github.com/icehack3/55a5c448261ccb20b1471c297713af7f.js",
+      "subId": "قنوات شامل"
+    },
+    {
+      "url": "https://gist.github.com/icehack3/55a5c448261ccb20b1471c297713af7f",
+      "subId": "قنوات"
+    },
+    {
+      "url": "https://gist.githubusercontent.com/icehack3/55a5c448261ccb20b1471c297713af7f/raw/ebbaa9b362273e5ef7d7053cc14e258f98eb0665/zmp.m3u8",
+      "subId": "قنوات شامله"
+    },
+    {
+      "url": "http://mkstream.servehttp.com:1940/AmouYazid/ay1/playlist.m3u8",
+      "subId": "Hh"
+    },
+    {
+      "url": "https://iptv- org.github.io/iptv/categories/movie s.m3u",
+      "subId": "Movies"
     }
   ]
 }
