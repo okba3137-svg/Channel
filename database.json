@@ -7,7 +7,7 @@
       "title": "بي إن سبورت 1",
       "poster": "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=200&q=80",
       "urls": [
-        "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
+        "https://uvotv.com/live/sada-albalad-927/play?category=all&region=255"
       ],
       "isIframe": false
     },
@@ -19,7 +19,7 @@
       "poster": "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?w=300&q=80",
       "season": 1,
       "urls": [
-        "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4"
+        "https://uvotv.com/live/sada-albalad-927/play?category=all&region=255"
       ],
       "isIframe": false
     }
@@ -27,10 +27,26 @@
   "usersDB": [
     {
       "username": "okba",
-      "password": "123",
+      "password": "1233",
+      "expiryDate": "2027-10-31",
       "maxDevices": 3,
-      "activeDevices": 1,
-      "expiryDate": "2027-10-31"
+      "connectedDevices": [
+        "DEV-6OTKSRGYZ"
+      ]
+    }
+  ],
+  "m3uUrlsDB": [
+    {
+      "url": "DL-5-6-2026.m3u",
+      "subId": "جميع القنوات"
+    },
+    {
+      "url": "https://gist.github.com/icehack3/55a5c448261ccb20b1471c297713af7f.js",
+      "subId": "قنوات"
+    },
+    {
+      "url": "https://gist.github.com/icehack3/55a5c448261ccb20b1471c297713af7f.js",
+      "subId": "قنوات شامل"
     }
   ]
 }
