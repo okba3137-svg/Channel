@@ -7,7 +7,7 @@
       "title": "بي إن سبورت 1",
       "poster": "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=200&q=80",
       "urls": [
-        "https://uvotv.com/live/sada-albalad-927/play?category=all&region=255"
+        "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
       ],
       "isIframe": false
     },
@@ -19,7 +19,7 @@
       "poster": "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?w=300&q=80",
       "season": 1,
       "urls": [
-        "https://uvotv.com/live/sada-albalad-927/play?category=all&region=255"
+        "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4"
       ],
       "isIframe": false
     }
@@ -28,10 +28,9 @@
     {
       "username": "okba",
       "password": "1233",
-      "expiryDate": "2027-10-31",
-      "maxDevices": 3,
+      "maxDevices": 1,
       "connectedDevices": [
-        "DEV-6OTKSRGYZ"
+        "DEV-RZ3JHDKOT"
       ]
     }
   ],
@@ -41,28 +40,68 @@
       "subId": "جميع القنوات"
     },
     {
-      "url": "https://gist.github.com/icehack3/55a5c448261ccb20b1471c297713af7f.js",
-      "subId": "قنوات"
+      "url": "https://gist.githubusercontent.com/ItsRandall/3119615c8b4732d7b56e5217d66edbab/raw/7a89dbac3dfaa3425b2890cfb40c5d5dc5fbde15/playlist.m3u",
+      "subId": "11"
     },
     {
-      "url": "https://gist.github.com/icehack3/55a5c448261ccb20b1471c297713af7f.js",
-      "subId": "قنوات شامل"
+      "url": "https://raw.githubusercontent.com/Free-TV/IPTV/refs/heads/master/playlist.m3u8",
+      "subId": "222"
     },
     {
-      "url": "https://gist.github.com/icehack3/55a5c448261ccb20b1471c297713af7f",
-      "subId": "قنوات"
+      "url": "https://raw.githubusercontent.com/LITUATUI/M3UPT/refs/heads/main/M3U/M3UPT.m3u",
+      "subId": "قنوات M3U"
     },
     {
-      "url": "https://gist.githubusercontent.com/icehack3/55a5c448261ccb20b1471c297713af7f/raw/ebbaa9b362273e5ef7d7053cc14e258f98eb0665/zmp.m3u8",
-      "subId": "قنوات شامله"
+      "url": "https://video-auth6.iol.pt/edge_servers/tvi-720_passthrough/chunks.m3u8?wmsAuthSign=",
+      "subId": "قنوات M3U"
     },
     {
-      "url": "http://mkstream.servehttp.com:1940/AmouYazid/ay1/playlist.m3u8",
-      "subId": "Hh"
+      "url": "https://raw.githubusercontent.com/LITUATUI/M3UPT/refs/heads/main/M3U/TVI.m3u8",
+      "subId": "قنوات M3U"
     },
     {
-      "url": "https://iptv- org.github.io/iptv/categories/movie s.m3u",
-      "subId": "Movies"
+      "url": "https://raw.githubusercontent.com/iptv-org/iptv/refs/heads/master/streams/ae.m3u",
+      "subId": "قنوات عربيهae"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/iptv-org/iptv/refs/heads/master/streams/ar.m3u",
+      "subId": "عربي"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/iptv-org/iptv/refs/heads/master/streams/bh.m3u",
+      "subId": "البحرين"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/iptv-org/iptv/refs/heads/master/streams/us_tubi.m3u",
+      "subId": "امريكي"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/iptv-org/iptv/refs/heads/master/streams/uk_bbc.m3u",
+      "subId": "Bbc"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/amazeyourself/m3u/refs/heads/main/yupptvfast.m3u",
+      "subId": "Yy"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/amazeyourself/m3u/refs/heads/main/roarzone.m3u",
+      "subId": "Oo"
+    },
+    {
+      "url": "https://iptv-org.github.io/iptv/index.m3u",
+      "subId": "990"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/imDazui/Tvlist-awesome-m3u-m3u8/master/m3u/%E5%9B%BD%E5%86%85%E7%94%B5%E8%A7%86%E5%8F%B0202509.m3u",
+      "subId": "66"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/imDazui/Tvlist-awesome-m3u-m3u8/master/m3u/%E5%9B%BD%E5%A4%96%E7%94%B5%E8%A7%86%E5%8F%B0202409.m3u",
+      "subId": "00"
+    },
+    {
+      "url": "https://openstream.sendly.me/index.m3u",
+      "subId": "Mm"
     }
   ]
 }
