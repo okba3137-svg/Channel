@@ -46,17 +46,24 @@
         .top-bar-add { width: 100%; display: flex; justify-content: center; align-items: center; position: relative; }
         .back-btn { position: absolute; left: 4%; cursor: pointer; padding: 10px; }
         .back-btn svg { fill: #ffffff; width: 24px; height: 24px; }
-        .form-box { width: 85%; max-width: 800px; background: rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 15px 25px; display: flex; flex-direction: column; gap: 15px; }
+        .form-box { width: 85%; max-width: 800px; background: rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 15px 25px; display: flex; flex-direction: column; gap: 15px; direction: rtl; }
         .inputs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 25px; }
-        .input-group { display: flex; flex-direction: column; gap: 6px; }
+        .input-group { display: flex; flex-direction: column; gap: 6px; text-align: right; }
         .input-group input, .input-group select { background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; padding: 8px 12px; color: #ffffff; outline: none; }
         .submit-btn { background-color: #d32f2f; color: #ffffff; border: none; border-radius: 4px; padding: 10px 35px; font-weight: bold; cursor: pointer; transition: 0.2s;}
         .submit-btn:hover { background-color: #b71c1c; }
+
+        /* ستايل الحسابات المحفوظة */
+        .profile-card { background: rgba(255,255,255,0.1); padding: 10px 15px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 12px; width: 100%; transition: 0.2s; border: 1px solid rgba(255,255,255,0.05); }
+        .profile-card:hover { background: rgba(255,255,255,0.2); border-color: #f39c12; }
+        .profile-icon { background: #e53935; width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 18px; color: #fff; }
+        .del-profile { margin-right: auto; background: rgba(255,0,0,0.2); border: none; color: #ff4757; width: 30px; height: 30px; border-radius: 50%; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: 0.2s; }
+        .del-profile:hover { background: #ff4757; color: white; }
         
         /* =========================================
            لوحة التحكم الرئيسية (Dashboard)
            ========================================= */
-        #dashboard-view.active { display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle at center, #3a2e31 0%, #1a1a24 60%, #0d0d12 100%); }
+        #dashboard-view.active { display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle at center, #3a2e31 0%, #1a1a24 60%, #0d0d12 100%); relative;}
         .dash-header { position: absolute; top: 5%; width: 100%; display: flex; justify-content: center; }
         .dash-logo-center { display: flex; flex-direction: column; align-items: center; gap: 5px; }
         .dash-logo-center svg { width: 35px; height: 35px; fill: #e53935; }
@@ -98,11 +105,14 @@
         .nav-item.active { color: #fff; }
         .nav-item.active::after { content: ''; position: absolute; bottom: -5px; left: 0; width: 100%; height: 2px; background-color: #f39c12; }
         .nav-separator { color: #555; font-size: 14px; }
-        .top-search-logo { display: flex; align-items: center; gap: 20px; }
-        .search-box-top { display: flex; align-items: center; border: 1px solid #555; border-radius: 20px; padding: 4px 15px; width: 250px; }
+        .top-search-logo { display: flex; align-items: center; gap: 15px; }
+        .search-box-top { display: flex; align-items: center; border: 1px solid #555; border-radius: 20px; padding: 4px 15px; width: 220px; }
         .search-box-top svg { width: 16px; height: 16px; fill: #aaa; margin-right: 8px; }
         .search-box-top input { background: transparent; border: none; color: #fff; outline: none; width: 100%; font-size: 13px; }
-        .app-logo-small { display: flex; align-items: center; gap: 5px; font-weight: bold; font-size: 16px; }
+        .refresh-btn { background: transparent; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.3s; padding: 5px; }
+        .refresh-btn:hover { transform: rotate(180deg); }
+        .refresh-btn svg { width: 22px; height: 22px; fill: #f39c12; }
+        .app-logo-small { display: flex; align-items: center; gap: 5px; font-weight: bold; font-size: 16px; margin-left: 10px;}
         .app-logo-small svg { width: 20px; height: 20px; fill: #e53935; }
         .media-content-area { display: flex; height: calc(100% - 60px); width: 100%; }
 
@@ -118,7 +128,7 @@
         .channel-num { color: #888; font-size: 12px; width: 35px; }
         .channel-icon { width: 30px; height: 20px; border-radius: 2px; object-fit: cover; }
         .video-player-mock { width: 100%; height: 55%; background: #000; border-radius: 4px; position: relative; display: flex; justify-content: center; align-items: center; overflow: hidden; }
-        .live-info { margin-top: 15px; font-size: 14px; font-weight: bold; }
+        .live-info { font-size: 14px; font-weight: bold; margin-top: 0;}
         .live-servers { margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap;}
         .server-btn { background: rgba(255,255,255,0.1); border: 1px solid #555; color: #fff; padding: 5px 15px; border-radius: 4px; cursor: pointer; font-size: 12px; }
         .server-btn.active { background: #f39c12; border-color: #f39c12; color: #000; font-weight: bold; }
@@ -225,22 +235,51 @@
         <div id="home-view" class="view active">
             <div class="left-section">
                 <div class="header-title"><span class="logo">Al-Oqab</span> <span style="margin:0 10px;color:rgba(255,255,255,0.4)">|</span> <span>Player</span></div>
-                <div class="add-card" id="open-add-screen" onclick="showView('add-view')"><div class="plus-icon">+</div><span class="add-text">تسجيل الدخول</span></div>
+                <div class="add-card" id="open-add-screen" onclick="openLoginView()"><div class="plus-icon">+</div><span class="add-text">تسجيل الدخول</span></div>
                 <div class="footer-container"><div class="footer-bold">Al-Oqab Player System.</div><div class="footer-sub">Integrated with Plymouth and Local DB</div></div>
             </div>
         </div>
 
         <div id="add-view" class="view">
             <div class="top-bar-add"><div class="back-btn" onclick="showView('home-view')"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></div><div style="font-weight: 500;">تسجيل الدخول</div></div>
-            <div class="form-box" style="max-width: 400px; align-items: center; margin: auto; transform: translateY(10%);">
-                <div class="input-group" style="width: 100%;"><label>اسم المستخدم</label><input type="text" id="play-user"></div>
-                <div class="input-group" style="width: 100%;"><label>كلمة المرور</label><input type="password" id="play-pass"></div>
-                <div id="login-error" style="color: #ff4757; font-size: 13px; font-weight: bold; display: none; text-align: center;">بيانات غير صحيحة!</div>
-                <button class="submit-btn" style="width: 100%; margin-top: 10px;" id="submit-playlist" onclick="login()">دخول الآن</button>
+            
+            <div class="form-box" style="max-width: 400px; align-items: center; margin: auto; transform: translateY(5%);">
+                
+                <div id="profiles-container" style="display:none; width: 100%; flex-direction: column; gap: 10px;">
+                    <h3 style="text-align:center; margin-bottom:10px; color:#f39c12;">الحسابات المحفوظة</h3>
+                    <div id="saved-profiles-list" style="display: flex; flex-direction: column; gap: 10px; width: 100%;"></div>
+                    <button class="submit-btn" style="background-color: #4b367c; margin-top:10px;" onclick="showNewAccountForm()">إضافة حساب آخر +</button>
+                </div>
+
+                <div id="new-account-form" style="width:100%; display:flex; flex-direction:column; gap:15px;">
+                    <div class="input-group" style="width: 100%;">
+                        <label>اسم المشغل</label>
+                        <input type="text" id="play-player-name" placeholder="مثال: مشغل العائلة">
+                    </div>
+                    <div class="input-group" style="width: 100%;">
+                        <label>الهوست (Host)</label>
+                        <input type="text" id="play-host" placeholder="http://example.com:8080">
+                    </div>
+                    <div class="input-group" style="width: 100%;">
+                        <label>اسم المستخدم</label>
+                        <input type="text" id="play-user">
+                    </div>
+                    <div class="input-group" style="width: 100%;">
+                        <label>كلمة المرور</label>
+                        <input type="password" id="play-pass">
+                    </div>
+                    <div id="login-error" style="color: #ff4757; font-size: 13px; font-weight: bold; display: none; text-align: center;">بيانات غير صحيحة!</div>
+                    <button class="submit-btn" style="width: 100%; margin-top: 10px;" id="submit-playlist" onclick="login()">دخول الآن</button>
+                    <button class="submit-btn" style="width: 100%; background-color: #555; display:none;" id="back-to-profiles-btn" onclick="initLoginScreen()">رجوع للحسابات المحفوظة</button>
+                </div>
             </div>
         </div>
 
         <div id="dashboard-view" class="view">
+            <div style="position: absolute; top: 20px; right: 30px; background: rgba(0,0,0,0.5); padding: 8px 15px; border-radius: 8px; border: 1px solid #333; direction: rtl; z-index: 10;">
+                <span style="color:#aaa; font-size:12px;">تاريخ انتهاء الحساب:</span> <strong id="dash-expiry" style="color:#2ea44f; font-size:14px;">---</strong>
+            </div>
+
             <div class="dash-header">
                 <div class="dash-logo-center">
                     <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
@@ -295,8 +334,10 @@
                 </div>
 
                 <div class="settings-card">
-                    <h3 class="settings-section-title">حالة الحساب (معلومات الجلسة)</h3>
+                    <h3 class="settings-section-title">معلومات الحساب</h3>
                     <div style="display:flex; flex-direction:column; gap:12px; font-size:15px; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 6px;">
+                        <div><span style="color:#aaa;">اسم المشغل:</span> <strong id="st-pname" style="color:#fff;">---</strong></div>
+                        <div><span style="color:#aaa;">الهوست:</span> <strong id="st-host" style="color:#fff;">---</strong></div>
                         <div><span style="color:#aaa;">اسم المستخدم:</span> <strong id="st-username" style="color:#fff;">---</strong></div>
                         <div><span style="color:#aaa;">تاريخ الانتهاء:</span> <strong id="st-expiry" style="color:#2ea44f;">---</strong></div>
                         <div><span style="color:#aaa;">تفعيل الأجهزة (مستخدم/مسموح):</span> <strong id="st-devices" style="color:#f39c12;">---</strong></div>
@@ -320,6 +361,7 @@
                             <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
                             <input type="text" id="secret-live-search" placeholder="Search..." onkeyup="checkSearchSecret(this); renderContent(this.value)">
                         </div>
+                        <button onclick="fetchM3UFiles()" class="refresh-btn" title="تحديث المحتوى"><svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.24 4.94 14.24 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></button>
                         <div class="app-logo-small"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> Player</div>
                     </div>
                 </div>
@@ -331,7 +373,10 @@
                             <div id="live-video-container" class="video-container"><video id="live-player" playsinline controls></video></div>
                             <div id="live-iframe-container" class="iframe-container"><iframe id="live-iframe" allowfullscreen></iframe></div>
                         </div>
-                        <div class="live-info" id="live-title-display">اختر قناة للتشغيل</div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top: 15px;">
+                            <div class="live-info" id="live-title-display">اختر قناة للتشغيل</div>
+                            <button onclick="refreshCurrentLive()" class="refresh-btn" title="تحديث المشغل"><svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.24 4.94 14.24 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></button>
+                        </div>
                         <div class="live-servers" id="live-servers-btns"></div>
                     </div>
                 </div>
@@ -349,6 +394,8 @@
                     </div>
                     <div class="top-search-logo">
                         <div class="search-box-top"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg><input type="text" onkeyup="renderContent(this.value)"></div>
+                        <button onclick="fetchM3UFiles()" class="refresh-btn" title="تحديث المحتوى"><svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.24 4.94 14.24 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></button>
+                        <div class="app-logo-small"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> Player</div>
                     </div>
                 </div>
                 <div class="media-content-area">
@@ -378,6 +425,8 @@
                     </div>
                     <div class="top-search-logo">
                         <div class="search-box-top"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg><input type="text" onkeyup="renderContent(this.value)"></div>
+                        <button onclick="fetchM3UFiles()" class="refresh-btn" title="تحديث المحتوى"><svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.24 4.94 14.24 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></button>
+                        <div class="app-logo-small"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> Player</div>
                     </div>
                 </div>
                 <div class="media-content-area">
@@ -544,7 +593,10 @@
                         <div id="vod-video-container" class="video-container"><video id="vod-player" playsinline controls></video></div>
                         <div id="vod-iframe-container" class="iframe-container"><iframe id="vod-iframe" allowfullscreen></iframe></div>
                     </div>
-                    <div class="live-info" id="vod-title-display" style="font-size:24px; color:#f39c12; margin-top:15px;">العنوان</div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top: 15px;">
+                        <div class="live-info" id="vod-title-display" style="font-size:24px; color:#f39c12; margin-top:0;">العنوان</div>
+                        <button onclick="refreshCurrentVod()" class="refresh-btn" title="تحديث المشغل"><svg viewBox="0 0 24 24" style="width:28px; height:28px;"><path d="M17.65 6.35C16.24 4.94 14.24 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></button>
+                    </div>
                     <div class="live-servers" id="vod-servers-btns"></div>
                 </div>
                 <div class="vod-modal-sidebar" id="vod-sidebar" style="display:none;">
@@ -580,6 +632,12 @@
         let currentType = 'live', currentSubId = 'all';
         let currentMediaObj = null;
 
+        // متغيرات الحفظ وتحديث المشغل
+        let savedProfiles = JSON.parse(localStorage.getItem('iqab_saved_profiles')) || [];
+        let activeLiveItem = null;
+        let activeVodUrls = null;
+        let activeVodIsIframe = false;
+
         function saveToStorage() {
             localStorage.setItem('iqab_db_v5', JSON.stringify(database));
             localStorage.setItem('iqab_users_v5', JSON.stringify(usersDB));
@@ -604,6 +662,22 @@
                     location.reload(true);
                 }
             }
+
+            // استعادة الجلسة في حال عمل تحديث (Refresh) للصفحة لمنع الخروج التلقائي
+            let sessionUser = sessionStorage.getItem('loggedInUser');
+            if(sessionUser) {
+                let dbUser = usersDB.find(x => x.username === sessionUser);
+                if(dbUser) {
+                    // زيادة الأجهزة مرة أخرى لأنها تنقص تلقائياً في beforeunload
+                    let max = dbUser.maxDevices || 1;
+                    if (dbUser.activeDevices < max) dbUser.activeDevices++;
+                    saveToStorage();
+
+                    let pName = sessionStorage.getItem('loggedInPName') || 'المشغل';
+                    let host = sessionStorage.getItem('loggedInHost') || 'localhost';
+                    setupSessionUI(dbUser, pName, host);
+                }
+            }
         };
 
         const m3uPlaylists = [ { url: 'DL-5-6-2026.m3u', subId: 'جميع القنوات' } ];
@@ -616,7 +690,6 @@
                     if (!response.ok) continue; 
                     const text = await response.text();
                     
-                    // استخدام تعبير منتظم لالتقاط الأسطر بشكل صحيح في جميع الأنظمة
                     const lines = text.split(/\r?\n/);
                     let currentChannel = {};
                     let currentGenre = playlist.subId; 
@@ -669,6 +742,63 @@
             if(document.getElementById('live-view').classList.contains('active')){ loadCategories(); renderContent(); }
         }
 
+        // --- نظام الحسابات (Profiles) ---
+        function openLoginView() {
+            showView('add-view');
+            initLoginScreen();
+        }
+
+        function initLoginScreen() {
+            if (savedProfiles.length > 0) {
+                document.getElementById('new-account-form').style.display = 'none';
+                document.getElementById('profiles-container').style.display = 'flex';
+                document.getElementById('back-to-profiles-btn').style.display = 'block';
+                renderProfiles();
+            } else {
+                showNewAccountForm();
+                document.getElementById('back-to-profiles-btn').style.display = 'none';
+            }
+        }
+
+        function showNewAccountForm() {
+            document.getElementById('new-account-form').style.display = 'flex';
+            document.getElementById('profiles-container').style.display = 'none';
+        }
+
+        function renderProfiles() {
+            const list = document.getElementById('saved-profiles-list');
+            list.innerHTML = '';
+            savedProfiles.forEach((prof, idx) => {
+                const p = document.createElement('div');
+                p.className = 'profile-card';
+                p.innerHTML = `
+                    <div class="profile-icon">${prof.playerName ? prof.playerName.charAt(0).toUpperCase() : 'م'}</div>
+                    <div style="display:flex; flex-direction:column; align-items:flex-start; text-align:right;">
+                        <span style="font-weight:bold; font-size:15px;">${prof.playerName || 'مشغل غير معروف'}</span>
+                        <span style="font-size:12px; color:#aaa;">${prof.host || 'لا يوجد هوست'}</span>
+                    </div>
+                    <button class="del-profile" onclick="deleteProfile(event, ${idx})" title="حذف الحساب">X</button>
+                `;
+                p.onclick = () => loginWithProfile(prof);
+                list.appendChild(p);
+            });
+        }
+
+        function deleteProfile(e, idx) {
+            e.stopPropagation();
+            savedProfiles.splice(idx, 1);
+            localStorage.setItem('iqab_saved_profiles', JSON.stringify(savedProfiles));
+            initLoginScreen();
+        }
+
+        function loginWithProfile(prof) {
+            document.getElementById('play-user').value = prof.username;
+            document.getElementById('play-pass').value = prof.password;
+            document.getElementById('play-player-name').value = prof.playerName;
+            document.getElementById('play-host').value = prof.host;
+            login();
+        }
+
         function showLoginError(msg) {
             const err = document.getElementById('login-error');
             err.innerText = msg;
@@ -679,6 +809,8 @@
         function login() {
             const user = document.getElementById('play-user').value.trim();
             const pass = document.getElementById('play-pass').value.trim();
+            const pName = document.getElementById('play-player-name').value.trim() || 'المشغل';
+            const host = document.getElementById('play-host').value.trim() || 'لا يوجد';
             
             let foundUser = usersDB.find(u => u.username === user && u.password === pass);
             
@@ -701,18 +833,37 @@
 
                 foundUser.activeDevices = active + 1;
                 saveToStorage();
+
+                // حفظ الحساب في القائمة إذا لم يكن موجوداً
+                if(!savedProfiles.find(p => p.username === user && p.host === host)) {
+                    savedProfiles.push({username: user, password: pass, playerName: pName, host: host});
+                    localStorage.setItem('iqab_saved_profiles', JSON.stringify(savedProfiles));
+                }
+
                 sessionStorage.setItem('loggedInUser', foundUser.username);
-                
-                document.getElementById('st-username').innerText = foundUser.username;
-                document.getElementById('st-expiry').innerText = foundUser.expiryDate || 'مفتوح (بدون تاريخ)';
-                document.getElementById('st-devices').innerText = `${foundUser.activeDevices} من ${max}`;
+                sessionStorage.setItem('loggedInPName', pName);
+                sessionStorage.setItem('loggedInHost', host);
                 
                 document.getElementById('login-error').style.display = 'none';
-                fetchM3UFiles();
+                setupSessionUI(foundUser, pName, host);
                 showMediaView('live');
             } else {
                 showLoginError("البيانات المدخلة غير صحيحة!");
             }
+        }
+
+        function setupSessionUI(user, pName, host) {
+            let max = user.maxDevices || 1;
+            document.getElementById('st-username').innerText = user.username;
+            document.getElementById('st-expiry').innerText = user.expiryDate || 'مفتوح (بدون تاريخ)';
+            document.getElementById('st-devices').innerText = `${user.activeDevices} من ${max}`;
+            
+            // معلومات إضافية
+            document.getElementById('st-pname').innerText = pName;
+            document.getElementById('st-host').innerText = host;
+            document.getElementById('dash-expiry').innerText = user.expiryDate || 'مفتوح (بدون تاريخ)';
+
+            fetchM3UFiles();
         }
 
         function logout() {
@@ -725,6 +876,8 @@
                saveToStorage();
             }
             sessionStorage.removeItem('loggedInUser');
+            sessionStorage.removeItem('loggedInPName');
+            sessionStorage.removeItem('loggedInHost');
             location.reload();
         }
 
@@ -766,6 +919,13 @@
             selectCategory('all', allBtn, listId);
         }
 
+        function selectCategory(sub, btnElement, listId) {
+            document.querySelectorAll(`#${listId} .list-item`).forEach(b => b.classList.remove('active'));
+            btnElement.classList.add('active');
+            currentSubId = sub;
+            renderContent();
+        }
+
         function renderContent(searchQuery = '') {
             const combinedDB = [...database, ...m3uChannels]; 
             let filtered = combinedDB.filter(item => item.type === currentType);
@@ -776,7 +936,6 @@
                 filtered = filtered.filter(item => item.title && item.title.toLowerCase().includes(query));
             }
 
-            // --- الكود المعالج للتعليق (استخدام Map لتسريع التصفية O(N) بدلاً من O(N^2)) ---
             let uniqueMap = new Map();
             filtered.forEach(item => {
                 let key = item.title ? item.title.trim().toLowerCase() : 'unknown';
@@ -836,8 +995,13 @@
         }
 
         function playLive(item) {
+            activeLiveItem = item; // لحفظ القناة المعروضة حالياً لتحديث المشغل
             document.getElementById('live-title-display').innerText = item.title; const serversDiv = document.getElementById('live-servers-btns'); serversDiv.innerHTML = '';
             if(item.urls && item.urls.length > 0) { item.urls.forEach((url, idx) => { const btn = document.createElement('button'); btn.className = 'server-btn' + (idx === 0 ? ' active' : ''); btn.innerText = `سيرفر ${idx + 1}`; btn.onclick = () => { document.querySelectorAll('#live-servers-btns .server-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); initPlayer('live-player', url, 'live', item.isIframe); }; serversDiv.appendChild(btn); }); initPlayer('live-player', item.urls[0], 'live', item.isIframe); }
+        }
+
+        function refreshCurrentLive() {
+            if(activeLiveItem) playLive(activeLiveItem);
         }
 
         function openVodModal() {
@@ -860,9 +1024,16 @@
         }
 
         function renderVodServers(urls, isIframe) {
+            activeVodUrls = urls; activeVodIsIframe = isIframe; // لحفظ بيانات الفيديو الحالي لتحديثه
             const serversDiv = document.getElementById('vod-servers-btns'); serversDiv.innerHTML = ''; if(!urls) return;
             urls.forEach((url, idx) => { const btn = document.createElement('button'); btn.className = 'server-btn' + (idx === 0 ? ' active' : ''); btn.innerText = `سيرفر ${idx + 1}`; btn.onclick = () => { document.querySelectorAll('#vod-servers-btns .server-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); initPlayer('vod-player', url, 'vod', isIframe); }; serversDiv.appendChild(btn); });
             initPlayer('vod-player', urls[0], 'vod', isIframe);
+        }
+
+        function refreshCurrentVod() {
+            if(activeVodUrls && activeVodUrls.length > 0) {
+                initPlayer('vod-player', activeVodUrls[0], 'vod', activeVodIsIframe);
+            }
         }
 
         function stopAllPlayers() { if(plyrLive) { plyrLive.destroy(); plyrLive = null; } if(hlsLive) { hlsLive.destroy(); hlsLive = null; } let lp = document.getElementById('live-player'); if(lp) lp.src = ""; let li = document.getElementById('live-iframe'); if(li) li.src = ""; closeModal('vod-modal'); }
