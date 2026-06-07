@@ -782,7 +782,6 @@
             for (const playlist of m3uUrlsDB) {
                 try {
                     let fetchUrl = playlist.url;
-                    // إضافة باراميتر لتجاوز الكاش إذا لم يكن موجوداً
                     if(!fetchUrl.includes('?')) fetchUrl += '?t=' + new Date().getTime();
                     
                     const response = await fetch(fetchUrl, { cache: 'no-store' });
@@ -805,7 +804,7 @@
                         if (line.startsWith('#EXTINF:')) {
                             const parts = line.split(',');
                             currentChannel.title = parts.length > 1 ? parts[1].trim() : 'قناة غير معروفة';
-                            currentChannel.type = 'live'; // التزامن عادة مخصص للقنوات
+                            currentChannel.type = 'live'; 
                             currentChannel.subId = currentGenre; 
                             currentChannel.isIframe = false;
                             currentChannel.poster = 'https://images.unsplash.com/photo-1593784991095-a205069470b6?w=200&q=80'; 
@@ -842,11 +841,7 @@
         }
 
         // --- نظام الحسابات (Profiles) ---
-        function openLoginView() {
-            showView('add-view');
-            initLoginScreen();
-        }
-
+        function openLoginView() { showView('add-view'); initLoginScreen(); }
         function initLoginScreen() {
             if (savedProfiles.length > 0) {
                 document.getElementById('new-account-form').style.display = 'none';
@@ -865,11 +860,9 @@
         }
 
         function renderProfiles() {
-            const list = document.getElementById('saved-profiles-list');
-            list.innerHTML = '';
+            const list = document.getElementById('saved-profiles-list'); list.innerHTML = '';
             savedProfiles.forEach((prof, idx) => {
-                const p = document.createElement('div');
-                p.className = 'profile-card';
+                const p = document.createElement('div'); p.className = 'profile-card';
                 p.innerHTML = `
                     <div class="profile-icon">${prof.playerName ? prof.playerName.charAt(0).toUpperCase() : 'م'}</div>
                     <div style="display:flex; flex-direction:column; align-items:flex-start; text-align:right;">
@@ -878,108 +871,41 @@
                     </div>
                     <button class="del-profile" onclick="deleteProfile(event, ${idx})" title="حذف الحساب">X</button>
                 `;
-                p.onclick = () => loginWithProfile(prof);
-                list.appendChild(p);
+                p.onclick = () => loginWithProfile(prof); list.appendChild(p);
             });
         }
 
-        function deleteProfile(e, idx) {
-            e.stopPropagation();
-            savedProfiles.splice(idx, 1);
-            localStorage.setItem('iqab_saved_profiles', JSON.stringify(savedProfiles));
-            initLoginScreen();
-        }
-
-        function loginWithProfile(prof) {
-            document.getElementById('play-user').value = prof.username;
-            document.getElementById('play-pass').value = prof.password;
-            document.getElementById('play-player-name').value = prof.playerName;
-            document.getElementById('play-host').value = prof.host;
-            login();
-        }
-
-        function showLoginError(msg) {
-            const err = document.getElementById('login-error');
-            err.innerText = msg;
-            err.style.display = 'block';
-        }
+        function deleteProfile(e, idx) { e.stopPropagation(); savedProfiles.splice(idx, 1); localStorage.setItem('iqab_saved_profiles', JSON.stringify(savedProfiles)); initLoginScreen(); }
+        function loginWithProfile(prof) { document.getElementById('play-user').value = prof.username; document.getElementById('play-pass').value = prof.password; document.getElementById('play-player-name').value = prof.playerName; document.getElementById('play-host').value = prof.host; login(); }
+        function showLoginError(msg) { const err = document.getElementById('login-error'); err.innerText = msg; err.style.display = 'block'; }
 
         // --- نظام تسجيل الدخول ---
         function login() {
-            const user = document.getElementById('play-user').value.trim();
-            const pass = document.getElementById('play-pass').value.trim();
-            const pName = document.getElementById('play-player-name').value.trim() || 'المشغل';
-            const host = document.getElementById('play-host').value.trim() || 'لا يوجد';
-            
+            const user = document.getElementById('play-user').value.trim(); const pass = document.getElementById('play-pass').value.trim(); const pName = document.getElementById('play-player-name').value.trim() || 'المشغل'; const host = document.getElementById('play-host').value.trim() || 'لا يوجد';
             let foundUser = usersDB.find(u => u.username === user && u.password === pass);
             
             if (foundUser) {
-                if(foundUser.expiryDate) {
-                    let expDate = new Date(foundUser.expiryDate);
-                    if(new Date() > expDate) {
-                        showLoginError("عذراً، لقد انتهت صلاحية هذا الحساب!");
-                        return;
-                    }
-                }
-
+                if(foundUser.expiryDate) { let expDate = new Date(foundUser.expiryDate); if(new Date() > expDate) { showLoginError("عذراً، لقد انتهت صلاحية هذا الحساب!"); return; } }
                 if(!foundUser.connectedDevices) foundUser.connectedDevices = [];
-                
-                if (!foundUser.connectedDevices.includes(deviceId)) {
-                    let max = foundUser.maxDevices || 1;
-                    if(foundUser.connectedDevices.length >= max) {
-                        showLoginError("عذراً، الحساب شغال في جهاز آخر حالياً وبلغ الحد الأقصى!");
-                        return;
-                    }
-                    foundUser.connectedDevices.push(deviceId);
-                }
-
+                if (!foundUser.connectedDevices.includes(deviceId)) { let max = foundUser.maxDevices || 1; if(foundUser.connectedDevices.length >= max) { showLoginError("عذراً، الحساب شغال في جهاز آخر حالياً وبلغ الحد الأقصى!"); return; } foundUser.connectedDevices.push(deviceId); }
                 saveToStorage();
-
-                if(!savedProfiles.find(p => p.username === user && p.host === host)) {
-                    savedProfiles.push({username: user, password: pass, playerName: pName, host: host});
-                    localStorage.setItem('iqab_saved_profiles', JSON.stringify(savedProfiles));
-                }
-
-                sessionStorage.setItem('loggedInUser', foundUser.username);
-                sessionStorage.setItem('loggedInPName', pName);
-                sessionStorage.setItem('loggedInHost', host);
-                
-                document.getElementById('login-error').style.display = 'none';
-                setupSessionUI(foundUser, pName, host);
-                showMediaView('live');
-            } else {
-                showLoginError("البيانات المدخلة غير صحيحة!");
-            }
+                if(!savedProfiles.find(p => p.username === user && p.host === host)) { savedProfiles.push({username: user, password: pass, playerName: pName, host: host}); localStorage.setItem('iqab_saved_profiles', JSON.stringify(savedProfiles)); }
+                sessionStorage.setItem('loggedInUser', foundUser.username); sessionStorage.setItem('loggedInPName', pName); sessionStorage.setItem('loggedInHost', host);
+                document.getElementById('login-error').style.display = 'none'; setupSessionUI(foundUser, pName, host); showMediaView('live');
+            } else { showLoginError("البيانات المدخلة غير صحيحة!"); }
         }
 
         function setupSessionUI(user, pName, host) {
-            let max = user.maxDevices || 1;
-            let activeCount = user.connectedDevices ? user.connectedDevices.length : 0;
-            document.getElementById('st-username').innerText = user.username;
-            document.getElementById('st-expiry').innerText = user.expiryDate || 'مفتوح (بدون تاريخ)';
-            document.getElementById('st-devices').innerText = `${activeCount} من ${max}`;
-            document.getElementById('st-device-id').innerText = deviceId;
-            
-            document.getElementById('st-pname').innerText = pName;
-            document.getElementById('st-host').innerText = host;
-            document.getElementById('dash-expiry').innerText = user.expiryDate || 'مفتوح (بدون تاريخ)';
-
+            let max = user.maxDevices || 1; let activeCount = user.connectedDevices ? user.connectedDevices.length : 0;
+            document.getElementById('st-username').innerText = user.username; document.getElementById('st-expiry').innerText = user.expiryDate || 'مفتوح (بدون تاريخ)'; document.getElementById('st-devices').innerText = `${activeCount} من ${max}`; document.getElementById('st-device-id').innerText = deviceId;
+            document.getElementById('st-pname').innerText = pName; document.getElementById('st-host').innerText = host; document.getElementById('dash-expiry').innerText = user.expiryDate || 'مفتوح (بدون تاريخ)';
             fetchM3UFiles();
         }
 
         function logout() {
             let sessionUser = sessionStorage.getItem('loggedInUser');
-            if(sessionUser) {
-               let dbUser = usersDB.find(x => x.username === sessionUser);
-               if(dbUser && dbUser.connectedDevices) {
-                   dbUser.connectedDevices = dbUser.connectedDevices.filter(id => id !== deviceId);
-                   saveToStorage();
-               }
-            }
-            sessionStorage.removeItem('loggedInUser');
-            sessionStorage.removeItem('loggedInPName');
-            sessionStorage.removeItem('loggedInHost');
-            location.reload();
+            if(sessionUser) { let dbUser = usersDB.find(x => x.username === sessionUser); if(dbUser && dbUser.connectedDevices) { dbUser.connectedDevices = dbUser.connectedDevices.filter(id => id !== deviceId); saveToStorage(); } }
+            sessionStorage.removeItem('loggedInUser'); sessionStorage.removeItem('loggedInPName'); sessionStorage.removeItem('loggedInHost'); location.reload();
         }
 
         // --- التحكم بالشاشات ---
@@ -1009,30 +935,16 @@
             selectCategory('all', allBtn, listId);
         }
 
-        function selectCategory(sub, btnElement, listId) {
-            document.querySelectorAll(`#${listId} .list-item`).forEach(b => b.classList.remove('active'));
-            btnElement.classList.add('active');
-            currentSubId = sub;
-            renderContent();
-        }
+        function selectCategory(sub, btnElement, listId) { document.querySelectorAll(`#${listId} .list-item`).forEach(b => b.classList.remove('active')); btnElement.classList.add('active'); currentSubId = sub; renderContent(); }
 
         function renderContent(searchQuery = '') {
             const combinedDB = [...database, ...m3uChannels]; 
             let filtered = combinedDB.filter(item => item.type === currentType);
-            
             if (currentSubId !== 'all') filtered = filtered.filter(item => item.subId === currentSubId);
-            if (searchQuery) {
-                const query = searchQuery.toLowerCase();
-                filtered = filtered.filter(item => item.title && item.title.toLowerCase().includes(query));
-            }
+            if (searchQuery) { const query = searchQuery.toLowerCase(); filtered = filtered.filter(item => item.title && item.title.toLowerCase().includes(query)); }
 
             let uniqueMap = new Map();
-            filtered.forEach(item => {
-                let key = item.title ? item.title.trim().toLowerCase() : 'unknown';
-                if (!uniqueMap.has(key)) {
-                    uniqueMap.set(key, item);
-                }
-            });
+            filtered.forEach(item => { let key = item.title ? item.title.trim().toLowerCase() : 'unknown'; if (!uniqueMap.has(key)) { uniqueMap.set(key, item); } });
             let uniqueItems = Array.from(uniqueMap.values());
 
             if(currentType === 'live') {
@@ -1054,45 +966,76 @@
             }
         }
 
-        function openDetailsScreen(item) {
-            currentMediaObj = item; document.getElementById('detail-title').innerText = item.title;
-            document.getElementById('detail-desc').innerText = item.type === 'movies' ? 'فيلم سينمائي مميز' : 'مسلسل درامي ممتع';
-            document.getElementById('detail-img').src = item.poster; document.getElementById('detail-bg-img').style.backgroundImage = `url('${item.poster}')`;
-            showView('details-view');
-        }
-
+        function openDetailsScreen(item) { currentMediaObj = item; document.getElementById('detail-title').innerText = item.title; document.getElementById('detail-desc').innerText = item.type === 'movies' ? 'فيلم سينمائي مميز' : 'مسلسل درامي ممتع'; document.getElementById('detail-img').src = item.poster; document.getElementById('detail-bg-img').style.backgroundImage = `url('${item.poster}')`; showView('details-view'); }
         function goBackFromDetails() { if(currentMediaObj && currentMediaObj.type === 'movies') showView('movies-view'); else showView('series-view'); }
 
-        // --- مشغلات الفيديو (Plyr & Hls & Iframe) ---
+        // --- مشغلات الفيديو (التعديل الخاص بكسر حماية الـ HTTPS / Mixed Content) ---
         const plyrOptions = { controls: ['play-large', 'restart', 'rewind', 'play', 'fast-forward', 'progress', 'current-time', 'duration', 'mute', 'volume', 'fullscreen'], autoplay: true };
-        function processUrl(url, isIframe) {
-            if (!url) return ""; if (isIframe) { if (url.includes('pixeldrain.com/u/')) return url.replace('/u/', '/e/'); if (url.includes('pixeldrain.com/api/file/')) return url.replace('/api/file/', '/e/'); return url.trim(); } else { if (url.includes('pixeldrain.com/u/')) return url.replace('/u/', '/api/file/'); return url.trim(); }
-        }
-
-        function initPlayer(elementId, originalUrl, context, isIframe = false) {
-            const url = processUrl(originalUrl, isIframe); const video = document.getElementById(elementId);
-            const videoContainer = document.getElementById(context === 'live' ? 'live-video-container' : 'vod-video-container');
-            const iframeContainer = document.getElementById(context === 'live' ? 'live-iframe-container' : 'vod-iframe-container');
-            const iframe = document.getElementById(context === 'live' ? 'live-iframe' : 'vod-iframe');
-            if(context === 'live') { if(plyrLive) plyrLive.destroy(); if(hlsLive) hlsLive.destroy(); } else { if(plyrVod) plyrVod.destroy(); if(hlsVod) hlsVod.destroy(); }
-            if (isIframe) { videoContainer.style.display = 'none'; iframeContainer.style.display = 'block'; iframe.src = url; } else {
-                iframeContainer.style.display = 'none'; iframe.src = ""; videoContainer.style.display = 'block';
-                if(url.includes('.m3u8') && Hls.isSupported()) {
-                    const hls = new Hls(); hls.loadSource(url); hls.attachMedia(video);
-                    hls.on(Hls.Events.MANIFEST_PARSED, () => { const plyr = new Plyr(video, plyrOptions); if(context === 'live') { hlsLive = hls; plyrLive = plyr; } else { hlsVod = hls; plyrVod = plyr; } });
-                } else { video.src = url; const plyr = new Plyr(video, plyrOptions); if(context === 'live') plyrLive = plyr; else plyrVod = plyr; }
+        
+        function processUrl(originalUrl, isIframe) {
+            if (!originalUrl) return ""; 
+            let url = originalUrl.trim();
+            if (isIframe) { 
+                if (url.includes('pixeldrain.com/u/')) return url.replace('/u/', '/e/'); 
+                if (url.includes('pixeldrain.com/api/file/')) return url.replace('/api/file/', '/e/'); 
+                return url; 
+            } else { 
+                if (url.includes('pixeldrain.com/u/')) url = url.replace('/u/', '/api/file/');
+                // تحويل الـ HTTP إلى بروكسي HTTPS للمتصفحات المؤمنة
+                if (window.location.protocol === 'https:' && url.startsWith('http://')) {
+                    // يمكنك استبدال الرابط أدناه ببروكسي الـ PHP الخاص بك لضمان الاستقرار التام
+                    url = 'https://corsproxy.io/?' + encodeURIComponent(url);
+                }
+                return url; 
             }
         }
 
-        function playLive(item) {
-            activeLiveItem = item; 
-            document.getElementById('live-title-display').innerText = item.title; const serversDiv = document.getElementById('live-servers-btns'); serversDiv.innerHTML = '';
-            if(item.urls && item.urls.length > 0) { item.urls.forEach((url, idx) => { const btn = document.createElement('button'); btn.className = 'server-btn' + (idx === 0 ? ' active' : ''); btn.innerText = `سيرفر ${idx + 1}`; btn.onclick = () => { document.querySelectorAll('#live-servers-btns .server-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); initPlayer('live-player', url, 'live', item.isIframe); }; serversDiv.appendChild(btn); }); initPlayer('live-player', item.urls[0], 'live', item.isIframe); }
+        function initPlayer(elementId, originalUrl, context, isIframe = false) {
+            const finalUrl = processUrl(originalUrl, isIframe); 
+            const video = document.getElementById(elementId);
+            const videoContainer = document.getElementById(context === 'live' ? 'live-video-container' : 'vod-video-container');
+            const iframeContainer = document.getElementById(context === 'live' ? 'live-iframe-container' : 'vod-iframe-container');
+            const iframe = document.getElementById(context === 'live' ? 'live-iframe' : 'vod-iframe');
+            
+            if(context === 'live') { if(plyrLive) plyrLive.destroy(); if(hlsLive) hlsLive.destroy(); } else { if(plyrVod) plyrVod.destroy(); if(hlsVod) hlsVod.destroy(); }
+            
+            if (isIframe) { 
+                videoContainer.style.display = 'none'; iframeContainer.style.display = 'block'; iframe.src = finalUrl; 
+            } else {
+                iframeContainer.style.display = 'none'; iframe.src = ""; videoContainer.style.display = 'block';
+                
+                // التأكد من دعم HLS.js (لملفات .m3u8 أو الروابط الممررة التي تعتمد على البث)
+                if((originalUrl.includes('.m3u8') || originalUrl.includes('.ts') || !originalUrl.includes('.mp4')) && Hls.isSupported()) {
+                    
+                    // إعداد خاص لـ Hls.js ليمرر الطلبات الداخلية (ملفات .ts مثلاً) عبر البروكسي
+                    const hlsConfig = {
+                        xhrSetup: function(xhr, xhrUrl) {
+                            if (window.location.protocol === 'https:' && xhrUrl.startsWith('http://')) {
+                                xhrUrl = 'https://corsproxy.io/?' + encodeURIComponent(xhrUrl);
+                            }
+                            xhr.open('GET', xhrUrl, true);
+                        }
+                    };
+                    
+                    const hls = new Hls(hlsConfig); 
+                    hls.loadSource(finalUrl); 
+                    hls.attachMedia(video);
+                    
+                    hls.on(Hls.Events.MANIFEST_PARSED, () => { 
+                        const plyr = new Plyr(video, plyrOptions); 
+                        if(context === 'live') { hlsLive = hls; plyrLive = plyr; } else { hlsVod = hls; plyrVod = plyr; } 
+                    });
+                } else { 
+                    // الروابط المباشرة مثل mp4
+                    video.src = finalUrl; 
+                    const plyr = new Plyr(video, plyrOptions); 
+                    if(context === 'live') plyrLive = plyr; else plyrVod = plyr; 
+                }
+            }
         }
 
-        function refreshCurrentLive() {
-            if(activeLiveItem) playLive(activeLiveItem);
-        }
+        function playLive(item) { activeLiveItem = item; document.getElementById('live-title-display').innerText = item.title; const serversDiv = document.getElementById('live-servers-btns'); serversDiv.innerHTML = ''; if(item.urls && item.urls.length > 0) { item.urls.forEach((url, idx) => { const btn = document.createElement('button'); btn.className = 'server-btn' + (idx === 0 ? ' active' : ''); btn.innerText = `سيرفر ${idx + 1}`; btn.onclick = () => { document.querySelectorAll('#live-servers-btns .server-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); initPlayer('live-player', url, 'live', item.isIframe); }; serversDiv.appendChild(btn); }); initPlayer('live-player', item.urls[0], 'live', item.isIframe); } }
+        function refreshCurrentLive() { if(activeLiveItem) playLive(activeLiveItem); }
 
         function openVodModal() {
             if(!currentMediaObj) return; let baseItem = currentMediaObj; document.getElementById('vod-modal').style.display = 'flex'; document.getElementById('vod-title-display').innerText = baseItem.title;
@@ -1109,7 +1052,7 @@
 
         function renderEpisodesList(seasonPart) {
             const listDiv = document.getElementById('episodes-list-container'); listDiv.innerHTML = ''; if(!seasonPart.episodes) return;
-            seasonPart.episodes.forEach((ep, index) => { const btn = document.createElement('div'); btn.className = 'ep-btn' + (index === 0 ? ' active' : ''); btn.innerHTML = `<span>${ep.title}</span><i class="fa-solid fa-play"></i>`; btn.onclick = () => { document.querySelectorAll('.ep-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); document.getElementById('vod-title-display').innerText = `${seasonPart.title} - ${ep.title}`; renderVodServers(ep.urls, seasonPart.isIframe); }; listDiv.appendChild(btn); });
+            seasonPart.episodes.forEach((ep, index) => { const btn = document.createElement('div'); btn.className = 'ep-btn' + (index === 0 ? ' active' : ''); btn.innerHTML = `<span>${ep.title}</span><svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:#fff;"><path d="M8 5v14l11-7z"/></svg>`; btn.onclick = () => { document.querySelectorAll('.ep-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); document.getElementById('vod-title-display').innerText = `${seasonPart.title} - ${ep.title}`; renderVodServers(ep.urls, seasonPart.isIframe); }; listDiv.appendChild(btn); });
             document.getElementById('vod-title-display').innerText = `${seasonPart.title} - ${seasonPart.episodes[0].title}`; renderVodServers(seasonPart.episodes[0].urls, seasonPart.isIframe);
         }
 
@@ -1120,11 +1063,7 @@
             initPlayer('vod-player', urls[0], 'vod', isIframe);
         }
 
-        function refreshCurrentVod() {
-            if(activeVodUrls && activeVodUrls.length > 0) {
-                initPlayer('vod-player', activeVodUrls[0], 'vod', activeVodIsIframe);
-            }
-        }
+        function refreshCurrentVod() { if(activeVodUrls && activeVodUrls.length > 0) { initPlayer('vod-player', activeVodUrls[0], 'vod', activeVodIsIframe); } }
 
         function stopAllPlayers() { if(plyrLive) { plyrLive.destroy(); plyrLive = null; } if(hlsLive) { hlsLive.destroy(); hlsLive = null; } let lp = document.getElementById('live-player'); if(lp) lp.src = ""; let li = document.getElementById('live-iframe'); if(li) li.src = ""; closeModal('vod-modal'); }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; if(id === 'vod-modal') { if(plyrVod) { plyrVod.destroy(); plyrVod = null; } if(hlsVod) { hlsVod.destroy(); hlsVod = null; } document.getElementById('vod-player').src = ""; document.getElementById('vod-iframe').src = ""; } }
@@ -1148,86 +1087,26 @@
                     <td><button class="action-btn-tbl" style="color:#2ea44f;" onclick="resetDevices(${idx})" title="إلغاء اتصال الأجهزة العالقة">تصفير الأجهزة (${actCount})</button><button class="action-btn-tbl" style="color:#ef4444;" onclick="deleteUser(${idx})">حذف</button></td>
                 </tr>`; 
             });
-
             renderM3uUrlsTable();
         }
 
-        // --- وظائف تبويب M3U الإضافية ---
-        function renderM3uUrlsTable() {
-            const table = document.getElementById('admin-m3u-urls-table');
-            if(!table) return;
-            table.innerHTML = '';
-            m3uUrlsDB.forEach((item, idx) => {
-                table.innerHTML += `<tr><td>${item.subId}</td><td style="direction:ltr; text-align:left;">${item.url}</td><td><button class="action-btn-tbl" style="color:#ef4444;" onclick="deleteM3uUrl(${idx})">حذف</button></td></tr>`;
-            });
-        }
-
-        function addM3uUrl() {
-            const subId = document.getElementById('m3u-url-subid').value.trim() || 'قنوات M3U';
-            const url = document.getElementById('m3u-url-input').value.trim();
-            if(!url) { alert('الرجاء إدخال رابط صالح!'); return; }
-            m3uUrlsDB.push({ url: url, subId: subId });
-            saveToStorage();
-            document.getElementById('m3u-url-input').value = '';
-            document.getElementById('m3u-url-subid').value = '';
-            renderM3uUrlsTable();
-            alert('تمت إضافة الرابط! سيتم استدعاء القنوات منه تلقائياً.');
-            fetchM3UFiles(); // تحديث فوري
-        }
-
-        function deleteM3uUrl(idx) {
-            if(confirm('هل تريد فعلاً حذف هذا الرابط؟')) {
-                m3uUrlsDB.splice(idx, 1);
-                saveToStorage();
-                renderM3uUrlsTable();
-                fetchM3UFiles();
-            }
-        }
+        function renderM3uUrlsTable() { const table = document.getElementById('admin-m3u-urls-table'); if(!table) return; table.innerHTML = ''; m3uUrlsDB.forEach((item, idx) => { table.innerHTML += `<tr><td>${item.subId}</td><td style="direction:ltr; text-align:left;">${item.url}</td><td><button class="action-btn-tbl" style="color:#ef4444;" onclick="deleteM3uUrl(${idx})">حذف</button></td></tr>`; }); }
+        function addM3uUrl() { const subId = document.getElementById('m3u-url-subid').value.trim() || 'قنوات M3U'; const url = document.getElementById('m3u-url-input').value.trim(); if(!url) { alert('الرجاء إدخال رابط صالح!'); return; } m3uUrlsDB.push({ url: url, subId: subId }); saveToStorage(); document.getElementById('m3u-url-input').value = ''; document.getElementById('m3u-url-subid').value = ''; renderM3uUrlsTable(); alert('تمت إضافة الرابط! سيتم استدعاء القنوات منه تلقائياً.'); fetchM3UFiles(); }
+        function deleteM3uUrl(idx) { if(confirm('هل تريد فعلاً حذف هذا الرابط؟')) { m3uUrlsDB.splice(idx, 1); saveToStorage(); renderM3uUrlsTable(); fetchM3UFiles(); } }
 
         function uploadLocalM3U() {
-            const fileInput = document.getElementById('m3u-file-input');
-            const type = document.getElementById('m3u-file-type').value;
-            const subId = document.getElementById('m3u-file-subid').value.trim() || 'ملف مستورد';
+            const fileInput = document.getElementById('m3u-file-input'); const type = document.getElementById('m3u-file-type').value; const subId = document.getElementById('m3u-file-subid').value.trim() || 'ملف مستورد';
             if(fileInput.files.length === 0) { alert('يرجى اختيار ملف من جهازك أولاً!'); return; }
-            
-            const file = fileInput.files[0];
-            const reader = new FileReader();
+            const file = fileInput.files[0]; const reader = new FileReader();
             reader.onload = function(e) {
-                const text = e.target.result;
-                const lines = text.split(/\r?\n/);
-                let currentChannel = {};
-                let addedCount = 0;
-                let currentGenre = subId;
-
+                const text = e.target.result; const lines = text.split(/\r?\n/); let currentChannel = {}; let addedCount = 0; let currentGenre = subId;
                 for (let i = 0; i < lines.length; i++) {
-                    let line = lines[i].trim();
-                    if (!line) continue;
-                    
-                    if (line.includes(',#genre#')) {
-                        currentGenre = line.split(',')[0].trim();
-                        continue;
-                    }
-
-                    if (line.startsWith('#EXTINF:')) {
-                        const parts = line.split(',');
-                        currentChannel.title = parts.length > 1 ? parts[1].trim() : 'عنصر غير معروف';
-                        currentChannel.type = type; // حفظه في القسم المحدد (مباشر/أفلام/مسلسلات)
-                        currentChannel.subId = currentGenre; 
-                        currentChannel.isIframe = false;
-                        currentChannel.poster = type === 'movies' ? 'https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?w=300&q=80' : 'https://images.unsplash.com/photo-1593784991095-a205069470b6?w=200&q=80'; 
-                    } 
-                    else if (line.startsWith('http') && currentChannel.title) {
-                        currentChannel.urls = [line];
-                        currentChannel.id = Date.now() + addedCount;
-                        if(type === 'movies' || type === 'series') currentChannel.season = 1;
-                        database.push({...currentChannel});
-                        addedCount++;
-                        currentChannel = {}; 
-                    }
+                    let line = lines[i].trim(); if (!line) continue;
+                    if (line.includes(',#genre#')) { currentGenre = line.split(',')[0].trim(); continue; }
+                    if (line.startsWith('#EXTINF:')) { const parts = line.split(','); currentChannel.title = parts.length > 1 ? parts[1].trim() : 'عنصر غير معروف'; currentChannel.type = type; currentChannel.subId = currentGenre; currentChannel.isIframe = false; currentChannel.poster = type === 'movies' ? 'https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?w=300&q=80' : 'https://images.unsplash.com/photo-1593784991095-a205069470b6?w=200&q=80'; } 
+                    else if (line.startsWith('http') && currentChannel.title) { currentChannel.urls = [line]; currentChannel.id = Date.now() + addedCount; if(type === 'movies' || type === 'series') currentChannel.season = 1; database.push({...currentChannel}); addedCount++; currentChannel = {}; }
                 }
-                saveToStorage();
-                renderAdminTables();
-                alert(`تم استيراد ${addedCount} عنصر بنجاح وحفظها في قاعدة البيانات الأساسية!`);
+                saveToStorage(); renderAdminTables(); alert(`تم استيراد ${addedCount} عنصر بنجاح وحفظها في قاعدة البيانات الأساسية!`);
             };
             reader.readAsText(file);
         }
@@ -1258,54 +1137,27 @@
         function clearContentForm() { document.getElementById('admin-item-id').value = ''; document.getElementById('admin-title').value = ''; document.getElementById('admin-poster').value = ''; document.getElementById('admin-url').value = ''; document.getElementById('admin-season-num').value = '1'; document.getElementById('admin-episode-num').value = ''; document.getElementById('admin-subid').value = ''; document.getElementById('admin-is-iframe').checked = false; }
         
         function saveUserItem() { 
-            const user = document.getElementById('admin-username').value.trim(); 
-            const pass = document.getElementById('admin-password').value.trim(); 
-            const exp = document.getElementById('admin-expiry').value;
-            const maxDev = parseInt(document.getElementById('admin-max-devices').value) || 1;
-            if(!user || !pass) return; 
-            
-            let existing = usersDB.find(u => u.username === user);
-            if(existing) {
-                existing.password = pass; existing.expiryDate = exp; existing.maxDevices = maxDev;
-            } else {
-                usersDB.push({ username: user, password: pass, expiryDate: exp, maxDevices: maxDev, connectedDevices: [] }); 
-            }
-            saveToStorage(); 
-            document.getElementById('admin-username').value=''; document.getElementById('admin-password').value=''; document.getElementById('admin-expiry').value=''; document.getElementById('admin-max-devices').value='1';
-            renderAdminTables(); 
+            const user = document.getElementById('admin-username').value.trim(); const pass = document.getElementById('admin-password').value.trim(); const exp = document.getElementById('admin-expiry').value; const maxDev = parseInt(document.getElementById('admin-max-devices').value) || 1;
+            if(!user || !pass) return; let existing = usersDB.find(u => u.username === user);
+            if(existing) { existing.password = pass; existing.expiryDate = exp; existing.maxDevices = maxDev; } else { usersDB.push({ username: user, password: pass, expiryDate: exp, maxDevices: maxDev, connectedDevices: [] }); }
+            saveToStorage(); document.getElementById('admin-username').value=''; document.getElementById('admin-password').value=''; document.getElementById('admin-expiry').value=''; document.getElementById('admin-max-devices').value='1'; renderAdminTables(); 
         }
         function deleteUser(index) { if(confirm('حذف الحساب؟')) { usersDB.splice(index, 1); saveToStorage(); renderAdminTables(); } }
-        
-        function resetDevices(index) {
-            usersDB[index].connectedDevices = [];
-            saveToStorage();
-            alert('تم تصفير الأجهزة المتصلة لهذا المستخدم بنجاح.');
-            renderAdminTables();
-        }
+        function resetDevices(index) { usersDB[index].connectedDevices = []; saveToStorage(); alert('تم تصفير الأجهزة المتصلة لهذا المستخدم بنجاح.'); renderAdminTables(); }
 
         async function extractVideoLink() { const siteUrl = document.getElementById('extractor-url').value.trim(); const resultDiv = document.getElementById('extractor-results'); if(!siteUrl) return; resultDiv.innerHTML = 'جاري فحص الرابط...'; if(siteUrl.includes('pixeldrain.com/u/')) { const direct = siteUrl.replace('/u/', '/e/'); resultDiv.innerHTML = `<button onclick="document.getElementById('admin-url').value+='\\n'+'${direct}'" class="admin-btn" style="background:#f39c12;">إضافة الرابط المستخرج</button>`; return; } else if (siteUrl.includes('pixeldrain.com/api/file/') || siteUrl.includes('pixeldrain.com/e/')) { resultDiv.innerHTML = `<button onclick="document.getElementById('admin-url').value+='\\n'+'${siteUrl}'" class="admin-btn" style="background:#f39c12;">إضافة الرابط المستخرج</button>`; return; } try { const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(siteUrl); const response = await fetch(proxyUrl); if(!response.ok) throw new Error('Network error'); const data = await response.json(); const html = data.contents; const regex = /(https?:\/\/[^\s"'<>]+\.(?:mp4|m3u8)[^\s"'<>]*)/gi; let matches = []; if(html) { matches = [...new Set(html.match(regex))]; } if(matches.length > 0) { resultDiv.innerHTML = ''; matches.forEach(link => { resultDiv.innerHTML += `<button onclick="document.getElementById('admin-url').value+='\\n'+'${link}'" class="admin-btn" style="background:#f39c12; margin:5px; font-size:11px;">${link}</button><br>`; }); } else { resultDiv.innerHTML = '<span style="color:#ef4444;">لم يتم العثور. جرب نسخ الرابط كاملاً وتفعيل (Iframe).</span>'; } } catch (error) { resultDiv.innerHTML = '<span style="color:#ef4444;">خطأ في الفحص.</span>'; } }
         
         async function pushToGitHub() { 
             const btn = document.getElementById('github-update-btn'); btn.innerText = 'جاري الرفع...'; 
             const p1 = "github_pat_11CDBWO4Q"; const p2 = "0CPyUlhqlG4Pl_wIurVR5ZK"; const p3 = "7twtQuOlJ3rfqJXoG1dnrJCaH1JkW"; const p4 = "nW8VyAWUENCSWFzf72yKe"; 
-            const token = p1 + p2 + p3 + p4; 
-            const repo = "okba3137-svg/Channel"; 
-            const path = "database.json"; 
-            const url = `https://api.github.com/repos/${repo}/contents/${path}`; 
+            const token = p1 + p2 + p3 + p4; const repo = "okba3137-svg/Channel"; const path = "database.json"; const url = `https://api.github.com/repos/${repo}/contents/${path}`; 
             try { 
-                let sha = ""; 
-                const getRes = await fetch(url, { headers: { "Authorization": `token ${token}` } }); 
-                if (getRes.ok) { const getData = await getRes.json(); sha = getData.sha; } 
-                // تم تضمين m3uUrlsDB ليتم رفع روابط التزامن أيضاً لـ GitHub
-                const contentObj = { database: database, usersDB: usersDB, m3uUrlsDB: m3uUrlsDB }; 
-                const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(contentObj, null, 2)))); 
-                const body = { message: "تحديث قاعدة بيانات العقاب TV", content: contentBase64 }; 
-                if (sha) body.sha = sha; 
+                let sha = ""; const getRes = await fetch(url, { headers: { "Authorization": `token ${token}` } }); if (getRes.ok) { const getData = await getRes.json(); sha = getData.sha; } 
+                const contentObj = { database: database, usersDB: usersDB, m3uUrlsDB: m3uUrlsDB }; const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(contentObj, null, 2)))); 
+                const body = { message: "تحديث قاعدة بيانات العقاب TV", content: contentBase64 }; if (sha) body.sha = sha; 
                 const putRes = await fetch(url, { method: "PUT", headers: { "Authorization": `token ${token}`, "Content-Type": "application/json" }, body: JSON.stringify(body) }); 
                 if (putRes.ok) { alert("تم تحديث الموقع ورفع البيانات إلى GitHub بنجاح!"); } else { const err = await putRes.json(); alert("خطأ في الرفع: " + err.message); } 
-            } catch (error) { 
-                alert("حدث خطأ في الاتصال بسيرفر GitHub."); 
-            } 
+            } catch (error) { alert("حدث خطأ في الاتصال بسيرفر GitHub."); } 
             btn.innerText = 'تحديث الموقع (رفع لـ GitHub)'; 
         }
     </script>
