@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="ltr">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -323,7 +323,7 @@
                     <h3 class="settings-section-title">إعدادات التطبيق</h3>
                     <div class="input-group">
                         <label>لغة التطبيق (مظهر فقط)</label>
-                        <select class="admin-input">
+                        <select id="app-language" class="admin-input" onchange="applyLanguageChange()">
                             <option value="ar">العربية (Arabic)</option>
                             <option value="en">English (الإنجليزية)</option>
                         </select>
@@ -332,7 +332,7 @@
                         <label style="font-size:14px; font-weight:bold;">تحديث تلقائي كل يوم</label>
                         <input type="checkbox" id="auto-update-toggle" style="width:20px; height:20px; accent-color:#f39c12; cursor:pointer;" onchange="toggleAutoUpdate()">
                     </div>
-                    <button class="submit-btn" style="background-color: #4b367c; margin-top: 10px;" onclick="location.reload(true)">تحديث الصفحة بالكامل (الآن)</button>
+                    <button class="submit-btn" style="background-color: #4b367c; margin-top: 10px;" onclick="saveSettings()">حفظ الإعدادات</button>
                 </div>
 
                 <div class="settings-card">
@@ -343,6 +343,7 @@
                         <div><span style="color:#aaa;">اسم المستخدم:</span> <strong id="st-username" style="color:#fff;">---</strong></div>
                         <div><span style="color:#aaa;">تاريخ الانتهاء:</span> <strong id="st-expiry" style="color:#2ea44f;">---</strong></div>
                         <div><span style="color:#aaa;">تفعيل الأجهزة (مستخدم/مسموح):</span> <strong id="st-devices" style="color:#f39c12;">---</strong></div>
+                        <div><span style="color:#aaa;">معرف الجهاز (ID):</span> <strong id="st-device-id" style="color:#3498db; font-family: monospace;">---</strong></div>
                     </div>
                 </div>
 
@@ -621,6 +622,13 @@
             }
         }, { once: true });
 
+        // --- توليد وتخزين معرف الجهاز الذكي (بديل الماك أدرس) ---
+        let deviceId = localStorage.getItem('iqab_device_id');
+        if (!deviceId) {
+            deviceId = 'DEV-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+            localStorage.setItem('iqab_device_id', deviceId);
+        }
+
         // --- قاعدة البيانات والتهيئة ---
         const defaultDatabase = [
             { id: 1, type: 'live', subId: 'قنوات رياضية', title: "بي إن سبورت 1", poster: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=200&q=80", urls: ["https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"], isIframe: false },
@@ -628,7 +636,25 @@
         ];
 
         let database = JSON.parse(localStorage.getItem('iqab_db_v5')) || defaultDatabase;
-        let usersDB = JSON.parse(localStorage.getItem('iqab_users_v5')) || [{ username: 'okba', password: '123', maxDevices: 1, activeDevices: 0 }];
+        
+        // نظام الهجرة لحل مشاكل الحسابات القديمة وضبط كلمة السر للإدمن وبنية الجلسات
+        let usersDB = JSON.parse(localStorage.getItem('iqab_users_v6'));
+        if (!usersDB) {
+            let oldUsers = JSON.parse(localStorage.getItem('iqab_users_v5'));
+            if (oldUsers) {
+                usersDB = oldUsers.map(u => ({
+                    username: u.username,
+                    password: u.username === 'okba' ? '1233' : u.password,
+                    expiryDate: u.expiryDate,
+                    maxDevices: u.maxDevices,
+                    connectedDevices: [] // مسح الأجهزة المعلقة
+                }));
+            } else {
+                usersDB = [{ username: 'okba', password: '1233', maxDevices: 1, connectedDevices: [] }];
+            }
+            localStorage.setItem('iqab_users_v6', JSON.stringify(usersDB));
+        }
+
         let m3uChannels = []; 
         let plyrLive = null, plyrVod = null, hlsLive = null, hlsVod = null;
         let currentType = 'live', currentSubId = 'all';
@@ -642,19 +668,35 @@
 
         function saveToStorage() {
             localStorage.setItem('iqab_db_v5', JSON.stringify(database));
-            localStorage.setItem('iqab_users_v5', JSON.stringify(usersDB));
+            localStorage.setItem('iqab_users_v6', JSON.stringify(usersDB));
         }
 
-        // --- نظام التحديث التلقائي اليومي ---
+        // --- نظام الإعدادات والتحديث ---
         function toggleAutoUpdate() {
             let isEnabled = document.getElementById('auto-update-toggle').checked;
             localStorage.setItem('iqab_auto_update', isEnabled);
+        }
+
+        function applyLanguageChange() {
+            let lang = document.getElementById('app-language').value;
+            document.documentElement.lang = lang;
+            document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+        }
+
+        function saveSettings() {
+            let lang = document.getElementById('app-language').value;
+            localStorage.setItem('iqab_language', lang);
+            alert('تم حفظ الإعدادات وتطبيق اللغة بنجاح');
         }
 
         window.onload = function() {
             let autoUpdate = localStorage.getItem('iqab_auto_update') === 'true';
             let toggleElement = document.getElementById('auto-update-toggle');
             if (toggleElement) toggleElement.checked = autoUpdate;
+            
+            let savedLang = localStorage.getItem('iqab_language') || 'ar';
+            if(document.getElementById('app-language')) document.getElementById('app-language').value = savedLang;
+            applyLanguageChange();
             
             if(autoUpdate) {
                 let lastUpdate = localStorage.getItem('iqab_last_update');
@@ -665,16 +707,16 @@
                 }
             }
 
-            // استعادة الجلسة في حال عمل تحديث (Refresh) للصفحة لمنع الخروج التلقائي
+            // استعادة الجلسة بأمان تام بناءً على معرف الجهاز الجديد
             let sessionUser = sessionStorage.getItem('loggedInUser');
             if(sessionUser) {
                 let dbUser = usersDB.find(x => x.username === sessionUser);
                 if(dbUser) {
-                    // زيادة الأجهزة مرة أخرى لأنها تنقص تلقائياً في beforeunload
-                    let max = dbUser.maxDevices || 1;
-                    if (dbUser.activeDevices < max) dbUser.activeDevices++;
-                    saveToStorage();
-
+                    if (!dbUser.connectedDevices) dbUser.connectedDevices = [];
+                    if (!dbUser.connectedDevices.includes(deviceId)) {
+                        dbUser.connectedDevices.push(deviceId);
+                        saveToStorage();
+                    }
                     let pName = sessionStorage.getItem('loggedInPName') || 'المشغل';
                     let host = sessionStorage.getItem('loggedInHost') || 'localhost';
                     setupSessionUI(dbUser, pName, host);
@@ -825,18 +867,20 @@
                     }
                 }
 
-                let max = foundUser.maxDevices || 1;
-                let active = foundUser.activeDevices || 0;
+                if(!foundUser.connectedDevices) foundUser.connectedDevices = [];
                 
-                if(active >= max) {
-                    showLoginError("عذراً، الحساب شغال في جهاز آخر حالياً!");
-                    return;
+                // التأكد إذا كان هذا الجهاز (المتصفح) مسجل دخول من قبل لمنع التكرار الوهمي
+                if (!foundUser.connectedDevices.includes(deviceId)) {
+                    let max = foundUser.maxDevices || 1;
+                    if(foundUser.connectedDevices.length >= max) {
+                        showLoginError("عذراً، الحساب شغال في جهاز آخر حالياً وبلغ الحد الأقصى!");
+                        return;
+                    }
+                    foundUser.connectedDevices.push(deviceId);
                 }
 
-                foundUser.activeDevices = active + 1;
                 saveToStorage();
 
-                // حفظ الحساب في القائمة إذا لم يكن موجوداً
                 if(!savedProfiles.find(p => p.username === user && p.host === host)) {
                     savedProfiles.push({username: user, password: pass, playerName: pName, host: host});
                     localStorage.setItem('iqab_saved_profiles', JSON.stringify(savedProfiles));
@@ -856,11 +900,12 @@
 
         function setupSessionUI(user, pName, host) {
             let max = user.maxDevices || 1;
+            let activeCount = user.connectedDevices ? user.connectedDevices.length : 0;
             document.getElementById('st-username').innerText = user.username;
             document.getElementById('st-expiry').innerText = user.expiryDate || 'مفتوح (بدون تاريخ)';
-            document.getElementById('st-devices').innerText = `${user.activeDevices} من ${max}`;
+            document.getElementById('st-devices').innerText = `${activeCount} من ${max}`;
+            document.getElementById('st-device-id').innerText = deviceId; // إظهار معرف الجهاز
             
-            // معلومات إضافية
             document.getElementById('st-pname').innerText = pName;
             document.getElementById('st-host').innerText = host;
             document.getElementById('dash-expiry').innerText = user.expiryDate || 'مفتوح (بدون تاريخ)';
@@ -872,27 +917,17 @@
             let sessionUser = sessionStorage.getItem('loggedInUser');
             if(sessionUser) {
                let dbUser = usersDB.find(x => x.username === sessionUser);
-               if(dbUser && dbUser.activeDevices > 0) {
-                   dbUser.activeDevices--;
+               // إزالة الجهاز الحالي فقط من الأجهزة المتصلة
+               if(dbUser && dbUser.connectedDevices) {
+                   dbUser.connectedDevices = dbUser.connectedDevices.filter(id => id !== deviceId);
+                   saveToStorage();
                }
-               saveToStorage();
             }
             sessionStorage.removeItem('loggedInUser');
             sessionStorage.removeItem('loggedInPName');
             sessionStorage.removeItem('loggedInHost');
             location.reload();
         }
-
-        window.addEventListener('beforeunload', () => {
-            let sessionUser = sessionStorage.getItem('loggedInUser');
-            if(sessionUser) {
-               let dbUser = usersDB.find(x => x.username === sessionUser);
-               if(dbUser && dbUser.activeDevices > 0) {
-                   dbUser.activeDevices--;
-                   localStorage.setItem('iqab_users_v5', JSON.stringify(usersDB));
-               }
-            }
-        });
 
         // --- التحكم بالشاشات ---
         function hideAllViews() { document.querySelectorAll('.view').forEach(v => v.classList.remove('active')); }
@@ -997,7 +1032,7 @@
         }
 
         function playLive(item) {
-            activeLiveItem = item; // لحفظ القناة المعروضة حالياً لتحديث المشغل
+            activeLiveItem = item; 
             document.getElementById('live-title-display').innerText = item.title; const serversDiv = document.getElementById('live-servers-btns'); serversDiv.innerHTML = '';
             if(item.urls && item.urls.length > 0) { item.urls.forEach((url, idx) => { const btn = document.createElement('button'); btn.className = 'server-btn' + (idx === 0 ? ' active' : ''); btn.innerText = `سيرفر ${idx + 1}`; btn.onclick = () => { document.querySelectorAll('#live-servers-btns .server-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); initPlayer('live-player', url, 'live', item.isIframe); }; serversDiv.appendChild(btn); }); initPlayer('live-player', item.urls[0], 'live', item.isIframe); }
         }
@@ -1026,7 +1061,7 @@
         }
 
         function renderVodServers(urls, isIframe) {
-            activeVodUrls = urls; activeVodIsIframe = isIframe; // لحفظ بيانات الفيديو الحالي لتحديثه
+            activeVodUrls = urls; activeVodIsIframe = isIframe; 
             const serversDiv = document.getElementById('vod-servers-btns'); serversDiv.innerHTML = ''; if(!urls) return;
             urls.forEach((url, idx) => { const btn = document.createElement('button'); btn.className = 'server-btn' + (idx === 0 ? ' active' : ''); btn.innerText = `سيرفر ${idx + 1}`; btn.onclick = () => { document.querySelectorAll('#vod-servers-btns .server-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); initPlayer('vod-player', url, 'vod', isIframe); }; serversDiv.appendChild(btn); });
             initPlayer('vod-player', urls[0], 'vod', isIframe);
@@ -1054,9 +1089,10 @@
             const uTable = document.getElementById('admin-users-table'); uTable.innerHTML = '';
             usersDB.forEach((u, idx) => { 
                 let expInfo = u.expiryDate || 'مفتوح';
+                let actCount = u.connectedDevices ? u.connectedDevices.length : 0;
                 uTable.innerHTML += `<tr>
                     <td>${u.username}</td><td>${u.password}</td><td>${expInfo}</td><td>${u.maxDevices || 1}</td>
-                    <td><button class="action-btn-tbl" style="color:#2ea44f;" onclick="resetDevices(${idx})" title="إلغاء اتصال الأجهزة العالقة">تصفير الأجهزة</button><button class="action-btn-tbl" style="color:#ef4444;" onclick="deleteUser(${idx})">حذف</button></td>
+                    <td><button class="action-btn-tbl" style="color:#2ea44f;" onclick="resetDevices(${idx})" title="إلغاء اتصال الأجهزة العالقة">تصفير الأجهزة (${actCount})</button><button class="action-btn-tbl" style="color:#ef4444;" onclick="deleteUser(${idx})">حذف</button></td>
                 </tr>`; 
             });
         }
@@ -1097,7 +1133,7 @@
             if(existing) {
                 existing.password = pass; existing.expiryDate = exp; existing.maxDevices = maxDev;
             } else {
-                usersDB.push({ username: user, password: pass, expiryDate: exp, maxDevices: maxDev, activeDevices: 0 }); 
+                usersDB.push({ username: user, password: pass, expiryDate: exp, maxDevices: maxDev, connectedDevices: [] }); 
             }
             saveToStorage(); 
             document.getElementById('admin-username').value=''; document.getElementById('admin-password').value=''; document.getElementById('admin-expiry').value=''; document.getElementById('admin-max-devices').value='1';
@@ -1106,7 +1142,7 @@
         function deleteUser(index) { if(confirm('حذف الحساب؟')) { usersDB.splice(index, 1); saveToStorage(); renderAdminTables(); } }
         
         function resetDevices(index) {
-            usersDB[index].activeDevices = 0;
+            usersDB[index].connectedDevices = [];
             saveToStorage();
             alert('تم تصفير الأجهزة المتصلة لهذا المستخدم بنجاح.');
             renderAdminTables();
