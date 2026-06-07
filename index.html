@@ -476,6 +476,7 @@
                 <div class="admin-sidebar">
                     <div class="admin-header">لوحة الإدارة المتقدمة</div>
                     <div class="admin-nav-item active" onclick="switchAdminTab('content-tab', this)">إدارة المحتوى</div>
+                    <div class="admin-nav-item" onclick="switchAdminTab('m3u-tab', this)">إدارة ملفات M3U</div>
                     <div class="admin-nav-item" onclick="switchAdminTab('users-tab', this)">إدارة المستخدمين والحماية</div>
                     <div style="margin-top: auto; border-top: 1px solid #333;" class="admin-nav-item" onclick="showView('dashboard-view'); openAdminPanel(false);">العودة للرئيسية</div>
                 </div>
@@ -548,6 +549,58 @@
                                 <thead><tr><th>النوع</th><th>العنوان والتفاصيل</th><th>إجراءات</th></tr></thead>
                                 <tbody id="admin-content-table"></tbody>
                             </table>
+                        </div>
+                    </div>
+
+                    <div id="m3u-tab" class="admin-panel-section">
+                        <h2 class="admin-title">إدارة ملفات و روابط M3U</h2>
+
+                        <div class="extractor-box" style="margin-bottom: 20px;">
+                            <label style="color:#f39c12; font-size:14px; font-weight:bold; display:block; margin-bottom:10px;">إضافة رابط تزامن (M3U External URL)</label>
+                            <div class="admin-form-grid" style="grid-template-columns: 1fr 1fr 2fr;">
+                                <div class="admin-form-group">
+                                    <label>القسم الفرعي للرابط:</label>
+                                    <input type="text" id="m3u-url-subid" class="admin-input" placeholder="مثال: قنوات رياضية">
+                                </div>
+                                <div class="admin-form-group" style="grid-column: span 2;">
+                                    <label>رابط M3U:</label>
+                                    <div style="display: flex; gap: 10px;">
+                                        <input type="text" id="m3u-url-input" class="admin-input" placeholder="https://...">
+                                        <button class="admin-btn" style="width: auto;" onclick="addM3uUrl()">إضافة رابط</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="margin-top: 15px; max-height: 150px; overflow-y: auto;">
+                                <table class="admin-table">
+                                    <thead><tr><th>القسم (SubId)</th><th>الرابط</th><th>إجراءات</th></tr></thead>
+                                    <tbody id="admin-m3u-urls-table"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="extractor-box">
+                            <label style="color:#2ea44f; font-size:14px; font-weight:bold; display:block; margin-bottom:10px;">رفع ملف M3U من الجهاز (يتم حفظ القنوات في الإدارة)</label>
+                            <div class="admin-form-grid">
+                                <div class="admin-form-group">
+                                    <label>النوع (أين ستظهر؟):</label>
+                                    <select id="m3u-file-type" class="admin-input">
+                                        <option value="live">بث مباشر (Live)</option>
+                                        <option value="movies">أفلام (Movies)</option>
+                                        <option value="series">مسلسلات (Series)</option>
+                                    </select>
+                                </div>
+                                <div class="admin-form-group">
+                                    <label>القسم الفرعي لجميع العناصر في الملف:</label>
+                                    <input type="text" id="m3u-file-subid" class="admin-input" placeholder="مثال: باقة VIP">
+                                </div>
+                                <div class="admin-form-group" style="grid-column: span 2;">
+                                    <label>اختر ملف (m3u, m3u8, txt):</label>
+                                    <div style="display: flex; gap: 10px;">
+                                        <input type="file" id="m3u-file-input" class="admin-input" accept=".m3u,.m3u8,.txt" style="background: transparent; border: 1px solid #444;">
+                                        <button class="admin-btn" style="background:#2ea44f; width: auto;" onclick="uploadLocalM3U()">استيراد الملف وحفظه</button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -636,8 +689,8 @@
         ];
 
         let database = JSON.parse(localStorage.getItem('iqab_db_v5')) || defaultDatabase;
+        let m3uUrlsDB = JSON.parse(localStorage.getItem('iqab_m3u_urls_v1')) || [ { url: 'DL-5-6-2026.m3u', subId: 'جميع القنوات' } ];
         
-        // نظام الهجرة لحل مشاكل الحسابات القديمة وضبط كلمة السر للإدمن وبنية الجلسات
         let usersDB = JSON.parse(localStorage.getItem('iqab_users_v6'));
         if (!usersDB) {
             let oldUsers = JSON.parse(localStorage.getItem('iqab_users_v5'));
@@ -647,7 +700,7 @@
                     password: u.username === 'okba' ? '1233' : u.password,
                     expiryDate: u.expiryDate,
                     maxDevices: u.maxDevices,
-                    connectedDevices: [] // مسح الأجهزة المعلقة
+                    connectedDevices: []
                 }));
             } else {
                 usersDB = [{ username: 'okba', password: '1233', maxDevices: 1, connectedDevices: [] }];
@@ -660,7 +713,6 @@
         let currentType = 'live', currentSubId = 'all';
         let currentMediaObj = null;
 
-        // متغيرات الحفظ وتحديث المشغل
         let savedProfiles = JSON.parse(localStorage.getItem('iqab_saved_profiles')) || [];
         let activeLiveItem = null;
         let activeVodUrls = null;
@@ -669,6 +721,7 @@
         function saveToStorage() {
             localStorage.setItem('iqab_db_v5', JSON.stringify(database));
             localStorage.setItem('iqab_users_v6', JSON.stringify(usersDB));
+            localStorage.setItem('iqab_m3u_urls_v1', JSON.stringify(m3uUrlsDB));
         }
 
         // --- نظام الإعدادات والتحديث ---
@@ -707,7 +760,6 @@
                 }
             }
 
-            // استعادة الجلسة بأمان تام بناءً على معرف الجهاز الجديد
             let sessionUser = sessionStorage.getItem('loggedInUser');
             if(sessionUser) {
                 let dbUser = usersDB.find(x => x.username === sessionUser);
@@ -724,19 +776,22 @@
             }
         };
 
-        const m3uPlaylists = [ { url: 'DL-5-6-2026.m3u', subId: 'جميع القنوات' } ];
-
+        // --- نظام M3U الديناميكي (التزامن) ---
         async function fetchM3UFiles() {
             m3uChannels = []; 
-            for (const playlist of m3uPlaylists) {
+            for (const playlist of m3uUrlsDB) {
                 try {
-                    const response = await fetch(playlist.url + '?t=' + new Date().getTime(), { cache: 'no-store' });
+                    let fetchUrl = playlist.url;
+                    // إضافة باراميتر لتجاوز الكاش إذا لم يكن موجوداً
+                    if(!fetchUrl.includes('?')) fetchUrl += '?t=' + new Date().getTime();
+                    
+                    const response = await fetch(fetchUrl, { cache: 'no-store' });
                     if (!response.ok) continue; 
                     const text = await response.text();
                     
                     const lines = text.split(/\r?\n/);
                     let currentChannel = {};
-                    let currentGenre = playlist.subId; 
+                    let currentGenre = playlist.subId || 'M3U'; 
 
                     for (let i = 0; i < lines.length; i++) {
                         let line = lines[i].trim();
@@ -750,7 +805,7 @@
                         if (line.startsWith('#EXTINF:')) {
                             const parts = line.split(',');
                             currentChannel.title = parts.length > 1 ? parts[1].trim() : 'قناة غير معروفة';
-                            currentChannel.type = 'live';
+                            currentChannel.type = 'live'; // التزامن عادة مخصص للقنوات
                             currentChannel.subId = currentGenre; 
                             currentChannel.isIframe = false;
                             currentChannel.poster = 'https://images.unsplash.com/photo-1593784991095-a205069470b6?w=200&q=80'; 
@@ -780,7 +835,7 @@
                         }
                     }
                 } catch (error) {
-                    console.error("M3U Fetch Error:", error);
+                    console.error("M3U Fetch Error for url:", playlist.url, error);
                 }
             }
             if(document.getElementById('live-view').classList.contains('active')){ loadCategories(); renderContent(); }
@@ -869,7 +924,6 @@
 
                 if(!foundUser.connectedDevices) foundUser.connectedDevices = [];
                 
-                // التأكد إذا كان هذا الجهاز (المتصفح) مسجل دخول من قبل لمنع التكرار الوهمي
                 if (!foundUser.connectedDevices.includes(deviceId)) {
                     let max = foundUser.maxDevices || 1;
                     if(foundUser.connectedDevices.length >= max) {
@@ -904,7 +958,7 @@
             document.getElementById('st-username').innerText = user.username;
             document.getElementById('st-expiry').innerText = user.expiryDate || 'مفتوح (بدون تاريخ)';
             document.getElementById('st-devices').innerText = `${activeCount} من ${max}`;
-            document.getElementById('st-device-id').innerText = deviceId; // إظهار معرف الجهاز
+            document.getElementById('st-device-id').innerText = deviceId;
             
             document.getElementById('st-pname').innerText = pName;
             document.getElementById('st-host').innerText = host;
@@ -917,7 +971,6 @@
             let sessionUser = sessionStorage.getItem('loggedInUser');
             if(sessionUser) {
                let dbUser = usersDB.find(x => x.username === sessionUser);
-               // إزالة الجهاز الحالي فقط من الأجهزة المتصلة
                if(dbUser && dbUser.connectedDevices) {
                    dbUser.connectedDevices = dbUser.connectedDevices.filter(id => id !== deviceId);
                    saveToStorage();
@@ -1095,6 +1148,88 @@
                     <td><button class="action-btn-tbl" style="color:#2ea44f;" onclick="resetDevices(${idx})" title="إلغاء اتصال الأجهزة العالقة">تصفير الأجهزة (${actCount})</button><button class="action-btn-tbl" style="color:#ef4444;" onclick="deleteUser(${idx})">حذف</button></td>
                 </tr>`; 
             });
+
+            renderM3uUrlsTable();
+        }
+
+        // --- وظائف تبويب M3U الإضافية ---
+        function renderM3uUrlsTable() {
+            const table = document.getElementById('admin-m3u-urls-table');
+            if(!table) return;
+            table.innerHTML = '';
+            m3uUrlsDB.forEach((item, idx) => {
+                table.innerHTML += `<tr><td>${item.subId}</td><td style="direction:ltr; text-align:left;">${item.url}</td><td><button class="action-btn-tbl" style="color:#ef4444;" onclick="deleteM3uUrl(${idx})">حذف</button></td></tr>`;
+            });
+        }
+
+        function addM3uUrl() {
+            const subId = document.getElementById('m3u-url-subid').value.trim() || 'قنوات M3U';
+            const url = document.getElementById('m3u-url-input').value.trim();
+            if(!url) { alert('الرجاء إدخال رابط صالح!'); return; }
+            m3uUrlsDB.push({ url: url, subId: subId });
+            saveToStorage();
+            document.getElementById('m3u-url-input').value = '';
+            document.getElementById('m3u-url-subid').value = '';
+            renderM3uUrlsTable();
+            alert('تمت إضافة الرابط! سيتم استدعاء القنوات منه تلقائياً.');
+            fetchM3UFiles(); // تحديث فوري
+        }
+
+        function deleteM3uUrl(idx) {
+            if(confirm('هل تريد فعلاً حذف هذا الرابط؟')) {
+                m3uUrlsDB.splice(idx, 1);
+                saveToStorage();
+                renderM3uUrlsTable();
+                fetchM3UFiles();
+            }
+        }
+
+        function uploadLocalM3U() {
+            const fileInput = document.getElementById('m3u-file-input');
+            const type = document.getElementById('m3u-file-type').value;
+            const subId = document.getElementById('m3u-file-subid').value.trim() || 'ملف مستورد';
+            if(fileInput.files.length === 0) { alert('يرجى اختيار ملف من جهازك أولاً!'); return; }
+            
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                const lines = text.split(/\r?\n/);
+                let currentChannel = {};
+                let addedCount = 0;
+                let currentGenre = subId;
+
+                for (let i = 0; i < lines.length; i++) {
+                    let line = lines[i].trim();
+                    if (!line) continue;
+                    
+                    if (line.includes(',#genre#')) {
+                        currentGenre = line.split(',')[0].trim();
+                        continue;
+                    }
+
+                    if (line.startsWith('#EXTINF:')) {
+                        const parts = line.split(',');
+                        currentChannel.title = parts.length > 1 ? parts[1].trim() : 'عنصر غير معروف';
+                        currentChannel.type = type; // حفظه في القسم المحدد (مباشر/أفلام/مسلسلات)
+                        currentChannel.subId = currentGenre; 
+                        currentChannel.isIframe = false;
+                        currentChannel.poster = type === 'movies' ? 'https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?w=300&q=80' : 'https://images.unsplash.com/photo-1593784991095-a205069470b6?w=200&q=80'; 
+                    } 
+                    else if (line.startsWith('http') && currentChannel.title) {
+                        currentChannel.urls = [line];
+                        currentChannel.id = Date.now() + addedCount;
+                        if(type === 'movies' || type === 'series') currentChannel.season = 1;
+                        database.push({...currentChannel});
+                        addedCount++;
+                        currentChannel = {}; 
+                    }
+                }
+                saveToStorage();
+                renderAdminTables();
+                alert(`تم استيراد ${addedCount} عنصر بنجاح وحفظها في قاعدة البيانات الأساسية!`);
+            };
+            reader.readAsText(file);
         }
 
         function saveContentItem() {
@@ -1149,7 +1284,30 @@
         }
 
         async function extractVideoLink() { const siteUrl = document.getElementById('extractor-url').value.trim(); const resultDiv = document.getElementById('extractor-results'); if(!siteUrl) return; resultDiv.innerHTML = 'جاري فحص الرابط...'; if(siteUrl.includes('pixeldrain.com/u/')) { const direct = siteUrl.replace('/u/', '/e/'); resultDiv.innerHTML = `<button onclick="document.getElementById('admin-url').value+='\\n'+'${direct}'" class="admin-btn" style="background:#f39c12;">إضافة الرابط المستخرج</button>`; return; } else if (siteUrl.includes('pixeldrain.com/api/file/') || siteUrl.includes('pixeldrain.com/e/')) { resultDiv.innerHTML = `<button onclick="document.getElementById('admin-url').value+='\\n'+'${siteUrl}'" class="admin-btn" style="background:#f39c12;">إضافة الرابط المستخرج</button>`; return; } try { const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(siteUrl); const response = await fetch(proxyUrl); if(!response.ok) throw new Error('Network error'); const data = await response.json(); const html = data.contents; const regex = /(https?:\/\/[^\s"'<>]+\.(?:mp4|m3u8)[^\s"'<>]*)/gi; let matches = []; if(html) { matches = [...new Set(html.match(regex))]; } if(matches.length > 0) { resultDiv.innerHTML = ''; matches.forEach(link => { resultDiv.innerHTML += `<button onclick="document.getElementById('admin-url').value+='\\n'+'${link}'" class="admin-btn" style="background:#f39c12; margin:5px; font-size:11px;">${link}</button><br>`; }); } else { resultDiv.innerHTML = '<span style="color:#ef4444;">لم يتم العثور. جرب نسخ الرابط كاملاً وتفعيل (Iframe).</span>'; } } catch (error) { resultDiv.innerHTML = '<span style="color:#ef4444;">خطأ في الفحص.</span>'; } }
-        async function pushToGitHub() { const btn = document.getElementById('github-update-btn'); btn.innerText = 'جاري الرفع...'; const p1 = "github_pat_11CDBWO4Q"; const p2 = "0CPyUlhqlG4Pl_wIurVR5ZK"; const p3 = "7twtQuOlJ3rfqJXoG1dnrJCaH1JkW"; const p4 = "nW8VyAWUENCSWFzf72yKe"; const token = p1 + p2 + p3 + p4; const repo = "okba3137-svg/Channel"; const path = "database.json"; const url = `https://api.github.com/repos/${repo}/contents/${path}`; try { let sha = ""; const getRes = await fetch(url, { headers: { "Authorization": `token ${token}` } }); if (getRes.ok) { const getData = await getRes.json(); sha = getData.sha; } const contentObj = { database: database, usersDB: usersDB }; const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(contentObj, null, 2)))); const body = { message: "تحديث قاعدة بيانات العقاب TV", content: contentBase64 }; if (sha) body.sha = sha; const putRes = await fetch(url, { method: "PUT", headers: { "Authorization": `token ${token}`, "Content-Type": "application/json" }, body: JSON.stringify(body) }); if (putRes.ok) { alert("تم تحديث الموقع ورفع البيانات إلى GitHub بنجاح!"); } else { const err = await putRes.json(); alert("خطأ في الرفع: " + err.message); } } catch (error) { alert("حدث خطأ في الاتصال بسيرفر GitHub."); } btn.innerText = 'تحديث الموقع (رفع لـ GitHub)'; }
+        
+        async function pushToGitHub() { 
+            const btn = document.getElementById('github-update-btn'); btn.innerText = 'جاري الرفع...'; 
+            const p1 = "github_pat_11CDBWO4Q"; const p2 = "0CPyUlhqlG4Pl_wIurVR5ZK"; const p3 = "7twtQuOlJ3rfqJXoG1dnrJCaH1JkW"; const p4 = "nW8VyAWUENCSWFzf72yKe"; 
+            const token = p1 + p2 + p3 + p4; 
+            const repo = "okba3137-svg/Channel"; 
+            const path = "database.json"; 
+            const url = `https://api.github.com/repos/${repo}/contents/${path}`; 
+            try { 
+                let sha = ""; 
+                const getRes = await fetch(url, { headers: { "Authorization": `token ${token}` } }); 
+                if (getRes.ok) { const getData = await getRes.json(); sha = getData.sha; } 
+                // تم تضمين m3uUrlsDB ليتم رفع روابط التزامن أيضاً لـ GitHub
+                const contentObj = { database: database, usersDB: usersDB, m3uUrlsDB: m3uUrlsDB }; 
+                const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(contentObj, null, 2)))); 
+                const body = { message: "تحديث قاعدة بيانات العقاب TV", content: contentBase64 }; 
+                if (sha) body.sha = sha; 
+                const putRes = await fetch(url, { method: "PUT", headers: { "Authorization": `token ${token}`, "Content-Type": "application/json" }, body: JSON.stringify(body) }); 
+                if (putRes.ok) { alert("تم تحديث الموقع ورفع البيانات إلى GitHub بنجاح!"); } else { const err = await putRes.json(); alert("خطأ في الرفع: " + err.message); } 
+            } catch (error) { 
+                alert("حدث خطأ في الاتصال بسيرفر GitHub."); 
+            } 
+            btn.innerText = 'تحديث الموقع (رفع لـ GitHub)'; 
+        }
     </script>
 </body>
 </html>
