@@ -96,7 +96,8 @@
       "urls": [
         "https://3cup-live.s3.eu-west-3.amazonaws.com/max1/max1_144p/index.m3u8",
         "https://3cup-live.s3.eu-west-3.amazonaws.com/max1/max1_240p/index.m3u8",
-        "https://3cup-live.s3.eu-west-3.amazonaws.com/max1/max1_360p/index.m3u8",
+        "https://3cup-live.s3.eu-west-",
+        "https://rr2---sn-uhvcpax0n5-qufz.googlevideo.com/videoplayback?expire=1781582508&ei=LFowaoKCJfHB_tcPu8-2gQU&ip=2607:fb90:8d9b:c070:b1aa:52cc:3824:cee&id=dd6d6b7d0add389a&itag=18&source=youtube&requiressl=yes&xpc=Eghovf3BOnoBAQ==&cps=241&met=1781553708,&mh=0C&mm=31&mn=sn-uhvcpax0n5-qufz&ms=au&mv=m&mvi=2&pl=40&rms=au,au&susc=gvp&acao=yes&ctier=L&mime=video/mp4&vprv=1&rqh=1&dur=36.826&lmt=1777197379373926&mt=1781553188&cpn=fmmZU_W7eW3jLfOt&txp=5438534&sparams=expire,ei,ip,id,itag,source,requiressl,xpc,susc,acao,ctier,mime,vprv,rqh,dur,lmt&sig=AHEqNM4wRQIgVv5Q2yxjEr6HGnyZcVqCCWtgHQZ74UxwbRxL3LnBreQCIQDiXuaCyYzTwGeQFxWzy_5GGIKeULKjX6gFbhbriSXMdg==&lsparams=cps,met,mh,mm,mn,ms,mv,mvi,pl,rms&lsig=APaTxxMwRgIhAIDRn5MoaAf54jXXJSb0L-2s_8bd9H0bMmNRa5tVIW-QAiEAlNmyM6DeauqYd_B4Bg8hFB2p9qGYY03jcsu7oMJmbf0=3.amazonaws.com/max1/max1_360p/index.m3u8",
         "https://3cup-live.s3.eu-west-3.amazonaws.com/max1/max1_540p/index.m3u8",
         "https://3cup-live.s3.eu-west-3.amazonaws.com/max1/max1_480p/index.m3u8https://3cup-live.s3.eu-west-3.amazonaws.com/max1/max1_720p/index.m3u8",
         "https://3cup-live.s3.eu-west-3.amazonaws.com/max1/max1_1080p/index.m3u8",
