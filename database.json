@@ -7,21 +7,7 @@
       "title": "بي إن سبورت 1",
       "poster": "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=200&q=80",
       "urls": [
-        "https://3cup-live.s3.eu-west-3.amazonaws.com/max1/max1_144p/index.m3u8",
-        "https://3cup-live.s3.eu-west-3.amazonaws.com/max1/max1_240p/index.m3u8",
-        "https://3cup-live.s3.eu-west-3.amazonaws.com/max1/max1_360p/index.m3u8",
-        "https://3cup-live.s3.eu-west-3.amazonaws.com/max1/max1_540p/index.m3u8",
-        "https://3cup-live.s3.eu-west-3.amazonaws.com/max1/max1_480p/index.m3u8",
-        "https://3cup-live.s3.eu-west-3.amazonaws.com/max1/max1_720p/index.m3u8",
-        "https://3cup-live.s3.eu-west-3.amazonaws.com/max1/max1_1080p/index.m3u8",
-        "https://cup.yallashoo.live/en/index.m3u8",
-        "https://cup.yallashoo.live/max1/index.m3u8",
-        "https://m.syrlive.com/matches/usa-vs-paraguay/",
-        "https://live.shoranz.cfd/shossss3/index.m3u8",
-        "https://edu1.3allemni.com/2026/06/scholarships-for-international-students_01559772234.html?m=1",
-        "https://v2.site22.top/broadcast/LXug3soJfc4-Ph4SmNaXIQ/1781314060/1781313799/1/maxx1.m3u8",
-        "https://v3.site22.top/broadcast/O_2b89cfM9o4SwvmML4H5w/1781313985/1781313724/1/max1.m3u8",
-        "https://v3.site22.top/broadcast/PnOabHe_fnXZxzlpGV2qyg/1781314100/1781313839/1/sporttv5.m3u8"
+        "https://uvotv.com/live/sada-albalad-927/play?category=all&region=255"
       ],
       "isIframe": false
     },
@@ -33,92 +19,46 @@
       "poster": "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?w=300&q=80",
       "season": 1,
       "urls": [
-        "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4"
+        "https://uvotv.com/live/sada-albalad-927/play?category=all&region=255"
       ],
       "isIframe": false
     },
     {
-      "id": 1780818415564,
+      "id": 1780855269202,
       "type": "live",
-      "subId": "77",
-      "title": "Mbc3",
+      "subId": "Ppp",
+      "title": "Poo",
       "poster": "",
       "urls": [
-        "https://iptv-web.app/US/MBC3USA.us/"
+        "http://mynetworks.info:80/ali12345/12345/95313"
       ],
       "isIframe": false
     },
     {
-      "id": 1781137611061,
-      "type": "live",
-      "subId": "Ss",
-      "title": "Ss",
+      "id": 1780950282711,
+      "type": "series",
+      "subId": "Jsj",
+      "title": "Dii",
       "poster": "",
-      "urls": [
-        "https://shd-gcp-live.edgenextcdn.net/live/bitmovin-mbc-3-usa/5d58265a862a476dc7f97694addb5ded/manifest/audio1/192kbps/audio.m3u8",
-        "https://shd-gcp-live.edgenextcdn.net/live/bitmovin-mbc-3-usa/5d58265a862a476dc7f97694addb5ded/manifest/video/288p350kbps/video.m3u8",
-        "https://shd-gcp-live.edgenextcdn.net/live/bitmovin-mbc-3-usa/5d58265a862a476dc7f97694addb5ded/manifest/video/468p750kbps/video.m3u8",
-        "https://shd-gcp-live.edgenextcdn.net/live/bitmovin-mbc-3-usa/5d58265a862a476dc7f97694addb5ded/manifest/video/1080p2400kbps/video.m3u8",
-        "https://shd-gcp-live.edgenextcdn.net/live/bitmovin-mbc-3-usa/5d58265a862a476dc7f97694addb5ded/manifest/video/360p500kbps/video.m3u8",
-        "https://shd-gcp-live.edgenextcdn.net/live/bitmovin-mbc-3-usa/5d58265a862a476dc7f97694addb5ded/index.m3u8"
-      ],
-      "isIframe": false
+      "season": 1,
+      "isIframe": false,
+      "episodes": [
+        {
+          "title": "الحلقة 1",
+          "urls": [
+            "https://youtu.be/aPZRrvRBaVU?si=SYZMSwAKSrs71wD4"
+          ]
+        }
+      ]
     },
     {
-      "id": 1781137924481,
+      "id": 1781641217042,
       "type": "live",
-      "subId": "Ss",
-      "title": "S",
+      "subId": "Kooraa",
+      "title": "1",
       "poster": "",
       "urls": [
-        "https://fast.spacetoongo.com/channels/90aec0ab-ef92-415d-8af1-a8023049e71a/master1000.m3u8%3Bsession=90aec0ab-ef92-415d-8af1-a8023049e71a"
-      ],
-      "isIframe": false
-    },
-    {
-      "id": 1781138120129,
-      "type": "live",
-      "subId": "Ss",
-      "title": "Sp",
-      "poster": "",
-      "urls": [
-        "https://fast.spacetoongo.com/channels/2f68bfe1-576a-4f42-9a17-60401a1cd95c/master1000.m3u8%3Bsession=2f68bfe1-576a-4f42-9a17-60401a1cd95c?",
-        "token=05b3927175ed8459397da7d3c4845289.6c991318e39716ce8e5824b09fbf5deaff31f979765b2546648c69a07781b99a4f405bf6e279b417e1c1b8c2300fb1bc9538014dcbf7f3c27a7627cd33c9fa7cdfbc34a518960596298c2ed0c2b36f7a"
-      ],
-      "isIframe": false
-    },
-    {
-      "id": 1781312253979,
-      "type": "live",
-      "subId": "الرياضيه",
-      "title": "الرياضية كووره",
-      "poster": "",
-      "urls": [
-        "https://3cup-live.s3.eu-west-3.amazonaws.com/max1/max1_144p/index.m3u8",
-        "https://3cup-live.s3.eu-west-3.amazonaws.com/max1/max1_240p/index.m3u8",
-        "https://3cup-live.s3.eu-west-",
-        "https://rr2---sn-uhvcpax0n5-qufz.googlevideo.com/videoplayback?expire=1781582508&ei=LFowaoKCJfHB_tcPu8-2gQU&ip=2607:fb90:8d9b:c070:b1aa:52cc:3824:cee&id=dd6d6b7d0add389a&itag=18&source=youtube&requiressl=yes&xpc=Eghovf3BOnoBAQ==&cps=241&met=1781553708,&mh=0C&mm=31&mn=sn-uhvcpax0n5-qufz&ms=au&mv=m&mvi=2&pl=40&rms=au,au&susc=gvp&acao=yes&ctier=L&mime=video/mp4&vprv=1&rqh=1&dur=36.826&lmt=1777197379373926&mt=1781553188&cpn=fmmZU_W7eW3jLfOt&txp=5438534&sparams=expire,ei,ip,id,itag,source,requiressl,xpc,susc,acao,ctier,mime,vprv,rqh,dur,lmt&sig=AHEqNM4wRQIgVv5Q2yxjEr6HGnyZcVqCCWtgHQZ74UxwbRxL3LnBreQCIQDiXuaCyYzTwGeQFxWzy_5GGIKeULKjX6gFbhbriSXMdg==&lsparams=cps,met,mh,mm,mn,ms,mv,mvi,pl,rms&lsig=APaTxxMwRgIhAIDRn5MoaAf54jXXJSb0L-2s_8bd9H0bMmNRa5tVIW-QAiEAlNmyM6DeauqYd_B4Bg8hFB2p9qGYY03jcsu7oMJmbf0=3.amazonaws.com/max1/max1_360p/index.m3u8",
-        "https://3cup-live.s3.eu-west-3.amazonaws.com/max1/max1_540p/index.m3u8",
-        "https://3cup-live.s3.eu-west-3.amazonaws.com/max1/max1_480p/index.m3u8https://3cup-live.s3.eu-west-3.amazonaws.com/max1/max1_720p/index.m3u8",
-        "https://3cup-live.s3.eu-west-3.amazonaws.com/max1/max1_1080p/index.m3u8",
-        "https://cup.yallashoo.live/max1/index.m3u8",
-        "https://s3.us-east-1.amazonaws.com/yalapro1/hls/0/stream_640x360_800k.m3u8",
-        "https://cup.yallashoo.live/en/index.m3u8",
-        "https://s3.us-east-1.amazonaws.com/yalapro1/hls/0/stream_640x360_800k.m3u8"
-      ],
-      "isIframe": false
-    },
-    {
-      "id": 1781553821844,
-      "type": "live",
-      "subId": "مبارة اليوم",
-      "title": "كوووره",
-      "poster": "",
-      "urls": [
-        "https://live.kooran20.cfd/tist2/index.m3u8",
-        "https://rr2---sn-uhvcpax0n5-qufz.googlevideo.com/videoplayback?expire=1781582508&ei=LFowaoKCJfHB_tcPu8-2gQU&ip=2607:fb90:8d9b:c070:b1aa:52cc:3824:cee&id=dd6d6b7d0add389a&itag=18&source=youtube&requiressl=yes&xpc=Eghovf3BOnoBAQ==&cps=241&met=1781553708,&mh=0C&mm=31&mn=sn-uhvcpax0n5-qufz&ms=au&mv=m&mvi=2&pl=40&rms=au,au&susc=gvp&acao=yes&ctier=L&mime=video/mp4&vprv=1&rqh=1&dur=36.826&lmt=1777197379373926&mt=1781553188&cpn=fmmZU_W7eW3jLfOt&txp=5438534&sparams=expire,ei,ip,id,itag,source,requiressl,xpc,susc,acao,ctier,mime,vprv,rqh,dur,lmt&sig=AHEqNM4wRQIgVv5Q2yxjEr6HGnyZcVqCCWtgHQZ74UxwbRxL3LnBreQCIQDiXuaCyYzTwGeQFxWzy_5GGIKeULKjX6gFbhbriSXMdg==&lsparams=cps,met,mh,mm,mn,ms,mv,mvi,pl,rms&lsig=APaTxxMwRgIhAIDRn5MoaAf54jXXJSb0L-2s_8bd9H0bMmNRa5tVIW-QAiEAlNmyM6DeauqYd_B4Bg8hFB2p9qGYY03jcsu7oMJmbf0=",
-        "https://live.kooran18.cfd/tist1/index.m3u8",
-        "https://live.kooran16.cfd/tist3/index.m3u8"
+        "https://s3.us-east-2.amazonaws.com/cdnh113/hls/0/stream.m3u8"
       ],
       "isIframe": false
     }
@@ -127,9 +67,10 @@
     {
       "username": "okba",
       "password": "1233",
-      "maxDevices": 1,
+      "expiryDate": "2027-10-31",
+      "maxDevices": 3,
       "connectedDevices": [
-        "DEV-RZ3JHDKOT"
+        "DEV-6OTKSRGYZ"
       ]
     }
   ],
@@ -139,116 +80,32 @@
       "subId": "جميع القنوات"
     },
     {
-      "url": "https://gist.githubusercontent.com/ItsRandall/3119615c8b4732d7b56e5217d66edbab/raw/7a89dbac3dfaa3425b2890cfb40c5d5dc5fbde15/playlist.m3u",
-      "subId": "11"
+      "url": "https://gist.github.com/icehack3/55a5c448261ccb20b1471c297713af7f.js",
+      "subId": "قنوات"
     },
     {
-      "url": "https://raw.githubusercontent.com/Free-TV/IPTV/refs/heads/master/playlist.m3u8",
-      "subId": "222"
+      "url": "https://gist.github.com/icehack3/55a5c448261ccb20b1471c297713af7f.js",
+      "subId": "قنوات شامل"
     },
     {
-      "url": "https://raw.githubusercontent.com/LITUATUI/M3UPT/refs/heads/main/M3U/M3UPT.m3u",
-      "subId": "قنوات M3U"
+      "url": "https://gist.github.com/icehack3/55a5c448261ccb20b1471c297713af7f",
+      "subId": "قنوات"
     },
     {
-      "url": "https://video-auth6.iol.pt/edge_servers/tvi-720_passthrough/chunks.m3u8?wmsAuthSign=",
-      "subId": "قنوات M3U"
+      "url": "https://gist.githubusercontent.com/icehack3/55a5c448261ccb20b1471c297713af7f/raw/ebbaa9b362273e5ef7d7053cc14e258f98eb0665/zmp.m3u8",
+      "subId": "قنوات شامله"
     },
     {
-      "url": "https://raw.githubusercontent.com/LITUATUI/M3UPT/refs/heads/main/M3U/TVI.m3u8",
-      "subId": "قنوات M3U"
+      "url": "http://mkstream.servehttp.com:1940/AmouYazid/ay1/playlist.m3u8",
+      "subId": "Hh"
     },
     {
-      "url": "https://raw.githubusercontent.com/iptv-org/iptv/refs/heads/master/streams/ae.m3u",
-      "subId": "قنوات عربيهae"
+      "url": "https://iptv- org.github.io/iptv/categories/movie s.m3u",
+      "subId": "Movies"
     },
     {
-      "url": "https://raw.githubusercontent.com/iptv-org/iptv/refs/heads/master/streams/ar.m3u",
-      "subId": "عربي"
-    },
-    {
-      "url": "https://raw.githubusercontent.com/iptv-org/iptv/refs/heads/master/streams/bh.m3u",
-      "subId": "البحرين"
-    },
-    {
-      "url": "https://raw.githubusercontent.com/iptv-org/iptv/refs/heads/master/streams/us_tubi.m3u",
-      "subId": "امريكي"
-    },
-    {
-      "url": "https://raw.githubusercontent.com/iptv-org/iptv/refs/heads/master/streams/uk_bbc.m3u",
-      "subId": "Bbc"
-    },
-    {
-      "url": "https://raw.githubusercontent.com/amazeyourself/m3u/refs/heads/main/yupptvfast.m3u",
-      "subId": "Yy"
-    },
-    {
-      "url": "https://raw.githubusercontent.com/amazeyourself/m3u/refs/heads/main/roarzone.m3u",
-      "subId": "Oo"
-    },
-    {
-      "url": "https://iptv-org.github.io/iptv/index.m3u",
-      "subId": "990"
-    },
-    {
-      "url": "https://raw.githubusercontent.com/imDazui/Tvlist-awesome-m3u-m3u8/master/m3u/%E5%9B%BD%E5%86%85%E7%94%B5%E8%A7%86%E5%8F%B0202509.m3u",
-      "subId": "66"
-    },
-    {
-      "url": "https://raw.githubusercontent.com/imDazui/Tvlist-awesome-m3u-m3u8/master/m3u/%E5%9B%BD%E5%A4%96%E7%94%B5%E8%A7%86%E5%8F%B0202409.m3u",
-      "subId": "00"
-    },
-    {
-      "url": "https://openstream.sendly.me/index.m3u",
-      "subId": "Mm"
-    },
-    {
-      "url": "https://raw.githubusercontent.com/abusaeeidx/Mrgify-BDIX-IPTV/refs/heads/main/playlist.m3u",
-      "subId": "1010"
-    },
-    {
-      "url": "https://s.id/d9M3U8",
-      "subId": "2222"
-    },
-    {
-      "url": "https://spacetoon.com/ar/",
-      "subId": "Sss"
-    },
-    {
-      "url": "https://spacetoon.com",
-      "subId": "Sss"
-    },
-    {
-      "url": "https://raw.githubusercontent.com/waheeb1983/iptv-player/master/Channels/merged_playlist.m3u",
-      "subId": "مصري"
-    },
-    {
-      "url": "https://mbc1-enc.edgenextcdn.net/out/v1/0965e4d7deae49179172426cbfb3bc5e/index.m3u8",
-      "subId": "Ara"
-    },
-    {
-      "url": "https://shd-gcp-live.edgenextcdn.net/live/bitmovin-mbc-3-usa/5d58265a862a476dc7f97694addb5ded/manifest/audio1/192kbps/audio.m3u8",
-      "subId": "Yyyii"
-    },
-    {
-      "url": "https://shd-gcp-live.edgenextcdn.net/live/bitmovin-mbc-3-usa/5d58265a862a476dc7f97694addb5ded/index.m3u8",
-      "subId": "Sspesrltoon"
-    },
-    {
-      "url": "https://shd-gcp-live.edgenextcdn.net/live/bitmovin-mbc-3-usa/5d58265a862a476dc7f97694addb5ded/manifest/audio1/192kbps/audio.m3u8",
-      "subId": "S"
-    },
-    {
-      "url": "https://huggingface.co/spaces/mmsubandmovies/New1/raw/main/Asan.m3u8",
-      "subId": "Jj"
-    },
-    {
-      "url": "https://gist.githubusercontent.com/morcodou/647ac79ca1b63271b4d954e3cf9b4c68/raw/69f78bece9fcb67d36bdc9c5bd8a64bd9eefe7cc/iptv.m3u8",
-      "subId": "Jijj"
-    },
-    {
-      "url": "https://gist.githubusercontent.com/Vitaleksi/15d57d137d997135d3993a9024a04856/raw/2ad64c1f0264578f0335f68fa14f8063b32cfd55/Miks.m3u8",
-      "subId": "Okba"
+      "url": "http://mynetworks.info:80/ali12345/12345/12499",
+      "subId": "Jhm"
     }
   ]
 }
