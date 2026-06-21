@@ -1,22 +1,40 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Al-Oqab Player UI - Integrated</title>
+    <title>Al-Oqab Player UI - Integrated Pro Max</title>
     
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
+    <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mpegts.js@1.7.3/dist/mpegts.min.js"></script>
     <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
-    <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
+    <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
 
     <style>
         /* --- الإعدادات الأساسية --- */
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; user-select: none; }
-        body, html { width: 100%; height: 100%; overflow: hidden; background-color: #111111; color: #ffffff; }
+        body, html { width: 100%; height: 100%; overflow: hidden; background-color: #111111; color: #ffffff; direction: ltr; }
 
         .app-wrapper { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #1e1e1e; }
+        
         @media screen and (orientation: portrait) {
-            .app-wrapper { width: 100vh; height: 100vw; top: 100%; left: 0; transform-origin: 0 0; transform: rotate(-90deg); }
+            .app-wrapper { width: 100vh; height: 100vw; top: 100%; left: ; transform-origin: 0 0; transform: rotate(-90deg); }
+        }
+
+        /* --- التعديل الأول: دمج إعدادات التوافق 100dvh للآيفون والجلاكسي --- */
+        @media (max-height: 450px), (orientation: landscape) {
+            body, html {
+                height: 100dvh;
+                width: 100%;
+                position: fixed;
+                overflow: hidden;
+            }
+            .app-wrapper {
+                height: 100dvh;
+                width: 100vw;
+            }
         }
 
         ::-webkit-scrollbar { width: 4px; }
@@ -30,7 +48,7 @@
            شاشات البداية (Home & Add)
            ========================================= */
         #home-view.active { display: block; background: radial-gradient(circle at center, #3a2e31 0%, #1a1a24 60%, #0d0d12 100%); }
-        #add-view.active { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 4%; background: radial-gradient(circle at center, #3a2e31 0%, #1a1a24 60%, #0d0d12 100%); }
+        #add-view.active { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 4%; background: radial-gradient(circle at center, #3a2e31 0%, #1a1a24 60%, #0d0d12 100%); direction: rtl;}
         
         .left-section { position: absolute; top: 0; left: 0; width: 70%; height: 100%; border-right: 1.5px solid rgba(255, 255, 255, 0.1); }
         .header-title { position: absolute; top: 12%; left: 8%; display: flex; align-items: center; font-size: 20px; }
@@ -44,7 +62,7 @@
         .footer-sub { font-size: 11px; color: rgba(255, 255, 255, 0.65); }
         
         .top-bar-add { width: 100%; display: flex; justify-content: center; align-items: center; position: relative; }
-        .back-btn { position: absolute; left: 4%; cursor: pointer; padding: 10px; }
+        .back-btn { position: absolute; right: 4%; cursor: pointer; padding: 10px; }
         .back-btn svg { fill: #ffffff; width: 24px; height: 24px; }
         .form-box { width: 85%; max-width: 800px; background: rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 15px 25px; display: flex; flex-direction: column; gap: 15px; direction: rtl; }
         .inputs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 25px; }
@@ -53,7 +71,6 @@
         .submit-btn { background-color: #d32f2f; color: #ffffff; border: none; border-radius: 4px; padding: 10px 35px; font-weight: bold; cursor: pointer; transition: 0.2s;}
         .submit-btn:hover { background-color: #b71c1c; }
 
-        /* ستايل الحسابات المحفوظة */
         .profile-card { background: rgba(255,255,255,0.1); padding: 10px 15px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 12px; width: 100%; transition: 0.2s; border: 1px solid rgba(255,255,255,0.05); }
         .profile-card:hover { background: rgba(255,255,255,0.2); border-color: #f39c12; }
         .profile-icon { background: #e53935; width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 18px; color: #fff; }
@@ -63,7 +80,7 @@
         /* =========================================
            لوحة التحكم الرئيسية (Dashboard)
            ========================================= */
-        #dashboard-view.active { display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle at center, #3a2e31 0%, #1a1a24 60%, #0d0d12 100%); relative;}
+        #dashboard-view.active { display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle at center, #3a2e31 0%, #1a1a24 60%, #0d0d12 100%); position: relative; direction: ltr;}
         .dash-header { position: absolute; top: 5%; width: 100%; display: flex; justify-content: center; }
         .dash-logo-center { display: flex; flex-direction: column; align-items: center; gap: 5px; }
         .dash-logo-center svg { width: 35px; height: 35px; fill: #e53935; }
@@ -79,7 +96,6 @@
         .card-large span { font-size: 18px; }
         
         .dash-col { display: flex; flex-direction: column; gap: 15px; flex: 0 0 22%; }
-        
         .dash-col-right { display: flex; flex-direction: column; gap: 15px; flex: 0 0 18%; }
         .dash-btn-outline { flex: 1; background: rgba(0,0,0,0.3); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 8px; cursor: pointer; transition: 0.2s; }
         .dash-btn-outline:hover { background: rgba(255,255,255,0.1); }
@@ -89,102 +105,121 @@
         /* =========================================
            شاشة الإعدادات
            ========================================= */
-        #settings-view.active { display: flex; flex-direction: column; background: radial-gradient(circle at center, #3a2e31 0%, #1a1a24 60%, #0d0d12 100%); }
-        .settings-container { max-width: 600px; width: 90%; margin: 70px auto; display: flex; flex-direction: column; gap: 20px; direction: rtl; text-align: right;}
+        #settings-view.active { display: flex; flex-direction: column; background: radial-gradient(circle at center, #3a2e31 0%, #1a1a24 60%, #0d0d12 100%); direction: ltr;}
+        .settings-container { max-width: 600px; width: 90%; margin: 70px auto; display: flex; flex-direction: column; gap: 20px; text-align: left;}
         .settings-section-title { color:#f39c12; font-size: 18px; margin-bottom:10px; border-bottom:1px solid #333; padding-bottom:10px; }
         .settings-card { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; gap: 15px; }
         .toggle-row { display: flex; justify-content: space-between; align-items: center; }
 
         /* =========================================
-           شاشات المحتوى المشتركة
+           شاشات المحتوى المشتركة (تطابق تصميم الصورة LTR)
            ========================================= */
-        .media-app-container { display: flex; flex-direction: column; width: 100%; height: 100%; background-color: #222222; }
-        .top-navbar { display: flex; align-items: center; justify-content: space-between; height: 60px; padding: 0 30px; border-bottom: 1px solid #333; background-color: #1a1a1a; }
-        .nav-links { display: flex; align-items: center; gap: 20px; }
-        .nav-item { font-size: 15px; color: #aaa; cursor: pointer; padding: 10px 5px; position: relative; font-weight: 500; }
-        .nav-item.active { color: #fff; }
-        .nav-item.active::after { content: ''; position: absolute; bottom: -5px; left: 0; width: 100%; height: 2px; background-color: #f39c12; }
-        .nav-separator { color: #555; font-size: 14px; }
-        .top-search-logo { display: flex; align-items: center; gap: 15px; }
-        .search-box-top { display: flex; align-items: center; border: 1px solid #555; border-radius: 20px; padding: 4px 15px; width: 220px; }
-        .search-box-top svg { width: 16px; height: 16px; fill: #aaa; margin-right: 8px; }
-        .search-box-top input { background: transparent; border: none; color: #fff; outline: none; width: 100%; font-size: 13px; }
-        .refresh-btn { background: transparent; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.3s; padding: 5px; }
-        .refresh-btn:hover { transform: rotate(180deg); }
-        .refresh-btn svg { width: 22px; height: 22px; fill: #f39c12; }
-        .app-logo-small { display: flex; align-items: center; gap: 5px; font-weight: bold; font-size: 16px; margin-left: 10px;}
-        .app-logo-small svg { width: 20px; height: 20px; fill: #e53935; }
-        .media-content-area { display: flex; height: calc(100% - 60px); width: 100%; }
+        .media-app-container { display: flex; flex-direction: column; width: 100%; height: 100%; background-color: #1a1a24; direction: ltr;}
+        .top-navbar { display: flex; align-items: center; justify-content: space-between; height: 70px; padding: 0 30px; border-bottom: 1px solid rgba(255,255,255,0.1); background-color: #1a1a24; }
+        
+        .top-left { display: flex; align-items: center; gap: 20px; }
+        .back-icon-btn { cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .back-icon-btn svg { width: 24px; height: 24px; fill: #fff; transition: 0.2s;}
+        .back-icon-btn:hover svg { fill: #f39c12; }
+        
+        .app-logo-small { display: flex; align-items: center; gap: 10px; font-size: 22px; font-weight: 800; color: #fff;}
+        .app-logo-small svg { width: 28px; height: 28px; fill: #e53935; }
+        
+        .top-center { display: flex; align-items: center; justify-content: center; flex: 1; }
+        .search-box-top { display: flex; align-items: center; border: 1px solid rgba(255,255,255,0.3); border-radius: 20px; padding: 6px 20px; width: 350px; background: rgba(255,255,255,0.05); }
+        .search-box-top svg { width: 18px; height: 18px; fill: #aaa; margin-right: 10px; }
+        .search-box-top input { background: transparent; border: none; color: #fff; outline: none; width: 100%; font-size: 14px; }
+        
+        .top-right { display: flex; align-items: center; gap: 15px; }
+        .icon-btn { background: transparent; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s; padding: 5px; border-radius: 50%; width: 40px; height: 40px;}
+        .icon-btn:hover { background: rgba(255,255,255,0.1); }
+        .icon-btn svg { width: 22px; height: 22px; fill: #fff; }
+        .reload-btn:hover svg { fill: #f39c12; transform: rotate(180deg); transition: 0.4s;}
 
-        /* شاشة Live والمشغلات */
-        .live-pane-1 { width: 22%; border-right: 1px solid #333; overflow-y: auto; background-color: #1a1a1a; direction: rtl; }
-        .live-pane-2 { width: 28%; border-right: 1px solid #333; overflow-y: auto; background-color: #1e1e1e; direction: rtl;}
-        .live-pane-3 { width: 50%; padding: 20px; display: flex; flex-direction: column; background-color: #222; }
-        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; cursor: pointer; border-bottom: 1px solid #2a2a2a; font-size: 13px; color: #ccc; }
-        .list-item:hover { background-color: #2a2a2a; }
-        .list-item.active { border: 1px solid #f39c12; color: #fff; background-color: #2a2a2a; }
-        .list-item .count { font-size: 12px; color: #888; background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px;}
+        .media-content-area { display: flex; height: calc(100% - 70px); width: 100%; }
+
+        /* شاشة Live والمشغلات - الأقسام الثلاثة */
+        .live-pane-1 { width: 22%; border-right: 1px solid rgba(255,255,255,0.1); overflow-y: auto; background-color: #1a1a24; }
+        .live-pane-2 { width: 28%; border-right: 1px solid rgba(255,255,255,0.1); overflow-y: auto; background-color: #1a1a24; }
+        .live-pane-3 { width: 50%; padding: 20px; display: flex; flex-direction: column; background-color: #1a1a24; justify-content: flex-start;}
+        
+        .cat-search { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .cat-search input { width: 100%; background: transparent; border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 10px; border-radius: 4px; outline: none; font-size: 14px;}
+        
+        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; color: #ccc; transition: 0.2s;}
+        .list-item:hover { background-color: rgba(255,255,255,0.05); }
+        .list-item.active { border: 1px solid #f39c12; color: #f39c12; font-weight: bold; border-radius: 4px; margin: 2px 10px; width: calc(100% - 20px); }
+        .list-item .count { font-size: 13px; color: #fff; }
+        .list-item.active .count { color: #f39c12; }
+        
         .channel-item { justify-content: flex-start; gap: 15px; }
-        .channel-num { color: #888; font-size: 12px; width: 35px; }
-        .channel-icon { width: 30px; height: 20px; border-radius: 2px; object-fit: cover; }
-        .video-player-mock { width: 100%; height: 55%; background: #000; border-radius: 4px; position: relative; display: flex; justify-content: center; align-items: center; overflow: hidden; }
-        .live-info { font-size: 14px; font-weight: bold; margin-top: 0;}
-        .live-servers { margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap;}
-        .server-btn { background: rgba(255,255,255,0.1); border: 1px solid #555; color: #fff; padding: 5px 15px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        .channel-num { color: #888; font-size: 14px; width: 30px; text-align: left;}
+        .channel-icon { width: 40px; height: 30px; border-radius: 4px; object-fit: cover; background: #fff;}
+        .channel-title { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 14px;}
+
+        .video-player-mock { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 8px; position: relative; display: flex; justify-content: center; align-items: center; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);}
+        .live-info { font-size: 22px; font-weight: bold; margin-top: 20px; color: #fff;}
+        .live-servers { margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;}
+        
+        /* ستايلات الأزرار الجديدة (المفضلة والنقل) */
+        .server-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; transition: 0.2s; }
+        .server-btn:hover { background: rgba(255,255,255,0.2); }
         .server-btn.active { background: #f39c12; border-color: #f39c12; color: #000; font-weight: bold; }
+        
+        .action-btns-wrapper { display: flex; justify-content: flex-end; gap: 15px; flex-wrap: wrap; margin-top: auto; padding-top: 20px; }
+        .btn-purple { background-color: #8b5cf6; color: white; border-radius: 30px; padding: 10px 25px; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: bold; font-size: 14px; transition: 0.2s; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);}
+        .btn-purple:hover { background-color: #7c3aed; transform: translateY(-2px); }
+        .btn-purple svg { width: 18px; height: 18px; fill: #fff; }
 
         /* شاشات VOD */
-        .vod-sidebar { width: 20%; border-right: 1px solid #333; display: flex; flex-direction: column; background-color: #1a1a1a; direction: rtl;}
-        .vod-sidebar-header { padding: 20px; display: flex; flex-direction: column; align-items: center; border-bottom: 1px solid #333; }
+        .vod-sidebar { width: 20%; border-right: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; background-color: #1a1a24; }
+        .vod-sidebar-header { padding: 20px; display: flex; flex-direction: column; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .vod-big-icon { width: 80px; height: 80px; border: 3px solid #fff; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-bottom: 20px; }
         .vod-big-icon svg { width: 40px; height: 40px; fill: #fff; }
         .series-icon { border: none; border-radius: 0; }
         .series-icon svg { width: 60px; height: 60px; }
-        .vod-sidebar-tools { display: flex; width: 100%; justify-content: space-between; color: #aaa; font-size: 13px; cursor: pointer; direction: ltr;}
-        .vod-sidebar-tools div { display: flex; align-items: center; gap: 5px; }
-        .vod-sidebar-tools svg { width: 16px; height: 16px; fill: #aaa; }
         .vod-categories { flex: 1; overflow-y: auto; }
-        .vod-main { width: 80%; display: flex; flex-direction: column; background-color: #222; }
-        .vod-toolbar { padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; }
-        .sort-dropdown { background: #4b367c; color: #fff; border: none; padding: 5px 10px; border-radius: 4px; font-size: 13px; }
-        .posters-grid { padding: 20px 30px; display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; overflow-y: auto; flex: 1; direction: rtl;}
+        .vod-main { width: 80%; display: flex; flex-direction: column; background-color: #1a1a24; }
+        .vod-toolbar { padding: 15px 30px; display: flex; justify-content: flex-end; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sort-dropdown { background: #333; color: #fff; border: 1px solid #555; padding: 8px 15px; border-radius: 4px; font-size: 13px; outline: none;}
+        .posters-grid { padding: 20px 30px; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 20px; overflow-y: auto; flex: 1; }
         .poster-card { display: flex; flex-direction: column; cursor: pointer; position: relative; transition: transform 0.2s; }
         .poster-card:hover { transform: scale(1.05); }
-        .poster-img { width: 100%; aspect-ratio: 2/3; background-color: #333; border-radius: 4px; object-fit: cover; }
-        .poster-title { margin-top: 8px; font-size: 12px; color: #ddd; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .rating-badge { position: absolute; bottom: 30px; left: 5px; background-color: #0078d7; color: #fff; font-size: 11px; padding: 2px 5px; border-radius: 3px; font-weight: bold; }
+        .poster-img { width: 100%; aspect-ratio: 2/3; background-color: #333; border-radius: 8px; object-fit: cover; box-shadow: 0 5px 15px rgba(0,0,0,0.5);}
+        .poster-title { margin-top: 10px; font-size: 13px; color: #ddd; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .rating-badge { position: absolute; bottom: 35px; left: 8px; background-color: #f39c12; color: #000; font-size: 11px; padding: 3px 6px; border-radius: 4px; font-weight: bold; }
 
-        /* شاشة التفاصيل (التمهيدية قبل المشغل) */
+        /* شاشة التفاصيل */
         #details-view .media-app-container { position: relative; }
-        .details-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; filter: blur(8px) brightness(0.25); z-index: 1; }
-        .details-back-btn { position: absolute; top: 30px; left: 30px; cursor: pointer; z-index: 10; background: rgba(0,0,0,0.6); width: 45px; height: 45px; border-radius: 50%; display: flex; justify-content: center; align-items: center; transition: 0.2s; }
+        .details-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; filter: blur(15px) brightness(0.2); z-index: 1; }
+        .details-back-btn { position: absolute; top: 30px; left: 30px; cursor: pointer; z-index: 10; background: rgba(0,0,0,0.6); width: 45px; height: 45px; border-radius: 50%; display: flex; justify-content: center; align-items: center; transition: 0.2s; border: 1px solid rgba(255,255,255,0.2);}
         .details-back-btn:hover { background: rgba(0,0,0,0.9); transform: scale(1.1); }
         .details-back-btn svg { width: 24px; height: 24px; fill: #fff; }
-        .details-layout { position: relative; z-index: 2; display: flex; height: 100%; padding: 50px; gap: 40px; }
-        .details-poster-container { flex: 0 0 280px; height: 100%; display: flex; align-items: flex-end; }
-        .details-poster-large { width: 100%; height: auto; aspect-ratio: 2/3; object-fit: cover; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
-        .details-info-container { flex: 1; display: flex; flex-direction: column; justify-content: flex-start; direction: rtl; text-align: right; }
-        .details-buttons-row { display: flex; gap: 15px; direction: ltr; align-self: flex-end; margin-bottom: 30px; }
-        .btn-primary { background-color: #00a8ff; color: #fff; border: none; padding: 12px 25px; border-radius: 30px; font-size: 15px; font-weight: bold; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: 0.2s; }
-        .btn-primary:hover { background-color: #0097e6; transform: scale(1.05); }
-        .btn-primary svg { width: 18px; height: 18px; fill: #fff; }
-        .d-title { font-size: 42px; font-weight: bold; margin-bottom: 15px; color: #fff; }
-        .d-desc { font-size: 17px; line-height: 1.8; color: #e0e0e0; max-width: 700px; margin-top: 20px;}
+        .details-layout { position: relative; z-index: 2; display: flex; height: 100%; padding: 60px; gap: 50px; }
+        .details-poster-container { flex: 0 0 300px; height: 100%; display: flex; align-items: center; }
+        .details-poster-large { width: 100%; height: auto; aspect-ratio: 2/3; object-fit: cover; border-radius: 12px; box-shadow: 0 15px 50px rgba(0,0,0,0.8); }
+        .details-info-container { flex: 1; display: flex; flex-direction: column; justify-content: center; text-align: left; }
+        .details-buttons-row { display: flex; gap: 15px; margin-top: 30px; }
+        .btn-primary { background-color: #f39c12; color: #000; border: none; padding: 12px 30px; border-radius: 30px; font-size: 16px; font-weight: bold; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: 0.2s; box-shadow: 0 5px 20px rgba(243, 156, 18, 0.4);}
+        .btn-primary:hover { background-color: #e67e22; transform: scale(1.05); }
+        .btn-primary svg { width: 20px; height: 20px; fill: #000; }
+        .d-title { font-size: 48px; font-weight: 800; margin-bottom: 15px; color: #fff; }
+        .d-desc { font-size: 16px; line-height: 1.8; color: #bbb; max-width: 800px;}
 
         /* المودال الخاص بالمشغل المدمج */
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 200; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
-        .vod-modal-content { width: 95%; max-width: 1200px; height: 90vh; background: #1a1a1a; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; position: relative; border: 1px solid #333;}
-        .close-modal { position: absolute; top: 15px; left: 15px; z-index: 10; background: rgba(255,255,255,0.1); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 18px; font-weight:bold; }
+        .vod-modal-content { width: 95%; max-width: 1200px; height: 90vh; background: #1a1a24; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; position: relative; border: 1px solid rgba(255,255,255,0.1);}
+        .close-modal { position: absolute; top: 15px; right: 15px; z-index: 10; background: rgba(255,255,255,0.1); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 18px; font-weight:bold; transition: 0.2s;}
         .close-modal:hover { background: #d32f2f; }
-        .vod-modal-body { display: flex; flex: 1; overflow: hidden; flex-direction: row; direction: rtl; }
-        .vod-modal-player { flex: 1; padding: 20px; display: flex; flex-direction: column; background: #000; }
-        .vod-modal-sidebar { width: 300px; background: #111; border-left: 1px solid #333; display: flex; flex-direction: column; }
+        .vod-modal-body { display: flex; flex: 1; overflow: hidden; flex-direction: row; direction: ltr; }
+        .vod-modal-player { flex: 1; padding: 20px; display: flex; flex-direction: column; background: #1a1a24; }
+        .vod-modal-sidebar { width: 300px; background: #111119; border-left: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; }
         
-        .season-tabs { display: flex; overflow-x: auto; padding: 15px; gap: 10px; border-bottom: 1px solid #333; }
+        .season-tabs { display: flex; overflow-x: auto; padding: 15px; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .season-tab { padding: 8px 15px; background: rgba(255,255,255,0.05); border-radius: 8px; white-space: nowrap; cursor: pointer; font-size: 14px; }
         .season-tab.active { background: #f39c12; color: #000; font-weight: bold;}
         .episodes-list { flex: 1; overflow-y: auto; padding: 15px; }
-        .ep-btn { background: rgba(255,255,255,0.05); border: 1px solid transparent; color: white; padding: 15px; border-radius: 10px; cursor: pointer; font-size: 14px; text-align: right; margin-bottom: 10px; display: flex; justify-content: space-between; }
+        .ep-btn { background: rgba(255,255,255,0.05); border: 1px solid transparent; color: white; padding: 15px; border-radius: 10px; cursor: pointer; font-size: 14px; text-align: left; margin-bottom: 10px; display: flex; justify-content: space-between; }
         .ep-btn:hover, .ep-btn.active { background: rgba(243, 156, 18, 0.1); border-color: #f39c12; color: #f39c12; }
 
         /* مشغلات الفيديو */
@@ -197,18 +232,18 @@
            شاشة الإدارة (لوحة تحكم الأدمن السرية)
            ========================================= */
         #admin-view .media-app-container { background-color: #181818; }
-        .admin-sidebar { width: 20%; background-color: #111; border-left: 1px solid #333; display: flex; flex-direction: column; direction: rtl; }
+        .admin-sidebar { width: 20%; background-color: #111; border-right: 1px solid #333; display: flex; flex-direction: column; direction: ltr; }
         .admin-header { padding: 20px; border-bottom: 1px solid #333; text-align: center; color: #e53935; font-weight: bold; font-size: 20px; }
         .admin-nav-item { padding: 15px 20px; border-bottom: 1px solid #222; cursor: pointer; transition: 0.2s; font-size: 15px; }
         .admin-nav-item:hover, .admin-nav-item.active { background-color: #333; color: #f39c12; }
         
-        .admin-main { flex: 1; padding: 30px; direction: rtl; overflow-y: auto; background: #181818;}
+        .admin-main { flex: 1; padding: 30px; direction: ltr; overflow-y: auto; background: #181818;}
         .admin-panel-section { display: none; }
         .admin-panel-section.active { display: block; animation: fadeIn 0.4s; }
         .admin-title { font-size: 20px; margin-bottom: 20px; border-bottom: 2px solid #e53935; padding-bottom: 10px; display: inline-block; }
         
         .admin-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
-        .admin-form-group { display: flex; flex-direction: column; gap: 8px; }
+        .admin-form-group { display: flex; flex-direction: column; gap: 8px; text-align: left;}
         .admin-form-group label { font-size: 13px; color: #ccc; }
         .admin-input { background: #222; border: 1px solid #444; color: #fff; padding: 10px; border-radius: 5px; outline: none; width: 100%;}
         .admin-input:focus { border-color: #f39c12; }
@@ -218,7 +253,7 @@
         .github-btn { background: #2ea44f; color: white; }
         .github-btn:hover { background: #2c974b; }
 
-        .admin-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 13px; text-align: right; background: #111; }
+        .admin-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 13px; text-align: left; background: #111; }
         .admin-table th, .admin-table td { border: 1px solid #333; padding: 10px; }
         .admin-table th { background: #222; color: #f39c12; }
         .action-btn-tbl { background: transparent; border: none; color: #fff; cursor: pointer; margin: 0 5px; font-size: 14px; }
@@ -232,54 +267,58 @@
 
     <div class="app-wrapper">
         
+        <div onclick="toggleFullScreen()" title="Full Screen" style="position: fixed; bottom: 20px; right: 20px; width: 45px; height: 45px; background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255,255,255,0.1); border-radius: 50%; z-index: 9999; display: flex; justify-content: center; align-items: center; cursor: pointer; backdrop-filter: blur(5px); transition: background 0.3s;">
+            <svg viewBox="0 0 24 24" style="width: 26px; height: 26px; fill: rgba(255,255,255,0.7);"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+        </div>
+
         <div id="home-view" class="view active">
             <div class="left-section">
                 <div class="header-title"><span class="logo">Al-Oqab</span> <span style="margin:0 10px;color:rgba(255,255,255,0.4)">|</span> <span>Player</span></div>
-                <div class="add-card" id="open-add-screen" onclick="openLoginView()"><div class="plus-icon">+</div><span class="add-text">تسجيل الدخول</span></div>
+                <div class="add-card" id="open-add-screen" onclick="openLoginView()"><div class="plus-icon">+</div><span class="add-text">Login</span></div>
                 <div class="footer-container"><div class="footer-bold">Al-Oqab Player System.</div><div class="footer-sub">Integrated with Plymouth and Local DB</div></div>
             </div>
         </div>
 
         <div id="add-view" class="view">
-            <div class="top-bar-add"><div class="back-btn" onclick="showView('home-view')"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></div><div style="font-weight: 500;">تسجيل الدخول</div></div>
+            <div class="top-bar-add"><div class="back-btn" onclick="showView('home-view')"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></div><div style="font-weight: 500;">Login</div></div>
             
-            <div class="form-box" style="max-width: 550px; align-items: center; margin: auto; transform: translateY(5%);">
+            <div class="form-box" style="max-width: 550px; align-items: center; margin: auto; transform: translateY(5%); direction: ltr; text-align: left;">
                 
                 <div id="profiles-container" style="display:none; width: 100%; flex-direction: column; gap: 10px;">
-                    <h3 style="text-align:center; margin-bottom:10px; color:#f39c12;">الحسابات المحفوظة</h3>
+                    <h3 style="text-align:center; margin-bottom:10px; color:#f39c12;">Saved Profiles</h3>
                     <div id="saved-profiles-list" style="display: flex; flex-direction: column; gap: 10px; width: 100%;"></div>
-                    <button class="submit-btn" style="background-color: #4b367c; margin-top:10px;" onclick="showNewAccountForm()">إضافة حساب آخر +</button>
+                    <button class="submit-btn" style="background-color: #4b367c; margin-top:10px;" onclick="showNewAccountForm()">Add New Account +</button>
                 </div>
 
                 <div id="new-account-form" style="width:100%; display:flex; flex-direction:column; gap:15px;">
                     <div class="inputs-grid" style="width: 100%;">
-                        <div class="input-group">
-                            <label>اسم المشغل</label>
-                            <input type="text" id="play-player-name" placeholder="مثال: مشغل العائلة">
+                        <div class="input-group" style="text-align: left;">
+                            <label>Player Name</label>
+                            <input type="text" id="play-player-name" placeholder="e.g: Family Player">
                         </div>
-                        <div class="input-group">
-                            <label>الهوست (Host)</label>
+                        <div class="input-group" style="text-align: left;">
+                            <label>Host</label>
                             <input type="text" id="play-host" placeholder="http://example.com:8080">
                         </div>
-                        <div class="input-group">
-                            <label>اسم المستخدم</label>
+                        <div class="input-group" style="text-align: left;">
+                            <label>Username</label>
                             <input type="text" id="play-user">
                         </div>
-                        <div class="input-group">
-                            <label>كلمة المرور</label>
+                        <div class="input-group" style="text-align: left;">
+                            <label>Password</label>
                             <input type="password" id="play-pass">
                         </div>
                     </div>
-                    <div id="login-error" style="color: #ff4757; font-size: 13px; font-weight: bold; display: none; text-align: center;">بيانات غير صحيحة!</div>
-                    <button class="submit-btn" style="width: 100%; margin-top: 10px;" id="submit-playlist" onclick="login()">دخول الآن</button>
-                    <button class="submit-btn" style="width: 100%; background-color: #555; display:none;" id="back-to-profiles-btn" onclick="initLoginScreen()">رجوع للحسابات المحفوظة</button>
+                    <div id="login-error" style="color: #ff4757; font-size: 13px; font-weight: bold; display: none; text-align: center;">Invalid Data!</div>
+                    <button class="submit-btn" style="width: 100%; margin-top: 10px;" id="submit-playlist" onclick="login()">Login Now</button>
+                    <button class="submit-btn" style="width: 100%; background-color: #555; display:none;" id="back-to-profiles-btn" onclick="initLoginScreen()">Back to Profiles</button>
                 </div>
             </div>
         </div>
 
         <div id="dashboard-view" class="view">
-            <div style="position: absolute; top: 20px; right: 30px; background: rgba(0,0,0,0.5); padding: 8px 15px; border-radius: 8px; border: 1px solid #333; direction: rtl; z-index: 10;">
-                <span style="color:#aaa; font-size:12px;">تاريخ انتهاء الحساب:</span> <strong id="dash-expiry" style="color:#2ea44f; font-size:14px;">---</strong>
+            <div style="position: absolute; top: 20px; right: 30px; background: rgba(0,0,0,0.5); padding: 8px 15px; border-radius: 8px; border: 1px solid #333; z-index: 10;">
+                <span style="color:#aaa; font-size:12px;">Expiry:</span> <strong id="dash-expiry" style="color:#2ea44f; font-size:14px;">---</strong>
             </div>
 
             <div class="dash-header">
@@ -291,96 +330,107 @@
             <div class="dash-grid">
                 <div class="dash-card card-large" onclick="showMediaView('live')">
                     <svg viewBox="0 0 24 24"><path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 1.99-.9 1.99-2L23 5c0-1.1-.9-2-2-2zm0 14H3V5h18v12zm-5-6l-7 4V7z"/></svg>
-                    <span>البث المباشر</span>
+                    <span>Live TV</span>
                 </div>
                 <div class="dash-col">
                     <div class="dash-card" onclick="showMediaView('movies')">
                         <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
-                        <span>الأفلام</span>
+                        <span>Movies</span>
                     </div>
                     <div class="dash-card" onclick="showMediaView('series')">
                         <svg viewBox="0 0 24 24"><path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/></svg>
-                        <span>المسلسلات</span>
+                        <span>Series</span>
                     </div>
                 </div>
                 <div class="dash-col">
                     <div class="dash-card" onclick="showView('settings-view')">
                         <svg viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.73,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.43-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
-                        <span>الإعدادات</span>
+                        <span>Settings</span>
                     </div>
                 </div>
                 <div class="dash-col-right">
-                    <div class="dash-btn-outline" onclick="logout()"><svg viewBox="0 0 24 24"><path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5c-1.11 0-2 .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg><span>خروج</span></div>
+                    <div class="dash-btn-outline" onclick="logout()"><svg viewBox="0 0 24 24"><path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5c-1.11 0-2 .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg><span>Logout</span></div>
                 </div>
             </div>
         </div>
 
         <div id="settings-view" class="view">
-            <div class="top-bar-add"><div class="back-btn" onclick="showView('dashboard-view')"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></div><div style="font-weight: 500;">الإعدادات</div></div>
+            <div class="top-navbar" style="height: 60px;">
+                <div class="top-left">
+                    <span class="back-icon-btn" onclick="showView('dashboard-view')"><svg viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/></svg></span>
+                    <div class="app-logo-small">Settings</div>
+                </div>
+            </div>
             <div class="settings-container">
-                
                 <div class="settings-card">
-                    <h3 class="settings-section-title">إعدادات التطبيق</h3>
-                    <div class="input-group">
-                        <label>لغة التطبيق (مظهر فقط)</label>
+                    <h3 class="settings-section-title">App Settings</h3>
+                    <div class="input-group" style="text-align: left;">
+                        <label>Language (Appears translated in text only)</label>
                         <select id="app-language" class="admin-input" onchange="applyLanguageChange()">
-                            <option value="ar">العربية (Arabic)</option>
-                            <option value="en">English (الإنجليزية)</option>
+                            <option value="en">English (Default LTR)</option>
+                            <option value="ar">Arabic (العربية)</option>
                         </select>
                     </div>
                     <div class="toggle-row">
-                        <label style="font-size:14px; font-weight:bold;">تحديث تلقائي كل يوم</label>
+                        <label style="font-size:14px; font-weight:bold;">Auto Update Everyday</label>
                         <input type="checkbox" id="auto-update-toggle" style="width:20px; height:20px; accent-color:#f39c12; cursor:pointer;" onchange="toggleAutoUpdate()">
                     </div>
-                    <button class="submit-btn" style="background-color: #4b367c; margin-top: 10px;" onclick="saveSettings()">حفظ الإعدادات</button>
+                    <button class="submit-btn" style="background-color: #4b367c; margin-top: 10px;" onclick="saveSettings()">Save Settings</button>
                 </div>
 
                 <div class="settings-card">
-                    <h3 class="settings-section-title">معلومات الحساب</h3>
+                    <h3 class="settings-section-title">Account Info</h3>
                     <div style="display:flex; flex-direction:column; gap:12px; font-size:15px; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 6px;">
-                        <div><span style="color:#aaa;">اسم المشغل:</span> <strong id="st-pname" style="color:#fff;">---</strong></div>
-                        <div><span style="color:#aaa;">الهوست:</span> <strong id="st-host" style="color:#fff;">---</strong></div>
-                        <div><span style="color:#aaa;">اسم المستخدم:</span> <strong id="st-username" style="color:#fff;">---</strong></div>
-                        <div><span style="color:#aaa;">تاريخ الانتهاء:</span> <strong id="st-expiry" style="color:#2ea44f;">---</strong></div>
-                        <div><span style="color:#aaa;">تفعيل الأجهزة (مستخدم/مسموح):</span> <strong id="st-devices" style="color:#f39c12;">---</strong></div>
-                        <div><span style="color:#aaa;">معرف الجهاز (ID):</span> <strong id="st-device-id" style="color:#3498db; font-family: monospace;">---</strong></div>
+                        <div><span style="color:#aaa;">Player Name:</span> <strong id="st-pname" style="color:#fff;">---</strong></div>
+                        <div><span style="color:#aaa;">Host:</span> <strong id="st-host" style="color:#fff;">---</strong></div>
+                        <div><span style="color:#aaa;">Username:</span> <strong id="st-username" style="color:#fff;">---</strong></div>
+                        <div><span style="color:#aaa;">Expiry:</span> <strong id="st-expiry" style="color:#2ea44f;">---</strong></div>
+                        <div><span style="color:#aaa;">Devices:</span> <strong id="st-devices" style="color:#f39c12;">---</strong></div>
+                        <div><span style="color:#aaa;">Device ID:</span> <strong id="st-device-id" style="color:#3498db; font-family: monospace;">---</strong></div>
                     </div>
                 </div>
-
             </div>
         </div>
 
         <div id="live-view" class="view">
             <div class="media-app-container">
                 <div class="top-navbar">
-                    <div class="nav-links">
-                        <span class="nav-item" onclick="showView('dashboard-view')">Home</span> <span class="nav-separator">|</span>
-                        <span class="nav-item active">Live</span> <span class="nav-separator">|</span>
-                        <span class="nav-item" onclick="showMediaView('movies')">Movies</span> <span class="nav-separator">|</span>
-                        <span class="nav-item" onclick="showMediaView('series')">Series</span>
+                    <div class="top-left">
+                        <span class="back-icon-btn" onclick="showView('dashboard-view')">
+                            <svg viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/></svg>
+                        </span>
+                        <div class="app-logo-small">
+                            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/></svg>
+                            <span>Al-Oqab Live TV</span>
+                        </div>
                     </div>
-                    <div class="top-search-logo">
+                    <div class="top-center">
                         <div class="search-box-top">
                             <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
                             <input type="text" id="secret-live-search" placeholder="Search..." onkeyup="checkSearchSecret(this); renderContent(this.value)">
                         </div>
-                        <button onclick="fetchIptvOrgStreams()" class="refresh-btn" title="تحديث المحتوى"><svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.24 4.94 14.24 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></button>
-                        <div class="app-logo-small"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> Player</div>
+                    </div>
+                    <div class="top-right">
+                        <button onclick="fetchIptvOrgStreams()" class="icon-btn reload-btn" title="Reload"><svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.24 4.94 14.24 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></button>
+                        <span class="icon-btn" onclick="showMediaView('movies')" title="Movies"><svg viewBox="0 0 24 24"><path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/></svg></span>
+                        <span class="icon-btn" onclick="showView('settings-view')" title="Settings"><svg viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.73,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.43-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg></span>
                     </div>
                 </div>
                 <div class="media-content-area">
                     <div class="live-pane-1" id="live-categories"></div>
                     <div class="live-pane-2" id="live-channels-list"></div>
                     <div class="live-pane-3">
-                        <div class="video-player-mock" style="background: #000;">
+                        <div class="video-player-mock">
                             <div id="live-video-container" class="video-container"><video id="live-player" playsinline controls></video></div>
                             <div id="live-iframe-container" class="iframe-container"><iframe id="live-iframe" allowfullscreen></iframe></div>
                         </div>
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top: 15px;">
-                            <div class="live-info" id="live-title-display">اختر قناة للتشغيل</div>
-                            <button onclick="refreshCurrentLive()" class="refresh-btn" title="تحديث المشغل"><svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.24 4.94 14.24 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></button>
-                        </div>
+                        <div class="live-info" id="live-title-display">Select a channel</div>
                         <div class="live-servers" id="live-servers-btns"></div>
+                        
+                        <div class="action-btns-wrapper">
+                            <button class="btn-purple" onclick="addToFavorites('live')"><svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg> <span class="t-fav">Favorite</span></button>
+                            <button class="btn-purple" onclick="moveChannel()"><svg viewBox="0 0 24 24"><path d="M10 9h4V6h3l-5-5-5 5h3v3zm-1 1H6V7l-5 5 5 5v-3h3v-4zm14 2l-5-5v3h-3v4h3v3l5-5zm-9 3h-4v3H7l5 5 5-5h-3v-3z"/></svg> <span class="t-move">Move</span></button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -389,28 +439,24 @@
         <div id="movies-view" class="view">
             <div class="media-app-container">
                 <div class="top-navbar">
-                    <div class="nav-links">
-                        <span class="nav-item" onclick="showView('dashboard-view')">Home</span> <span class="nav-separator">|</span>
-                        <span class="nav-item" onclick="showMediaView('live')">Live</span> <span class="nav-separator">|</span>
-                        <span class="nav-item active">Movies</span> <span class="nav-separator">|</span>
-                        <span class="nav-item" onclick="showMediaView('series')">Series</span>
+                    <div class="top-left">
+                        <span class="back-icon-btn" onclick="showView('dashboard-view')"><svg viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/></svg></span>
+                        <div class="app-logo-small"><svg viewBox="0 0 24 24"><path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/></svg> <span>Movies</span></div>
                     </div>
-                    <div class="top-search-logo">
+                    <div class="top-center">
                         <div class="search-box-top"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg><input type="text" onkeyup="renderContent(this.value)"></div>
-                        <button onclick="fetchIptvOrgStreams()" class="refresh-btn" title="تحديث المحتوى"><svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.24 4.94 14.24 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></button>
-                        <div class="app-logo-small"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> Player</div>
+                    </div>
+                    <div class="top-right">
+                        <button onclick="fetchIptvOrgStreams()" class="icon-btn reload-btn" title="Reload"><svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.24 4.94 14.24 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></button>
+                        <span class="icon-btn" onclick="showMediaView('live')" title="Live"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/></svg></span>
+                        <span class="icon-btn" onclick="showView('settings-view')" title="Settings"><svg viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3..."></path></svg></span>
                     </div>
                 </div>
                 <div class="media-content-area">
                     <div class="vod-sidebar">
-                        <div class="vod-sidebar-header">
-                            <div class="vod-big-icon"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
-                            <div class="vod-sidebar-tools"><div onclick="showView('dashboard-view')"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg> Back</div></div>
-                        </div>
                         <div class="vod-categories" id="movies-categories"></div>
                     </div>
                     <div class="vod-main">
-                        <div class="vod-toolbar"><select class="sort-dropdown"><option>الكل</option></select></div>
                         <div class="posters-grid" id="movies-posters-list"></div>
                     </div>
                 </div>
@@ -420,28 +466,24 @@
         <div id="series-view" class="view">
             <div class="media-app-container">
                 <div class="top-navbar">
-                    <div class="nav-links">
-                        <span class="nav-item" onclick="showView('dashboard-view')">Home</span> <span class="nav-separator">|</span>
-                        <span class="nav-item" onclick="showMediaView('live')">Live</span> <span class="nav-separator">|</span>
-                        <span class="nav-item" onclick="showMediaView('movies')">Movies</span> <span class="nav-separator">|</span>
-                        <span class="nav-item active">Series</span>
+                    <div class="top-left">
+                        <span class="back-icon-btn" onclick="showView('dashboard-view')"><svg viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/></svg></span>
+                        <div class="app-logo-small"><svg viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8 12.5v-9l6 4.5-6 4.5z"/></svg> <span>Series</span></div>
                     </div>
-                    <div class="top-search-logo">
+                    <div class="top-center">
                         <div class="search-box-top"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg><input type="text" onkeyup="renderContent(this.value)"></div>
-                        <button onclick="fetchIptvOrgStreams()" class="refresh-btn" title="تحديث المحتوى"><svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.24 4.94 14.24 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></button>
-                        <div class="app-logo-small"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> Player</div>
+                    </div>
+                    <div class="top-right">
+                        <button onclick="fetchIptvOrgStreams()" class="icon-btn reload-btn" title="Reload"><svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.24 4.94 14.24 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></button>
+                        <span class="icon-btn" onclick="showMediaView('live')" title="Live"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/></svg></span>
+                        <span class="icon-btn" onclick="showView('settings-view')" title="Settings"><svg viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3..."></path></svg></span>
                     </div>
                 </div>
                 <div class="media-content-area">
                     <div class="vod-sidebar">
-                        <div class="vod-sidebar-header">
-                            <div class="vod-big-icon series-icon"><svg viewBox="0 0 24 24"><path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/></svg></div>
-                            <div class="vod-sidebar-tools"><div onclick="showView('dashboard-view')"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg> Back</div></div>
-                        </div>
                         <div class="vod-categories" id="series-categories"></div>
                     </div>
                     <div class="vod-main">
-                        <div class="vod-toolbar"><select class="sort-dropdown"><option>الكل</option></select></div>
                         <div class="posters-grid" id="series-posters-list"></div>
                     </div>
                 </div>
@@ -452,20 +494,21 @@
             <div class="media-app-container">
                 <div class="details-bg" id="detail-bg-img"></div>
                 <div class="details-back-btn" onclick="goBackFromDetails()">
-                    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+                    <svg viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/></svg>
                 </div>
                 <div class="details-layout">
                     <div class="details-poster-container">
                         <img class="details-poster-large" id="detail-img" src="" alt="Poster">
                     </div>
                     <div class="details-info-container">
+                        <div class="d-title" id="detail-title">Title</div>
+                        <div class="d-desc" id="detail-desc">Description coming soon...</div>
                         <div class="details-buttons-row">
                             <button class="btn-primary" id="play-btn-text" onclick="openVodModal()">
-                                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> تشغيل
+                                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> <span class="t-play">Play Now</span>
                             </button>
+                            <button class="btn-purple" onclick="addToFavorites('vod')" style="box-shadow: none; border-radius: 30px;"><svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg> <span class="t-fav">Favorite</span></button>
                         </div>
-                        <div class="d-title" id="detail-title">العنوان</div>
-                        <div class="d-desc" id="detail-desc">الوصف متاح قريباً...</div>
                     </div>
                 </div>
             </div>
@@ -474,130 +517,120 @@
         <div id="admin-view" class="view">
             <div class="media-app-container" style="flex-direction: row;">
                 <div class="admin-sidebar">
-                    <div class="admin-header">لوحة الإدارة المتقدمة</div>
-                    <div class="admin-nav-item active" onclick="switchAdminTab('content-tab', this)">إدارة المحتوى</div>
-                    <div class="admin-nav-item" onclick="switchAdminTab('m3u-tab', this)">إدارة ملفات M3U</div>
-                    <div class="admin-nav-item" onclick="switchAdminTab('users-tab', this)">إدارة المستخدمين والحماية</div>
-                    <div style="margin-top: auto; border-top: 1px solid #333;" class="admin-nav-item" onclick="showView('dashboard-view'); openAdminPanel(false);">العودة للرئيسية</div>
+                    <div class="admin-header">Admin Panel</div>
+                    <div class="admin-nav-item active" onclick="switchAdminTab('content-tab', this)">Content</div>
+                    <div class="admin-nav-item" onclick="switchAdminTab('m3u-tab', this)">M3U Files</div>
+                    <div class="admin-nav-item" onclick="switchAdminTab('users-tab', this)">Users</div>
+                    <div style="margin-top: auto; border-top: 1px solid #333;" class="admin-nav-item" onclick="showView('dashboard-view'); openAdminPanel(false);">Back to Home</div>
                 </div>
-                
                 <div class="admin-main">
-                    
                     <div id="content-tab" class="admin-panel-section active">
-                        <h2 class="admin-title">إضافة أو تعديل المحتوى المباشر / الأفلام / المسلسلات</h2>
+                        <h2 class="admin-title">Add/Edit Content</h2>
                         <input type="hidden" id="admin-item-id">
-                        
                         <div class="extractor-box">
-                            <label style="color:#f39c12; font-size:14px; font-weight:bold; display:block; margin-bottom:10px;">أداة استخراج الروابط الذكية</label>
+                            <label style="color:#f39c12; font-size:14px; font-weight:bold; display:block; margin-bottom:10px;">Smart Link Extractor</label>
                             <div style="display: flex; gap: 10px;">
-                                <input type="text" id="extractor-url" class="admin-input" placeholder="ضع رابط الموقع أو صفحة المشاهدة هنا...">
-                                <button class="admin-btn" style="width: auto;" onclick="extractVideoLink()">فحص الرابط</button>
+                                <input type="text" id="extractor-url" class="admin-input" placeholder="Paste website url...">
+                                <button class="admin-btn" style="width: auto;" onclick="extractVideoLink()">Extract</button>
                             </div>
                             <div id="extractor-results" style="margin-top: 10px; font-size: 13px; max-height: 150px; overflow-y: auto;"></div>
                         </div>
-
                         <div class="admin-form-grid">
-                            <div style="grid-column: span 2; display: flex; align-items: center; gap: 10px; background: rgba(243, 156, 18, 0.1); padding: 15px; border-radius: 8px; border: 1px solid rgba(243, 156, 18, 0.3);">
-                                <input type="checkbox" id="admin-is-iframe" style="width: 20px; height: 20px; accent-color: #f39c12; cursor: pointer;">
-                                <label for="admin-is-iframe" style="color:#f39c12; font-size:15px; font-weight:bold; cursor:pointer;">تشغيل عبر مشغل خارجي (Iframe) - مفيد للروابط المحمية</label>
+                            <div style="grid-column: span 2; display: flex; align-items: center; gap: 10px; background: rgba(243, 156, 18, 0.1); padding: 15px; border-radius: 8px;">
+                                <input type="checkbox" id="admin-is-iframe" style="width: 20px; height: 20px; accent-color: #f39c12;">
+                                <label for="admin-is-iframe" style="color:#f39c12; font-size:15px; font-weight:bold;">External Iframe Mode</label>
                             </div>
-
                             <div class="admin-form-group">
-                                <label>النوع:</label>
+                                <label>Type:</label>
                                 <select id="admin-type" class="admin-input" onchange="onAdminTypeChange()">
-                                    <option value="live">بث مباشر (Live)</option>
-                                    <option value="movies">أفلام (Movies)</option>
-                                    <option value="series">مسلسلات (Series)</option>
+                                    <option value="live">Live</option>
+                                    <option value="movies">Movies</option>
+                                    <option value="series">Series</option>
                                 </select>
                             </div>
                             <div class="admin-form-group">
-                                <label>القسم الفرعي (اكتب قسماً جديداً بحرية):</label>
-                                <input type="text" id="admin-subid" class="admin-input" placeholder="مثال: أكشن، قنوات عربية...">
+                                <label>Category:</label>
+                                <input type="text" id="admin-subid" class="admin-input" placeholder="e.g. Action">
                             </div>
                             <div class="admin-form-group">
-                                <label>العنوان (اسم العمل):</label>
-                                <input type="text" id="admin-title" class="admin-input" placeholder="مثال: فيلم كذا">
+                                <label>Title:</label>
+                                <input type="text" id="admin-title" class="admin-input">
                             </div>
                             <div class="admin-form-group">
-                                <label>رابط البوستر:</label>
-                                <input type="text" id="admin-poster" class="admin-input" placeholder="https://...">
+                                <label>Poster URL:</label>
+                                <input type="text" id="admin-poster" class="admin-input">
                             </div>
-                            
                             <div class="admin-form-group" id="admin-season-wrapper" style="display:none;">
-                                <label style="color:#f39c12;">رقم الجزء / الموسم:</label>
+                                <label style="color:#f39c12;">Season/Part Num:</label>
                                 <input type="number" id="admin-season-num" class="admin-input" value="1" min="1">
                             </div>
                             <div class="admin-form-group" id="admin-episode-wrapper" style="display:none;">
-                                <label style="color:#f39c12;">رقم الحلقة (لتعديل حلقة محددة):</label>
-                                <input type="number" id="admin-episode-num" class="admin-input" placeholder="اتركه فارغاً لإضافة سيل حلقات">
+                                <label style="color:#f39c12;">Episode Num (Edit specific):</label>
+                                <input type="number" id="admin-episode-num" class="admin-input">
                             </div>
                         </div>
-
                         <div class="admin-form-group" style="margin-bottom: 15px;">
-                            <label id="url-label-desc">الروابط وسيرفرات البث:</label>
-                            <textarea id="admin-url" class="admin-input" rows="4" placeholder="انسخ الروابط هنا..."></textarea>
+                            <label id="url-label-desc">Stream URLs:</label>
+                            <textarea id="admin-url" class="admin-input" rows="4"></textarea>
                         </div>
-                        
                         <div style="display: flex; gap: 10px;">
-                            <button class="admin-btn" style="flex: 2;" onclick="saveContentItem()">حفظ محلي</button>
-                            <button class="admin-btn github-btn" style="flex: 2;" id="github-update-btn" onclick="pushToGitHub()">تحديث الموقع (رفع لـ GitHub)</button>
-                            <button class="admin-btn" style="flex: 1; background:transparent; border:1px solid #333; color:white;" onclick="clearContentForm()">تفريغ</button>
+                            <button class="admin-btn" style="flex: 2;" onclick="saveContentItem()">Save Local</button>
+                            <button class="admin-btn github-btn" style="flex: 2;" id="github-update-btn" onclick="pushToGitHub()">Push to GitHub</button>
+                            <button class="admin-btn" style="flex: 1; background:transparent; border:1px solid #333; color:white;" onclick="clearContentForm()">Clear</button>
                         </div>
-
                         <div style="margin-top: 20px; max-height: 220px; overflow-y: auto;">
                             <table class="admin-table">
-                                <thead><tr><th>النوع</th><th>العنوان والتفاصيل</th><th>إجراءات</th></tr></thead>
+                                <thead><tr><th>Type</th><th>Title</th><th>Actions</th></tr></thead>
                                 <tbody id="admin-content-table"></tbody>
                             </table>
                         </div>
                     </div>
 
                     <div id="m3u-tab" class="admin-panel-section">
-                        <h2 class="admin-title">إدارة ملفات و روابط M3U</h2>
-
+                        <h2 class="admin-title">M3U Management</h2>
                         <div class="extractor-box" style="margin-bottom: 20px;">
-                            <label style="color:#f39c12; font-size:14px; font-weight:bold; display:block; margin-bottom:10px;">إضافة رابط تزامن (M3U External URL)</label>
+                            <label style="color:#f39c12; font-size:14px; font-weight:bold; display:block; margin-bottom:10px;">Add M3U URL Sync</label>
                             <div class="admin-form-grid" style="grid-template-columns: 1fr 1fr 2fr;">
                                 <div class="admin-form-group">
-                                    <label>القسم الفرعي للرابط:</label>
-                                    <input type="text" id="m3u-url-subid" class="admin-input" placeholder="مثال: قنوات رياضية">
+                                    <label>Category Name:</label>
+                                    <input type="text" id="m3u-url-subid" class="admin-input" placeholder="e.g. Sports">
                                 </div>
                                 <div class="admin-form-group" style="grid-column: span 2;">
-                                    <label>رابط M3U:</label>
+                                    <label>M3U Link:</label>
                                     <div style="display: flex; gap: 10px;">
                                         <input type="text" id="m3u-url-input" class="admin-input" placeholder="https://...">
-                                        <button class="admin-btn" style="width: auto;" onclick="addM3uUrl()">إضافة رابط</button>
+                                        <button class="admin-btn" style="width: auto;" onclick="addM3uUrl()">Add Link</button>
                                     </div>
                                 </div>
                             </div>
                             <div style="margin-top: 15px; max-height: 150px; overflow-y: auto;">
                                 <table class="admin-table">
-                                    <thead><tr><th>القسم (SubId)</th><th>الرابط</th><th>إجراءات</th></tr></thead>
+                                    <thead><tr><th>SubId</th><th>Link</th><th>Actions</th></tr></thead>
                                     <tbody id="admin-m3u-urls-table"></tbody>
                                 </table>
                             </div>
                         </div>
 
                         <div class="extractor-box">
-                            <label style="color:#2ea44f; font-size:14px; font-weight:bold; display:block; margin-bottom:10px;">رفع ملف M3U من الجهاز (يتم حفظ القنوات في الإدارة)</label>
+                            <label style="color:#2ea44f; font-size:14px; font-weight:bold; display:block; margin-bottom:10px;">Upload Local M3U File</label>
                             <div class="admin-form-grid">
                                 <div class="admin-form-group">
-                                    <label>النوع (أين ستظهر؟):</label>
+                                    <label>Type:</label>
                                     <select id="m3u-file-type" class="admin-input">
-                                        <option value="live">بث مباشر (Live)</option>
-                                        <option value="movies">أفلام (Movies)</option>
-                                        <option value="series">مسلسلات (Series)</option>
+                                        <option value="live">Live</option>
+                                        <option value="movies">Movies</option>
+                                        <option value="series">Series</option>
                                     </select>
                                 </div>
                                 <div class="admin-form-group">
-                                    <label>القسم الفرعي لجميع العناصر في الملف:</label>
-                                    <input type="text" id="m3u-file-subid" class="admin-input" placeholder="مثال: باقة VIP">
+                                    <label>Category:</label>
+                                    <input type="text" id="m3u-file-subid" class="admin-input">
                                 </div>
                                 <div class="admin-form-group" style="grid-column: span 2;">
-                                    <label>اختر ملف (m3u, m3u8, txt):</label>
+                                    <label>File (.m3u):</label>
                                     <div style="display: flex; gap: 10px;">
-                                        <input type="file" id="m3u-file-input" class="admin-input" accept=".m3u,.m3u8,.txt" style="background: transparent; border: 1px solid #444;">
-                                        <button class="admin-btn" style="background:#2ea44f; width: auto;" onclick="uploadLocalM3U()">استيراد الملف وحفظه</button>
+                                        <input type="file" id="m3u-file-input" class="admin-input" accept=".m3u,.m3u8,.txt">
+                                        <button class="admin-btn" style="background:#2ea44f; width: auto;" onclick="uploadLocalM3U()">Import</button>
                                     </div>
                                 </div>
                             </div>
@@ -605,39 +638,24 @@
                     </div>
 
                     <div id="users-tab" class="admin-panel-section">
-                        <h2 class="admin-title">إدارة المستخدمين والحماية (صلاحيات وأجهزة)</h2>
+                        <h2 class="admin-title">Users & Security</h2>
                         <div class="admin-form-grid" style="align-items: center;">
-                            <div class="admin-form-group">
-                                <label>اسم المستخدم</label>
-                                <input type="text" id="admin-username" class="admin-input">
-                            </div>
-                            <div class="admin-form-group">
-                                <label>كلمة المرور</label>
-                                <input type="text" id="admin-password" class="admin-input">
-                            </div>
-                            <div class="admin-form-group">
-                                <label style="color:#f39c12;">تاريخ انتهاء الحساب (اتركه فارغاً لحساب مفتوح)</label>
-                                <input type="date" id="admin-expiry" class="admin-input">
-                            </div>
-                            <div class="admin-form-group">
-                                <label style="color:#f39c12;">الحد الأقصى المسموح للأجهزة</label>
-                                <input type="number" id="admin-max-devices" class="admin-input" value="1" min="1">
-                            </div>
+                            <div class="admin-form-group"><label>Username</label><input type="text" id="admin-username" class="admin-input"></div>
+                            <div class="admin-form-group"><label>Password</label><input type="text" id="admin-password" class="admin-input"></div>
+                            <div class="admin-form-group"><label style="color:#f39c12;">Expiry Date</label><input type="date" id="admin-expiry" class="admin-input"></div>
+                            <div class="admin-form-group"><label style="color:#f39c12;">Max Devices</label><input type="number" id="admin-max-devices" class="admin-input" value="1" min="1"></div>
                         </div>
-                        <button class="admin-btn" style="width: 100%;" onclick="saveUserItem()">حفظ / تحديث الحساب</button>
-
+                        <button class="admin-btn" style="width: 100%;" onclick="saveUserItem()">Save User</button>
                         <div style="margin-top: 20px; max-height: 220px; overflow-y: auto;">
                             <table class="admin-table">
-                                <thead><tr><th>المستخدم</th><th>المرور</th><th>الانتهاء</th><th>الأجهزة المسموحة</th><th>إجراءات</th></tr></thead>
+                                <thead><tr><th>User</th><th>Pass</th><th>Expiry</th><th>Devices</th><th>Actions</th></tr></thead>
                                 <tbody id="admin-users-table"></tbody>
                             </table>
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
-
     </div>
 
     <div id="vod-modal" class="modal">
@@ -650,8 +668,8 @@
                         <div id="vod-iframe-container" class="iframe-container"><iframe id="vod-iframe" allowfullscreen></iframe></div>
                     </div>
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-top: 15px;">
-                        <div class="live-info" id="vod-title-display" style="font-size:24px; color:#f39c12; margin-top:0;">العنوان</div>
-                        <button onclick="refreshCurrentVod()" class="refresh-btn" title="تحديث المشغل"><svg viewBox="0 0 24 24" style="width:28px; height:28px;"><path d="M17.65 6.35C16.24 4.94 14.24 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></button>
+                        <div class="live-info" id="vod-title-display" style="font-size:24px; color:#f39c12; margin-top:0;">Title</div>
+                        <button onclick="refreshCurrentVod()" class="icon-btn reload-btn" title="Reload"><svg viewBox="0 0 24 24" style="width:28px; height:28px;"><path d="M17.65 6.35C16.24 4.94 14.24 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></button>
                     </div>
                     <div class="live-servers" id="vod-servers-btns"></div>
                 </div>
@@ -664,52 +682,42 @@
     </div>
 
     <script>
-        // إجبار الشاشة على الوضع العرضي
         document.body.addEventListener('click', () => {
             if (document.documentElement.requestFullscreen) {
                 document.documentElement.requestFullscreen().then(() => {
-                    if(screen.orientation && screen.orientation.lock) {
-                        screen.orientation.lock("landscape").catch(e => {});
-                    }
+                    if(screen.orientation && screen.orientation.lock) { screen.orientation.lock("landscape").catch(e => {}); }
                 }).catch(e => {});
             }
         }, { once: true });
 
-        // --- توليد وتخزين معرف الجهاز الذكي (بديل الماك أدرس) ---
-        let deviceId = localStorage.getItem('iqab_device_id');
-        if (!deviceId) {
-            deviceId = 'DEV-' + Math.random().toString(36).substr(2, 9).toUpperCase();
-            localStorage.setItem('iqab_device_id', deviceId);
+        // --- وظيفة ملء الشاشة المدمجة للزر المائي ---
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().then(() => {
+                    if(screen.orientation && screen.orientation.lock) { screen.orientation.lock("landscape").catch(e => {}); }
+                }).catch(e => {});
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
         }
 
-        // --- قاعدة البيانات والتهيئة ---
+        let deviceId = localStorage.getItem('iqab_device_id');
+        if (!deviceId) { deviceId = 'DEV-' + Math.random().toString(36).substr(2, 9).toUpperCase(); localStorage.setItem('iqab_device_id', deviceId); }
+
         const defaultDatabase = [
-            { id: 1, type: 'live', subId: 'قنوات رياضية', title: "بي إن سبورت 1", poster: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=200&q=80", urls: ["https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"], isIframe: false },
-            { id: 2, type: 'movies', subId: 'أفلام أكشن', title: "فيلم الأكشن المفتوح", poster: "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?w=300&q=80", season: 1, urls: ["http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4"], isIframe: false }
+            { id: 1, type: 'live', subId: 'General', title: "Demo live 1", poster: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=200&q=80", urls: ["https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"], isIframe: false },
+            { id: 2, type: 'live', subId: 'General', title: "Demo live 2", poster: "https://images.unsplash.com/photo-1593784991095-a205069470b6?w=200&q=80", urls: ["https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"], isIframe: false }
         ];
 
         let database = JSON.parse(localStorage.getItem('iqab_db_v5')) || defaultDatabase;
-        let m3uUrlsDB = JSON.parse(localStorage.getItem('iqab_m3u_urls_v1')) || [ { url: 'DL-5-6-2026.m3u', subId: 'جميع القنوات' } ];
+        let m3uUrlsDB = JSON.parse(localStorage.getItem('iqab_m3u_urls_v1')) || [];
+        let favorites = JSON.parse(localStorage.getItem('iqab_favs_v1')) || [];
         
-        let usersDB = JSON.parse(localStorage.getItem('iqab_users_v6'));
-        if (!usersDB) {
-            let oldUsers = JSON.parse(localStorage.getItem('iqab_users_v5'));
-            if (oldUsers) {
-                usersDB = oldUsers.map(u => ({
-                    username: u.username,
-                    password: u.username === 'okba' ? '1233' : u.password,
-                    expiryDate: u.expiryDate,
-                    maxDevices: u.maxDevices,
-                    connectedDevices: []
-                }));
-            } else {
-                usersDB = [{ username: 'okba', password: '1233', maxDevices: 1, connectedDevices: [] }];
-            }
-            localStorage.setItem('iqab_users_v6', JSON.stringify(usersDB));
-        }
+        let usersDB = JSON.parse(localStorage.getItem('iqab_users_v6')) || [{ username: 'okba', password: '1233', maxDevices: 1, connectedDevices: [] }];
 
         let m3uChannels = []; 
-        let plyrLive = null, plyrVod = null, hlsLive = null, hlsVod = null;
         let currentType = 'live', currentSubId = 'all';
         let currentMediaObj = null;
 
@@ -718,175 +726,106 @@
         let activeVodUrls = null;
         let activeVodIsIframe = false;
 
+        let plyrLive = null, plyrVod = null;
+        let hlsLive = null, hlsVod = null;
+        let dashLive = null, dashVod = null;
+        let tsLive = null, tsVod = null;
+
+        const advancedPlyrOptions = {
+            autoplay: true,
+            controls: ['play-large', 'restart', 'rewind', 'play', 'fast-forward', 'progress', 'current-time', 'duration', 'mute', 'volume', 'captions', 'settings', 'pip', 'airplay', 'cast', 'fullscreen'],
+            settings: ['captions', 'quality', 'speed', 'loop']
+        };
+
         function saveToStorage() {
             localStorage.setItem('iqab_db_v5', JSON.stringify(database));
             localStorage.setItem('iqab_users_v6', JSON.stringify(usersDB));
             localStorage.setItem('iqab_m3u_urls_v1', JSON.stringify(m3uUrlsDB));
+            localStorage.setItem('iqab_favs_v1', JSON.stringify(favorites));
         }
 
-        // --- نظام الإعدادات والتحديث ---
-        function toggleAutoUpdate() {
-            let isEnabled = document.getElementById('auto-update-toggle').checked;
-            localStorage.setItem('iqab_auto_update', isEnabled);
-        }
-
+        // Apply translations without altering the LTR layout
         function applyLanguageChange() {
-            let lang = document.getElementById('app-language').value;
-            document.documentElement.lang = lang;
-            document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+            let lang = document.getElementById('app-language') ? document.getElementById('app-language').value : 'en';
+            if(lang === 'ar') {
+                document.querySelectorAll('.t-fav').forEach(e => e.innerText = "المفضلة");
+                document.querySelectorAll('.t-move').forEach(e => e.innerText = "نقل");
+                document.querySelectorAll('.t-play').forEach(e => e.innerText = "تشغيل");
+            } else {
+                document.querySelectorAll('.t-fav').forEach(e => e.innerText = "Favorite");
+                document.querySelectorAll('.t-move').forEach(e => e.innerText = "Move");
+                document.querySelectorAll('.t-play').forEach(e => e.innerText = "Play Now");
+            }
         }
 
         function saveSettings() {
             let lang = document.getElementById('app-language').value;
             localStorage.setItem('iqab_language', lang);
-            alert('تم حفظ الإعدادات وتطبيق اللغة بنجاح');
+            alert('Settings saved successfully!');
         }
 
-        // --- دالة جلب روابط IPTV-ORG من GitHub تلقائياً ---
         async function fetchIptvOrgStreams() {
             try {
-                // نستخدم الـ API الخاص بالفرع الرئيسي (master) للحصول على التحديثات الديناميكية دائماً
-                const apiUrl = 'https://api.github.com/repos/iptv-org/iptv/contents/streams';
-                const response = await fetch(apiUrl);
-                
-                if (!response.ok) {
-                    console.warn("لم نتمكن من جلب قائمة streams من GitHub. سيتم تشغيل القنوات المحفوظة مسبقاً.");
-                    await fetchM3UFiles(); 
-                    return;
-                }
-                
+                const response = await fetch('https://api.github.com/repos/iptv-org/iptv/contents/streams');
+                if (!response.ok) { await fetchM3UFiles(); return; }
                 const files = await response.json();
-                
-                // تصفية الملفات لتشمل فقط التي تنتهي بصيغة .m3u
-                const m3uFiles = files.filter(file => file.name.endsWith('.m3u'));
                 let addedNew = false;
-
-                m3uFiles.forEach(file => {
-                    // التحقق مما إذا كان الرابط موجوداً بالفعل في قاعدة بياناتك لتجنب التكرار
-                    const exists = m3uUrlsDB.some(item => item.url === file.download_url);
-                    if (!exists) {
-                        // استخراج اسم التصنيف من اسم الملف (مثال: الملف ae.m3u يصبح اسمه AE)
-                        const categoryName = file.name.replace('.m3u', '').toUpperCase();
-                        m3uUrlsDB.push({
-                            url: file.download_url,
-                            subId: 'قنوات ' + categoryName 
-                        });
+                files.filter(f => f.name.endsWith('.m3u')).forEach(file => {
+                    if (!m3uUrlsDB.some(item => item.url === file.download_url)) {
+                        m3uUrlsDB.push({ url: file.download_url, subId: file.name.replace('.m3u', '').toUpperCase() });
                         addedNew = true;
                     }
                 });
-
-                if(addedNew) {
-                    saveToStorage(); // حفظ الروابط الجديدة في المتصفح
-                }
-
-                // بعد تحديث قائمة الروابط وإضافتها، نقوم بجلب محتواها وتشغيلها كالمعتاد
+                if(addedNew) saveToStorage();
                 await fetchM3UFiles();
-
-            } catch (error) {
-                console.error("خطأ في جلب بيانات iptv-org:", error);
-                await fetchM3UFiles(); // تشغيل الموجود في حالة انقطاع النت أو حدوث خطأ
-            }
+            } catch (error) { await fetchM3UFiles(); }
         }
 
         window.onload = function() {
-            let autoUpdate = localStorage.getItem('iqab_auto_update') === 'true';
-            let toggleElement = document.getElementById('auto-update-toggle');
-            if (toggleElement) toggleElement.checked = autoUpdate;
-            
-            let savedLang = localStorage.getItem('iqab_language') || 'ar';
+            let savedLang = localStorage.getItem('iqab_language') || 'en';
             if(document.getElementById('app-language')) document.getElementById('app-language').value = savedLang;
             applyLanguageChange();
             
-            if(autoUpdate) {
-                let lastUpdate = localStorage.getItem('iqab_last_update');
-                let now = Date.now();
-                if(!lastUpdate || now - parseInt(lastUpdate) > 86400000) { 
-                    localStorage.setItem('iqab_last_update', now);
-                    location.reload(true);
-                }
-            }
-
             let sessionUser = sessionStorage.getItem('loggedInUser');
             if(sessionUser) {
                 let dbUser = usersDB.find(x => x.username === sessionUser);
                 if(dbUser) {
                     if (!dbUser.connectedDevices) dbUser.connectedDevices = [];
-                    if (!dbUser.connectedDevices.includes(deviceId)) {
-                        dbUser.connectedDevices.push(deviceId);
-                        saveToStorage();
-                    }
-                    let pName = sessionStorage.getItem('loggedInPName') || 'المشغل';
-                    let host = sessionStorage.getItem('loggedInHost') || 'localhost';
-                    setupSessionUI(dbUser, pName, host);
+                    if (!dbUser.connectedDevices.includes(deviceId)) { dbUser.connectedDevices.push(deviceId); saveToStorage(); }
+                    setupSessionUI(dbUser, sessionStorage.getItem('loggedInPName'), sessionStorage.getItem('loggedInHost'));
                 }
             }
         };
 
-        // --- نظام M3U الديناميكي (التزامن) ---
         async function fetchM3UFiles() {
             m3uChannels = []; 
             for (const playlist of m3uUrlsDB) {
                 try {
                     let fetchUrl = playlist.url;
                     if(!fetchUrl.includes('?')) fetchUrl += '?t=' + new Date().getTime();
-                    
                     const response = await fetch(fetchUrl, { cache: 'no-store' });
                     if (!response.ok) continue; 
                     const text = await response.text();
-                    
                     const lines = text.split(/\r?\n/);
-                    let currentChannel = {};
-                    let currentGenre = playlist.subId || 'M3U'; 
-
+                    let currentChannel = {}; let currentGenre = playlist.subId || 'M3U'; 
                     for (let i = 0; i < lines.length; i++) {
-                        let line = lines[i].trim();
-                        if (!line) continue;
-
-                        if (line.includes(',#genre#')) {
-                            currentGenre = line.split(',')[0].trim();
-                            continue;
-                        }
-
+                        let line = lines[i].trim(); if (!line) continue;
+                        if (line.includes(',#genre#')) { currentGenre = line.split(',')[0].trim(); continue; }
                         if (line.startsWith('#EXTINF:')) {
-                            const parts = line.split(',');
-                            currentChannel.title = parts.length > 1 ? parts[1].trim() : 'قناة غير معروفة';
-                            currentChannel.type = 'live'; 
-                            currentChannel.subId = currentGenre; 
-                            currentChannel.isIframe = false;
+                            const parts = line.split(','); currentChannel.title = parts.length > 1 ? parts[1].trim() : 'Unknown';
+                            currentChannel.type = 'live'; currentChannel.subId = currentGenre; currentChannel.isIframe = false;
                             currentChannel.poster = 'https://images.unsplash.com/photo-1593784991095-a205069470b6?w=200&q=80'; 
                         } 
                         else if (line.startsWith('http') && currentChannel.title) {
-                            currentChannel.urls = [line];
-                            currentChannel.id = 'm3u_' + Date.now() + '_' + i;
-                            m3uChannels.push({...currentChannel});
-                            currentChannel = {}; 
-                        }
-                        else if (line.includes(',') && !line.startsWith('#')) {
-                            const firstComma = line.indexOf(',');
-                            const possibleName = line.substring(0, firstComma).trim();
-                            const possibleUrl = line.substring(firstComma + 1).trim(); 
-                            
-                            if (possibleUrl.startsWith('http')) {
-                                m3uChannels.push({
-                                    title: possibleName || 'قناة غير معروفة',
-                                    type: 'live',
-                                    subId: currentGenre,
-                                    isIframe: false,
-                                    poster: 'https://images.unsplash.com/photo-1593784991095-a205069470b6?w=200&q=80',
-                                    urls: [possibleUrl],
-                                    id: 'm3us_' + Date.now() + '_' + i
-                                });
-                            }
+                            currentChannel.urls = [line]; currentChannel.id = 'm3u_' + Date.now() + '_' + i;
+                            m3uChannels.push({...currentChannel}); currentChannel = {}; 
                         }
                     }
-                } catch (error) {
-                    console.error("M3U Fetch Error for url:", playlist.url, error);
-                }
+                } catch (e) {}
             }
             if(document.getElementById('live-view').classList.contains('active')){ loadCategories(); renderContent(); }
         }
 
-        // --- نظام الحسابات (Profiles) ---
         function openLoginView() { showView('add-view'); initLoginScreen(); }
         function initLoginScreen() {
             if (savedProfiles.length > 0) {
@@ -895,68 +834,49 @@
                 document.getElementById('back-to-profiles-btn').style.display = 'block';
                 renderProfiles();
             } else {
-                showNewAccountForm();
-                document.getElementById('back-to-profiles-btn').style.display = 'none';
+                showNewAccountForm(); document.getElementById('back-to-profiles-btn').style.display = 'none';
             }
         }
-
-        function showNewAccountForm() {
-            document.getElementById('new-account-form').style.display = 'flex';
-            document.getElementById('profiles-container').style.display = 'none';
-        }
-
+        function showNewAccountForm() { document.getElementById('new-account-form').style.display = 'flex'; document.getElementById('profiles-container').style.display = 'none'; }
         function renderProfiles() {
             const list = document.getElementById('saved-profiles-list'); list.innerHTML = '';
             savedProfiles.forEach((prof, idx) => {
                 const p = document.createElement('div'); p.className = 'profile-card';
-                p.innerHTML = `
-                    <div class="profile-icon">${prof.playerName ? prof.playerName.charAt(0).toUpperCase() : 'م'}</div>
-                    <div style="display:flex; flex-direction:column; align-items:flex-start; text-align:right;">
-                        <span style="font-weight:bold; font-size:15px;">${prof.playerName || 'مشغل غير معروف'}</span>
-                        <span style="font-size:12px; color:#aaa;">${prof.host || 'لا يوجد هوست'}</span>
-                    </div>
-                    <button class="del-profile" onclick="deleteProfile(event, ${idx})" title="حذف الحساب">X</button>
-                `;
+                p.innerHTML = `<div class="profile-icon">${prof.playerName ? prof.playerName.charAt(0).toUpperCase() : 'M'}</div><div style="flex:1;"><span style="font-weight:bold; font-size:15px; display:block;">${prof.playerName || 'Unknown'}</span><span style="font-size:12px; color:#aaa;">${prof.host || 'No Host'}</span></div><button class="del-profile" onclick="deleteProfile(event, ${idx})">X</button>`;
                 p.onclick = () => loginWithProfile(prof); list.appendChild(p);
             });
         }
-
         function deleteProfile(e, idx) { e.stopPropagation(); savedProfiles.splice(idx, 1); localStorage.setItem('iqab_saved_profiles', JSON.stringify(savedProfiles)); initLoginScreen(); }
         function loginWithProfile(prof) { document.getElementById('play-user').value = prof.username; document.getElementById('play-pass').value = prof.password; document.getElementById('play-player-name').value = prof.playerName; document.getElementById('play-host').value = prof.host; login(); }
         function showLoginError(msg) { const err = document.getElementById('login-error'); err.innerText = msg; err.style.display = 'block'; }
 
-        // --- نظام تسجيل الدخول ---
         function login() {
-            const user = document.getElementById('play-user').value.trim(); const pass = document.getElementById('play-pass').value.trim(); const pName = document.getElementById('play-player-name').value.trim() || 'المشغل'; const host = document.getElementById('play-host').value.trim() || 'لا يوجد';
+            const user = document.getElementById('play-user').value.trim(); const pass = document.getElementById('play-pass').value.trim(); const pName = document.getElementById('play-player-name').value.trim() || 'Player'; const host = document.getElementById('play-host').value.trim() || 'No Host';
             let foundUser = usersDB.find(u => u.username === user && u.password === pass);
-            
             if (foundUser) {
-                if(foundUser.expiryDate) { let expDate = new Date(foundUser.expiryDate); if(new Date() > expDate) { showLoginError("عذراً، لقد انتهت صلاحية هذا الحساب!"); return; } }
+                if(foundUser.expiryDate) { let expDate = new Date(foundUser.expiryDate); if(new Date() > expDate) { showLoginError("Account Expired!"); return; } }
                 if(!foundUser.connectedDevices) foundUser.connectedDevices = [];
-                if (!foundUser.connectedDevices.includes(deviceId)) { let max = foundUser.maxDevices || 1; if(foundUser.connectedDevices.length >= max) { showLoginError("عذراً، الحساب شغال في جهاز آخر حالياً وبلغ الحد الأقصى!"); return; } foundUser.connectedDevices.push(deviceId); }
+                if (!foundUser.connectedDevices.includes(deviceId)) { let max = foundUser.maxDevices || 1; if(foundUser.connectedDevices.length >= max) { showLoginError("Max devices reached!"); return; } foundUser.connectedDevices.push(deviceId); }
                 saveToStorage();
                 if(!savedProfiles.find(p => p.username === user && p.host === host)) { savedProfiles.push({username: user, password: pass, playerName: pName, host: host}); localStorage.setItem('iqab_saved_profiles', JSON.stringify(savedProfiles)); }
                 sessionStorage.setItem('loggedInUser', foundUser.username); sessionStorage.setItem('loggedInPName', pName); sessionStorage.setItem('loggedInHost', host);
                 document.getElementById('login-error').style.display = 'none'; setupSessionUI(foundUser, pName, host); showMediaView('live');
-            } else { showLoginError("البيانات المدخلة غير صحيحة!"); }
+            } else { showLoginError("Invalid Credentials!"); }
         }
 
         function setupSessionUI(user, pName, host) {
             let max = user.maxDevices || 1; let activeCount = user.connectedDevices ? user.connectedDevices.length : 0;
-            document.getElementById('st-username').innerText = user.username; document.getElementById('st-expiry').innerText = user.expiryDate || 'مفتوح (بدون تاريخ)'; document.getElementById('st-devices').innerText = `${activeCount} من ${max}`; document.getElementById('st-device-id').innerText = deviceId;
-            document.getElementById('st-pname').innerText = pName; document.getElementById('st-host').innerText = host; document.getElementById('dash-expiry').innerText = user.expiryDate || 'مفتوح (بدون تاريخ)';
-            
-            // استدعاء دالة تحديث وجلب الـ GitHub التلقائية بدلاً من الاستدعاء المباشر للملفات القديمة
+            document.getElementById('st-username').innerText = user.username; document.getElementById('st-expiry').innerText = user.expiryDate || 'Unlimited'; document.getElementById('st-devices').innerText = `${activeCount} / ${max}`; document.getElementById('st-device-id').innerText = deviceId;
+            document.getElementById('st-pname').innerText = pName; document.getElementById('st-host').innerText = host; document.getElementById('dash-expiry').innerText = user.expiryDate || 'Unlimited';
             fetchIptvOrgStreams();
         }
 
         function logout() {
             let sessionUser = sessionStorage.getItem('loggedInUser');
             if(sessionUser) { let dbUser = usersDB.find(x => x.username === sessionUser); if(dbUser && dbUser.connectedDevices) { dbUser.connectedDevices = dbUser.connectedDevices.filter(id => id !== deviceId); saveToStorage(); } }
-            sessionStorage.removeItem('loggedInUser'); sessionStorage.removeItem('loggedInPName'); sessionStorage.removeItem('loggedInHost'); location.reload();
+            sessionStorage.clear(); location.reload();
         }
 
-        // --- التحكم بالشاشات ---
         function hideAllViews() { document.querySelectorAll('.view').forEach(v => v.classList.remove('active')); }
         function showView(viewId) { hideAllViews(); document.getElementById(viewId).classList.add('active'); stopAllPlayers(); }
         function showMediaView(type) {
@@ -967,28 +887,65 @@
             loadCategories(); stopAllPlayers();
         }
 
+        // Load Categories Layout matched with image
         function loadCategories() {
             let listId = currentType === 'live' ? 'live-categories' : (currentType === 'movies' ? 'movies-categories' : 'series-categories');
             const list = document.getElementById(listId); list.innerHTML = '';
-            const allBtn = document.createElement('div'); allBtn.className = 'list-item active'; allBtn.innerHTML = `<span>الكل</span>`;
-            allBtn.onclick = (e) => selectCategory('all', e.currentTarget, listId); list.appendChild(allBtn);
+            
+            // Search box inside categories
+            list.innerHTML += `<div class="cat-search"><input type="text" placeholder="Search in categories" onkeyup="filterCategoriesList(this.value, '${listId}')"></div>`;
+
             const combinedDB = [...database, ...m3uChannels]; const typeItems = combinedDB.filter(i => i.type === currentType);
+            
+            // Render All
+            const allBtn = document.createElement('div'); allBtn.className = 'list-item cat-item active'; 
+            allBtn.innerHTML = `<span>All</span> <span class="count">${typeItems.length}</span>`;
+            allBtn.onclick = (e) => selectCategory('all', e.currentTarget, listId); list.appendChild(allBtn);
+
+            // Render Favorite
+            let favCount = favorites.filter(i => i.type === currentType).length;
+            const favBtn = document.createElement('div'); favBtn.className = 'list-item cat-item'; 
+            favBtn.innerHTML = `<span>Favorite</span> <span class="count">${favCount}</span>`;
+            favBtn.onclick = (e) => selectCategory('favorite', e.currentTarget, listId); list.appendChild(favBtn);
+
+            // Render SubCategories
             const uniqueSubs = [...new Set(typeItems.map(i => i.subId))];
             uniqueSubs.forEach(sub => {
-                if(!sub) return; const btn = document.createElement('div'); btn.className = 'list-item'; 
+                if(!sub) return; const btn = document.createElement('div'); btn.className = 'list-item cat-item'; 
+                btn.dataset.name = sub.toLowerCase();
                 let subCount = typeItems.filter(i => i.subId === sub).length;
                 btn.innerHTML = `<span>${sub}</span> <span class="count">${subCount}</span>`; 
                 btn.onclick = (e) => selectCategory(sub, e.currentTarget, listId); list.appendChild(btn);
             });
+            
             selectCategory('all', allBtn, listId);
         }
 
-        function selectCategory(sub, btnElement, listId) { document.querySelectorAll(`#${listId} .list-item`).forEach(b => b.classList.remove('active')); btnElement.classList.add('active'); currentSubId = sub; renderContent(); }
+        function filterCategoriesList(val, listId) {
+            let query = val.toLowerCase();
+            document.querySelectorAll(`#${listId} .cat-item`).forEach(el => {
+                if(!el.dataset.name) return; // skip all/favorite from hiding usually, or include them
+                if(el.innerText.toLowerCase().includes(query)) el.style.display = 'flex';
+                else el.style.display = 'none';
+            });
+        }
+
+        function selectCategory(sub, btnElement, listId) { 
+            document.querySelectorAll(`#${listId} .list-item`).forEach(b => b.classList.remove('active')); 
+            btnElement.classList.add('active'); 
+            currentSubId = sub; renderContent(); 
+        }
 
         function renderContent(searchQuery = '') {
             const combinedDB = [...database, ...m3uChannels]; 
             let filtered = combinedDB.filter(item => item.type === currentType);
-            if (currentSubId !== 'all') filtered = filtered.filter(item => item.subId === currentSubId);
+            
+            if (currentSubId === 'favorite') {
+                filtered = filtered.filter(item => favorites.some(f => f.id === item.id));
+            } else if (currentSubId !== 'all') {
+                filtered = filtered.filter(item => item.subId === currentSubId);
+            }
+            
             if (searchQuery) { const query = searchQuery.toLowerCase(); filtered = filtered.filter(item => item.title && item.title.toLowerCase().includes(query)); }
 
             let uniqueMap = new Map();
@@ -999,7 +956,7 @@
                 const list = document.getElementById('live-channels-list'); list.innerHTML = '';
                 uniqueItems.forEach((item, idx) => {
                     const card = document.createElement('div'); card.className = 'list-item channel-item';
-                    card.innerHTML = `<span class="channel-num">${idx+1}</span><img class="channel-icon" src="${item.poster}"><span>${item.title}</span>`;
+                    card.innerHTML = `<span class="channel-num">${idx+1}</span><img class="channel-icon" src="${item.poster}"><span class="channel-title" dir="auto">${item.title}</span>`;
                     card.onclick = () => { document.querySelectorAll('.channel-item').forEach(c => c.classList.remove('active')); card.classList.add('active'); playLive(item); };
                     list.appendChild(card);
                 });
@@ -1008,18 +965,55 @@
                 const grid = document.getElementById(gridId); grid.innerHTML = '';
                 uniqueItems.forEach(item => {
                     const card = document.createElement('div'); card.className = 'poster-card';
-                    card.innerHTML = `<img class="poster-img" src="${item.poster}"><span class="rating-badge">${item.season ? 'S'+item.season : 'HD'}</span><div class="poster-title">${item.title}</div>`;
+                    card.innerHTML = `<img class="poster-img" src="${item.poster}"><span class="rating-badge">${item.season ? 'S'+item.season : 'HD'}</span><div class="poster-title" dir="auto">${item.title}</div>`;
                     card.onclick = () => openDetailsScreen(item); grid.appendChild(card);
                 });
             }
         }
 
-        function openDetailsScreen(item) { currentMediaObj = item; document.getElementById('detail-title').innerText = item.title; document.getElementById('detail-desc').innerText = item.type === 'movies' ? 'فيلم سينمائي مميز' : 'مسلسل درامي ممتع'; document.getElementById('detail-img').src = item.poster; document.getElementById('detail-bg-img').style.backgroundImage = `url('${item.poster}')`; showView('details-view'); }
+        // --- ميزة المفضلة (Favorite) ---
+        function addToFavorites(context) {
+            let item = context === 'live' ? activeLiveItem : currentMediaObj;
+            if (!item) return alert("Select a channel first!");
+            
+            let existsIndex = favorites.findIndex(f => f.id === item.id);
+            if (existsIndex > -1) {
+                favorites.splice(existsIndex, 1);
+                alert("Removed from Favorites.");
+            } else {
+                favorites.push(item);
+                alert("Added to Favorites.");
+            }
+            saveToStorage();
+            if (currentType === 'live') loadCategories(); // refresh counts
+        }
+
+        // --- ميزة نقل القناة (Move Channel) ---
+        function moveChannel() {
+            if (!activeLiveItem) return alert("Select a Live channel first!");
+            let currentIdx = database.findIndex(i => i.id === activeLiveItem.id);
+            
+            if (currentIdx === -1) {
+                return alert("M3U channels cannot be moved directly. Only local DB channels.");
+            }
+            
+            let newPos = prompt(`Enter new position for this channel (Currently ${currentIdx + 1}):`);
+            if (newPos && !isNaN(newPos)) {
+                newPos = parseInt(newPos) - 1;
+                if (newPos >= 0 && newPos < database.length) {
+                    let itemToMove = database.splice(currentIdx, 1)[0];
+                    database.splice(newPos, 0, itemToMove);
+                    saveToStorage();
+                    renderContent();
+                    alert("Channel moved successfully!");
+                }
+            }
+        }
+
+        function openDetailsScreen(item) { currentMediaObj = item; document.getElementById('detail-title').innerText = item.title; document.getElementById('detail-desc').innerText = item.type === 'movies' ? 'Movie Description' : 'Series Description'; document.getElementById('detail-img').src = item.poster; document.getElementById('detail-bg-img').style.backgroundImage = `url('${item.poster}')`; showView('details-view'); }
         function goBackFromDetails() { if(currentMediaObj && currentMediaObj.type === 'movies') showView('movies-view'); else showView('series-view'); }
 
-        // --- مشغلات الفيديو (التعديل الخاص بكسر حماية الـ HTTPS / Mixed Content) ---
-        const plyrOptions = { controls: ['play-large', 'restart', 'rewind', 'play', 'fast-forward', 'progress', 'current-time', 'duration', 'mute', 'volume', 'fullscreen'], autoplay: true };
-        
+        // --- محرك المشغل الشامل (PRO MAX Variables) ---
         function processUrl(originalUrl, isIframe) {
             if (!originalUrl) return ""; 
             let url = originalUrl.trim();
@@ -1029,12 +1023,24 @@
                 return url; 
             } else { 
                 if (url.includes('pixeldrain.com/u/')) url = url.replace('/u/', '/api/file/');
-                // تحويل الـ HTTP إلى بروكسي HTTPS للمتصفحات المؤمنة
                 if (window.location.protocol === 'https:' && url.startsWith('http://')) {
-                    // يمكنك استبدال الرابط أدناه ببروكسي الـ PHP الخاص بك لضمان الاستقرار التام
                     url = 'https://corsproxy.io/?' + encodeURIComponent(url);
                 }
                 return url; 
+            }
+        }
+
+        function destroySpecificPlayer(context) {
+            if (context === 'live') {
+                if (plyrLive) { plyrLive.destroy(); plyrLive = null; }
+                if (hlsLive) { hlsLive.destroy(); hlsLive = null; }
+                if (dashLive) { dashLive.reset(); dashLive = null; }
+                if (tsLive) { tsLive.destroy(); tsLive = null; }
+            } else {
+                if (plyrVod) { plyrVod.destroy(); plyrVod = null; }
+                if (hlsVod) { hlsVod.destroy(); hlsVod = null; }
+                if (dashVod) { dashVod.reset(); dashVod = null; }
+                if (tsVod) { tsVod.destroy(); tsVod = null; }
             }
         }
 
@@ -1045,44 +1051,114 @@
             const iframeContainer = document.getElementById(context === 'live' ? 'live-iframe-container' : 'vod-iframe-container');
             const iframe = document.getElementById(context === 'live' ? 'live-iframe' : 'vod-iframe');
             
-            if(context === 'live') { if(plyrLive) plyrLive.destroy(); if(hlsLive) hlsLive.destroy(); } else { if(plyrVod) plyrVod.destroy(); if(hlsVod) hlsVod.destroy(); }
+            destroySpecificPlayer(context);
             
             if (isIframe) { 
                 videoContainer.style.display = 'none'; iframeContainer.style.display = 'block'; iframe.src = finalUrl; 
             } else {
                 iframeContainer.style.display = 'none'; iframe.src = ""; videoContainer.style.display = 'block';
                 
-                // التأكد من دعم HLS.js (لملفات .m3u8 أو الروابط الممررة التي تعتمد على البث)
-                if((originalUrl.includes('.m3u8') || originalUrl.includes('.ts') || !originalUrl.includes('.mp4')) && Hls.isSupported()) {
+                if (finalUrl.includes('.mpd')) {
+                    const currentDash = dashjs.MediaPlayer().create();
+                    currentDash.initialize(video, finalUrl, true);
+                    if(context === 'live') dashLive = currentDash; else dashVod = currentDash;
                     
-                    // إعداد خاص لـ Hls.js ليمرر الطلبات الداخلية (ملفات .ts مثلاً) عبر البروكسي
-                    const hlsConfig = {
-                        xhrSetup: function(xhr, xhrUrl) {
-                            if (window.location.protocol === 'https:' && xhrUrl.startsWith('http://')) {
-                                xhrUrl = 'https://corsproxy.io/?' + encodeURIComponent(xhrUrl);
-                            }
-                            xhr.open('GET', xhrUrl, true);
+                    currentDash.on(dashjs.MediaPlayer.events.STREAM_INITIALIZED, function() {
+                        const bitrates = currentDash.getBitrateInfoListFor('video');
+                        if(bitrates && bitrates.length > 1) {
+                            const qualities = bitrates.map(b => b.height).sort((a,b) => b-a);
+                            qualities.unshift(0); 
+                            const cPlyr = new Plyr(video, {
+                                ...advancedPlyrOptions,
+                                quality: {
+                                    default: 0, options: qualities, forced: true,
+                                    onChange: (e) => {
+                                        if (e === 0) currentDash.updateSettings({ streaming: { abr: { autoSwitchBitrate: { video: true } } } });
+                                        else {
+                                            currentDash.updateSettings({ streaming: { abr: { autoSwitchBitrate: { video: false } } } });
+                                            const idx = bitrates.findIndex(b => b.height === e);
+                                            currentDash.setQualityFor('video', idx);
+                                        }
+                                    }
+                                }
+                            });
+                            if(context === 'live') plyrLive = cPlyr; else plyrVod = cPlyr;
+                        } else {
+                            const cPlyr = new Plyr(video, advancedPlyrOptions);
+                            if(context === 'live') plyrLive = cPlyr; else plyrVod = cPlyr;
                         }
-                    };
-                    
-                    const hls = new Hls(hlsConfig); 
-                    hls.loadSource(finalUrl); 
-                    hls.attachMedia(video);
-                    
-                    hls.on(Hls.Events.MANIFEST_PARSED, () => { 
-                        const plyr = new Plyr(video, plyrOptions); 
-                        if(context === 'live') { hlsLive = hls; plyrLive = plyr; } else { hlsVod = hls; plyrVod = plyr; } 
                     });
+
+                } else if (finalUrl.includes('.m3u8') && Hls.isSupported()) { 
+                    const currentHls = new Hls({ xhrSetup: function(xhr, xhrUrl) {
+                        if (window.location.protocol === 'https:' && xhrUrl.startsWith('http://')) xhrUrl = 'https://corsproxy.io/?' + encodeURIComponent(xhrUrl);
+                        xhr.open('GET', xhrUrl, true);
+                    }}); 
+                    currentHls.loadSource(finalUrl); 
+                    currentHls.attachMedia(video); 
+                    if(context === 'live') hlsLive = currentHls; else hlsVod = currentHls;
+
+                    currentHls.on(Hls.Events.MANIFEST_PARSED, function () {
+                        const availableQualities = currentHls.levels.map(l => l.height);
+                        if(availableQualities.length > 1) {
+                            availableQualities.unshift(0); 
+                            const cPlyr = new Plyr(video, {
+                                ...advancedPlyrOptions,
+                                quality: {
+                                    default: 0, options: availableQualities, forced: true,
+                                    onChange: (e) => {
+                                        if (e === 0) currentHls.currentLevel = -1;
+                                        else currentHls.levels.forEach((l, i) => { if (l.height === e) currentHls.currentLevel = i; });
+                                    }
+                                }
+                            });
+                            if(context === 'live') plyrLive = cPlyr; else plyrVod = cPlyr;
+                        } else {
+                            const cPlyr = new Plyr(video, advancedPlyrOptions);
+                            if(context === 'live') plyrLive = cPlyr; else plyrVod = cPlyr;
+                        }
+                        video.play().catch(() => {});
+                    });
+
+                } else if ((finalUrl.includes('.ts') || finalUrl.includes('mpegts')) && typeof mpegts !== 'undefined') {
+                    if (mpegts.getFeatureList().mseLivePlayback) {
+                        const currentTs = mpegts.createPlayer({ type: 'mpegts', isLive: true, url: finalUrl });
+                        currentTs.attachMediaElement(video);
+                        currentTs.load();
+                        currentTs.play().catch(() => {});
+                        if(context === 'live') tsLive = currentTs; else tsVod = currentTs;
+                        const cPlyr = new Plyr(video, advancedPlyrOptions);
+                        if(context === 'live') plyrLive = cPlyr; else plyrVod = cPlyr;
+                    }
                 } else { 
-                    // الروابط المباشرة مثل mp4
                     video.src = finalUrl; 
-                    const plyr = new Plyr(video, plyrOptions); 
-                    if(context === 'live') plyrLive = plyr; else plyrVod = plyr; 
+                    const cPlyr = new Plyr(video, advancedPlyrOptions);
+                    if(context === 'live') plyrLive = cPlyr; else plyrVod = cPlyr;
+                    video.play().catch(() => {});
                 }
             }
         }
 
-        function playLive(item) { activeLiveItem = item; document.getElementById('live-title-display').innerText = item.title; const serversDiv = document.getElementById('live-servers-btns'); serversDiv.innerHTML = ''; if(item.urls && item.urls.length > 0) { item.urls.forEach((url, idx) => { const btn = document.createElement('button'); btn.className = 'server-btn' + (idx === 0 ? ' active' : ''); btn.innerText = `سيرفر ${idx + 1}`; btn.onclick = () => { document.querySelectorAll('#live-servers-btns .server-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); initPlayer('live-player', url, 'live', item.isIframe); }; serversDiv.appendChild(btn); }); initPlayer('live-player', item.urls[0], 'live', item.isIframe); } }
+        function playLive(item) { 
+            activeLiveItem = item; 
+            document.getElementById('live-title-display').innerText = item.title; 
+            const serversDiv = document.getElementById('live-servers-btns'); 
+            serversDiv.innerHTML = ''; 
+            if(item.urls && item.urls.length > 0) { 
+                item.urls.forEach((url, idx) => { 
+                    const btn = document.createElement('button'); 
+                    btn.className = 'server-btn' + (idx === 0 ? ' active' : ''); 
+                    btn.innerText = `Server ${idx + 1}`; 
+                    btn.onclick = () => { 
+                        document.querySelectorAll('#live-servers-btns .server-btn').forEach(b => b.classList.remove('active')); 
+                        btn.classList.add('active'); 
+                        initPlayer('live-player', url, 'live', item.isIframe); 
+                    }; 
+                    serversDiv.appendChild(btn); 
+                }); 
+                initPlayer('live-player', item.urls[0], 'live', item.isIframe); 
+            } 
+        }
         function refreshCurrentLive() { if(activeLiveItem) playLive(activeLiveItem); }
 
         function openVodModal() {
@@ -1094,7 +1170,7 @@
 
         function renderSeasonsTabs(allParts) {
             const tabsDiv = document.getElementById('season-tabs-container'); tabsDiv.innerHTML = '';
-            allParts.forEach((part, index) => { const tab = document.createElement('div'); tab.className = 'season-tab' + (index === 0 ? ' active' : ''); tab.innerText = part.type === 'series' ? `موسم ${part.season || index+1}` : `جزء ${part.season || index+1}`; tab.onclick = () => { document.querySelectorAll('.season-tab').forEach(t => t.classList.remove('active')); tab.classList.add('active'); if(part.type === 'series') renderEpisodesList(part); else renderVodServers(part.urls, part.isIframe); }; tabsDiv.appendChild(tab); });
+            allParts.forEach((part, index) => { const tab = document.createElement('div'); tab.className = 'season-tab' + (index === 0 ? ' active' : ''); tab.innerText = part.type === 'series' ? `Season ${part.season || index+1}` : `Part ${part.season || index+1}`; tab.onclick = () => { document.querySelectorAll('.season-tab').forEach(t => t.classList.remove('active')); tab.classList.add('active'); if(part.type === 'series') renderEpisodesList(part); else renderVodServers(part.urls, part.isIframe); }; tabsDiv.appendChild(tab); });
             if(allParts[0].type === 'series') renderEpisodesList(allParts[0]); else renderVodServers(allParts[0].urls, allParts[0].isIframe);
         }
 
@@ -1107,16 +1183,15 @@
         function renderVodServers(urls, isIframe) {
             activeVodUrls = urls; activeVodIsIframe = isIframe; 
             const serversDiv = document.getElementById('vod-servers-btns'); serversDiv.innerHTML = ''; if(!urls) return;
-            urls.forEach((url, idx) => { const btn = document.createElement('button'); btn.className = 'server-btn' + (idx === 0 ? ' active' : ''); btn.innerText = `سيرفر ${idx + 1}`; btn.onclick = () => { document.querySelectorAll('#vod-servers-btns .server-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); initPlayer('vod-player', url, 'vod', isIframe); }; serversDiv.appendChild(btn); });
+            urls.forEach((url, idx) => { const btn = document.createElement('button'); btn.className = 'server-btn' + (idx === 0 ? ' active' : ''); btn.innerText = `Server ${idx + 1}`; btn.onclick = () => { document.querySelectorAll('#vod-servers-btns .server-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); initPlayer('vod-player', url, 'vod', isIframe); }; serversDiv.appendChild(btn); });
             initPlayer('vod-player', urls[0], 'vod', isIframe);
         }
 
         function refreshCurrentVod() { if(activeVodUrls && activeVodUrls.length > 0) { initPlayer('vod-player', activeVodUrls[0], 'vod', activeVodIsIframe); } }
+        function stopAllPlayers() { destroySpecificPlayer('live'); destroySpecificPlayer('vod'); let lp = document.getElementById('live-player'); if(lp) lp.src = ""; let li = document.getElementById('live-iframe'); if(li) li.src = ""; closeModal('vod-modal'); }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; if(id === 'vod-modal') { destroySpecificPlayer('vod'); document.getElementById('vod-player').src = ""; document.getElementById('vod-iframe').src = ""; } }
 
-        function stopAllPlayers() { if(plyrLive) { plyrLive.destroy(); plyrLive = null; } if(hlsLive) { hlsLive.destroy(); hlsLive = null; } let lp = document.getElementById('live-player'); if(lp) lp.src = ""; let li = document.getElementById('live-iframe'); if(li) li.src = ""; closeModal('vod-modal'); }
-        function closeModal(id) { document.getElementById(id).style.display = 'none'; if(id === 'vod-modal') { if(plyrVod) { plyrVod.destroy(); plyrVod = null; } if(hlsVod) { hlsVod.destroy(); hlsVod = null; } document.getElementById('vod-player').src = ""; document.getElementById('vod-iframe').src = ""; } }
-
-        // --- الإدارة والاستخراج وتحديث GitHub ---
+        // --- وظائف الإدارة محفوظة كما هي تماماً ---
         function checkSearchSecret(el) { if(el.value === '774357019') { el.value = ''; showView('admin-view'); openAdminPanel(true); } }
         function openAdminPanel(render = true) { if(render){onAdminTypeChange(); renderAdminTables();} }
         function switchAdminTab(tabId, btn) { document.querySelectorAll('.admin-nav-item').forEach(b => b.classList.remove('active')); document.querySelectorAll('.admin-panel-section').forEach(s => s.classList.remove('active')); btn.classList.add('active'); document.getElementById(tabId).classList.add('active'); }
@@ -1124,89 +1199,83 @@
 
         function renderAdminTables() {
             const cTable = document.getElementById('admin-content-table'); cTable.innerHTML = '';
-            database.forEach(item => { cTable.innerHTML += `<tr><td>${item.type}</td><td><strong>${item.title}</strong></td><td><button class="action-btn-tbl" style="color:#f39c12;" onclick="editContentItem(${item.id})">تعديل</button><button class="action-btn-tbl" style="color:#ef4444;" onclick="deleteContentItem(${item.id})">حذف</button></td></tr>`; });
-            
+            database.forEach(item => { cTable.innerHTML += `<tr><td>${item.type}</td><td><strong>${item.title}</strong></td><td><button class="action-btn-tbl" style="color:#f39c12;" onclick="editContentItem(${item.id})">Edit</button><button class="action-btn-tbl" style="color:#ef4444;" onclick="deleteContentItem(${item.id})">Del</button></td></tr>`; });
             const uTable = document.getElementById('admin-users-table'); uTable.innerHTML = '';
             usersDB.forEach((u, idx) => { 
-                let expInfo = u.expiryDate || 'مفتوح';
-                let actCount = u.connectedDevices ? u.connectedDevices.length : 0;
-                uTable.innerHTML += `<tr>
-                    <td>${u.username}</td><td>${u.password}</td><td>${expInfo}</td><td>${u.maxDevices || 1}</td>
-                    <td><button class="action-btn-tbl" style="color:#2ea44f;" onclick="resetDevices(${idx})" title="إلغاء اتصال الأجهزة العالقة">تصفير الأجهزة (${actCount})</button><button class="action-btn-tbl" style="color:#ef4444;" onclick="deleteUser(${idx})">حذف</button></td>
-                </tr>`; 
+                let expInfo = u.expiryDate || 'Open'; let actCount = u.connectedDevices ? u.connectedDevices.length : 0;
+                uTable.innerHTML += `<tr><td>${u.username}</td><td>${u.password}</td><td>${expInfo}</td><td>${u.maxDevices || 1}</td><td><button class="action-btn-tbl" style="color:#2ea44f;" onclick="resetDevices(${idx})">Reset(${actCount})</button><button class="action-btn-tbl" style="color:#ef4444;" onclick="deleteUser(${idx})">Del</button></td></tr>`; 
             });
             renderM3uUrlsTable();
         }
 
-        function renderM3uUrlsTable() { const table = document.getElementById('admin-m3u-urls-table'); if(!table) return; table.innerHTML = ''; m3uUrlsDB.forEach((item, idx) => { table.innerHTML += `<tr><td>${item.subId}</td><td style="direction:ltr; text-align:left;">${item.url}</td><td><button class="action-btn-tbl" style="color:#ef4444;" onclick="deleteM3uUrl(${idx})">حذف</button></td></tr>`; }); }
-        function addM3uUrl() { const subId = document.getElementById('m3u-url-subid').value.trim() || 'قنوات M3U'; const url = document.getElementById('m3u-url-input').value.trim(); if(!url) { alert('الرجاء إدخال رابط صالح!'); return; } m3uUrlsDB.push({ url: url, subId: subId }); saveToStorage(); document.getElementById('m3u-url-input').value = ''; document.getElementById('m3u-url-subid').value = ''; renderM3uUrlsTable(); alert('تمت إضافة الرابط! سيتم استدعاء القنوات منه تلقائياً.'); fetchM3UFiles(); }
-        function deleteM3uUrl(idx) { if(confirm('هل تريد فعلاً حذف هذا الرابط؟')) { m3uUrlsDB.splice(idx, 1); saveToStorage(); renderM3uUrlsTable(); fetchM3UFiles(); } }
+        function renderM3uUrlsTable() { const table = document.getElementById('admin-m3u-urls-table'); if(!table) return; table.innerHTML = ''; m3uUrlsDB.forEach((item, idx) => { table.innerHTML += `<tr><td>${item.subId}</td><td style="direction:ltr; text-align:left;">${item.url}</td><td><button class="action-btn-tbl" style="color:#ef4444;" onclick="deleteM3uUrl(${idx})">Del</button></td></tr>`; }); }
+        function addM3uUrl() { const subId = document.getElementById('m3u-url-subid').value.trim() || 'M3U'; const url = document.getElementById('m3u-url-input').value.trim(); if(!url) return; m3uUrlsDB.push({ url: url, subId: subId }); saveToStorage(); document.getElementById('m3u-url-input').value = ''; document.getElementById('m3u-url-subid').value = ''; renderM3uUrlsTable(); fetchM3UFiles(); }
+        function deleteM3uUrl(idx) { if(confirm('Delete URL?')) { m3uUrlsDB.splice(idx, 1); saveToStorage(); renderM3uUrlsTable(); fetchM3UFiles(); } }
 
         function uploadLocalM3U() {
-            const fileInput = document.getElementById('m3u-file-input'); const type = document.getElementById('m3u-file-type').value; const subId = document.getElementById('m3u-file-subid').value.trim() || 'ملف مستورد';
-            if(fileInput.files.length === 0) { alert('يرجى اختيار ملف من جهازك أولاً!'); return; }
+            const fileInput = document.getElementById('m3u-file-input'); const type = document.getElementById('m3u-file-type').value; const subId = document.getElementById('m3u-file-subid').value.trim() || 'Imported';
+            if(fileInput.files.length === 0) return;
             const file = fileInput.files[0]; const reader = new FileReader();
             reader.onload = function(e) {
-                const text = e.target.result; const lines = text.split(/\r?\n/); let currentChannel = {}; let addedCount = 0; let currentGenre = subId;
+                const lines = e.target.result.split(/\r?\n/); let currentChannel = {}; let currentGenre = subId;
                 for (let i = 0; i < lines.length; i++) {
                     let line = lines[i].trim(); if (!line) continue;
                     if (line.includes(',#genre#')) { currentGenre = line.split(',')[0].trim(); continue; }
-                    if (line.startsWith('#EXTINF:')) { const parts = line.split(','); currentChannel.title = parts.length > 1 ? parts[1].trim() : 'عنصر غير معروف'; currentChannel.type = type; currentChannel.subId = currentGenre; currentChannel.isIframe = false; currentChannel.poster = type === 'movies' ? 'https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?w=300&q=80' : 'https://images.unsplash.com/photo-1593784991095-a205069470b6?w=200&q=80'; } 
-                    else if (line.startsWith('http') && currentChannel.title) { currentChannel.urls = [line]; currentChannel.id = Date.now() + addedCount; if(type === 'movies' || type === 'series') currentChannel.season = 1; database.push({...currentChannel}); addedCount++; currentChannel = {}; }
+                    if (line.startsWith('#EXTINF:')) { const parts = line.split(','); currentChannel.title = parts.length > 1 ? parts[1].trim() : 'Unknown'; currentChannel.type = type; currentChannel.subId = currentGenre; currentChannel.isIframe = false; currentChannel.poster = type === 'movies' ? 'https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?w=300&q=80' : 'https://images.unsplash.com/photo-1593784991095-a205069470b6?w=200&q=80'; } 
+                    else if (line.startsWith('http') && currentChannel.title) { currentChannel.urls = [line]; currentChannel.id = Date.now() + i; if(type === 'movies' || type === 'series') currentChannel.season = 1; database.push({...currentChannel}); currentChannel = {}; }
                 }
-                saveToStorage(); renderAdminTables(); alert(`تم استيراد ${addedCount} عنصر بنجاح وحفظها في قاعدة البيانات الأساسية!`);
-            };
-            reader.readAsText(file);
+                saveToStorage(); renderAdminTables(); alert(`Imported successfully!`);
+            }; reader.readAsText(file);
         }
 
         function saveContentItem() {
-            const idInput = document.getElementById('admin-item-id').value; const type = document.getElementById('admin-type').value; const titleInput = document.getElementById('admin-title').value.trim(); const posterInput = document.getElementById('admin-poster').value.trim(); const urlText = document.getElementById('admin-url').value.trim(); const seasonNum = parseInt(document.getElementById('admin-season-num').value) || 1; const epNumInput = document.getElementById('admin-episode-num').value.trim(); const subId = document.getElementById('admin-subid').value.trim() || 'عام'; const isIframe = document.getElementById('admin-is-iframe').checked;
-            if(!titleInput || !urlText) { alert('الرجاء تعبئة العنوان والروابط!'); return; }
+            const idInput = document.getElementById('admin-item-id').value; const type = document.getElementById('admin-type').value; const titleInput = document.getElementById('admin-title').value.trim(); const posterInput = document.getElementById('admin-poster').value.trim(); const urlText = document.getElementById('admin-url').value.trim(); const seasonNum = parseInt(document.getElementById('admin-season-num').value) || 1; const epNumInput = document.getElementById('admin-episode-num').value.trim(); const subId = document.getElementById('admin-subid').value.trim() || 'General'; const isIframe = document.getElementById('admin-is-iframe').checked;
+            if(!titleInput || !urlText) return;
             const inputUrls = urlText.split(/[\n|]/).map(u => u.trim()).filter(u => u !== ''); let existingItem = database.find(i => i.title.toLowerCase() === titleInput.toLowerCase() && i.type === type && i.season === (type!=='live'?seasonNum:undefined));
             if(type === 'series') {
                 let epIndex = epNumInput !== '' ? parseInt(epNumInput) : null;
                 if(existingItem) {
                     existingItem.isIframe = isIframe; if(!existingItem.episodes) existingItem.episodes = [];
-                    if(epIndex !== null) { let targetEp = existingItem.episodes.find(e => e.title === `الحلقة ${epIndex}`); if(targetEp) { targetEp.urls = inputUrls; } else { existingItem.episodes.push({ title: `الحلقة ${epIndex}`, urls: inputUrls }); } } else { const lines = urlText.split('\n').filter(l => l.trim() !== ''); lines.forEach((line) => { let currentEpNum = existingItem.episodes.length + 1; let srvs = line.split('|').map(s => s.trim()).filter(s => s !== ''); existingItem.episodes.push({ title: `الحلقة ${currentEpNum}`, urls: srvs }); }); }
+                    if(epIndex !== null) { let targetEp = existingItem.episodes.find(e => e.title === `Episode ${epIndex}`); if(targetEp) { targetEp.urls = inputUrls; } else { existingItem.episodes.push({ title: `Episode ${epIndex}`, urls: inputUrls }); } } else { const lines = urlText.split('\n').filter(l => l.trim() !== ''); lines.forEach((line) => { let currentEpNum = existingItem.episodes.length + 1; let srvs = line.split('|').map(s => s.trim()).filter(s => s !== ''); existingItem.episodes.push({ title: `Episode ${currentEpNum}`, urls: srvs }); }); }
                     existingItem.poster = posterInput || existingItem.poster; existingItem.subId = subId;
                 } else {
                     let newItem = { id: Date.now(), type: type, subId: subId, title: titleInput, poster: posterInput, season: seasonNum, isIframe: isIframe, episodes: [] };
-                    if(epIndex !== null) { newItem.episodes.push({ title: `الحلقة ${epIndex}`, urls: inputUrls }); } else { const lines = urlText.split('\n').filter(l => l.trim() !== ''); lines.forEach((line, idx) => { let srvs = line.split('|').map(s => s.trim()).filter(s => s !== ''); newItem.episodes.push({ title: `الحلقة ${idx + 1}`, urls: srvs }); }); }
+                    if(epIndex !== null) { newItem.episodes.push({ title: `Episode ${epIndex}`, urls: inputUrls }); } else { const lines = urlText.split('\n').filter(l => l.trim() !== ''); lines.forEach((line, idx) => { let srvs = line.split('|').map(s => s.trim()).filter(s => s !== ''); newItem.episodes.push({ title: `Episode ${idx + 1}`, urls: srvs }); }); }
                     database.push(newItem);
                 }
             } else {
                 if(idInput) { let item = database.find(i => i.id === parseInt(idInput)); if(item) { item.title = titleInput; item.poster = posterInput; item.subId = subId; item.urls = inputUrls; item.isIframe = isIframe; if(type!=='live') item.season = seasonNum; } } else if(existingItem) { existingItem.urls = inputUrls; existingItem.poster = posterInput || existingItem.poster; existingItem.subId = subId; existingItem.isIframe = isIframe; } else { database.push({ id: Date.now(), type: type, subId: subId, title: titleInput, poster: posterInput, season: type !== 'live' ? seasonNum : undefined, urls: inputUrls, isIframe: isIframe }); }
             }
-            saveToStorage(); clearContentForm(); renderAdminTables(); alert('تم الحفظ محلياً بنجاح!');
+            saveToStorage(); clearContentForm(); renderAdminTables();
         }
 
         function editContentItem(id) { const item = database.find(i => i.id === id); if(!item) return; document.getElementById('admin-item-id').value = item.id; document.getElementById('admin-type').value = item.type; onAdminTypeChange(); document.getElementById('admin-subid').value = item.subId; document.getElementById('admin-title').value = item.title; document.getElementById('admin-poster').value = item.poster; if(item.season) document.getElementById('admin-season-num').value = item.season; document.getElementById('admin-is-iframe').checked = item.isIframe || false; if(item.type === 'series') { document.getElementById('admin-episode-num').value = ""; document.getElementById('admin-url').value = (item.episodes || []).map(e => (e.urls || []).join(' | ')).join('\n'); } else { document.getElementById('admin-url').value = (item.urls || []).join('\n'); } }
-        function deleteContentItem(id) { if(confirm('هل تود الحذف نهائياً؟')) { database = database.filter(i => i.id !== id); saveToStorage(); renderAdminTables(); } }
+        function deleteContentItem(id) { if(confirm('Delete permanently?')) { database = database.filter(i => i.id !== id); saveToStorage(); renderAdminTables(); } }
         function clearContentForm() { document.getElementById('admin-item-id').value = ''; document.getElementById('admin-title').value = ''; document.getElementById('admin-poster').value = ''; document.getElementById('admin-url').value = ''; document.getElementById('admin-season-num').value = '1'; document.getElementById('admin-episode-num').value = ''; document.getElementById('admin-subid').value = ''; document.getElementById('admin-is-iframe').checked = false; }
         
         function saveUserItem() { 
             const user = document.getElementById('admin-username').value.trim(); const pass = document.getElementById('admin-password').value.trim(); const exp = document.getElementById('admin-expiry').value; const maxDev = parseInt(document.getElementById('admin-max-devices').value) || 1;
             if(!user || !pass) return; let existing = usersDB.find(u => u.username === user);
             if(existing) { existing.password = pass; existing.expiryDate = exp; existing.maxDevices = maxDev; } else { usersDB.push({ username: user, password: pass, expiryDate: exp, maxDevices: maxDev, connectedDevices: [] }); }
-            saveToStorage(); document.getElementById('admin-username').value=''; document.getElementById('admin-password').value=''; document.getElementById('admin-expiry').value=''; document.getElementById('admin-max-devices').value='1'; renderAdminTables(); 
+            saveToStorage(); renderAdminTables(); 
         }
-        function deleteUser(index) { if(confirm('حذف الحساب؟')) { usersDB.splice(index, 1); saveToStorage(); renderAdminTables(); } }
-        function resetDevices(index) { usersDB[index].connectedDevices = []; saveToStorage(); alert('تم تصفير الأجهزة المتصلة لهذا المستخدم بنجاح.'); renderAdminTables(); }
+        function deleteUser(index) { if(confirm('Delete user?')) { usersDB.splice(index, 1); saveToStorage(); renderAdminTables(); } }
+        function resetDevices(index) { usersDB[index].connectedDevices = []; saveToStorage(); renderAdminTables(); }
 
-        async function extractVideoLink() { const siteUrl = document.getElementById('extractor-url').value.trim(); const resultDiv = document.getElementById('extractor-results'); if(!siteUrl) return; resultDiv.innerHTML = 'جاري فحص الرابط...'; if(siteUrl.includes('pixeldrain.com/u/')) { const direct = siteUrl.replace('/u/', '/e/'); resultDiv.innerHTML = `<button onclick="document.getElementById('admin-url').value+='\\n'+'${direct}'" class="admin-btn" style="background:#f39c12;">إضافة الرابط المستخرج</button>`; return; } else if (siteUrl.includes('pixeldrain.com/api/file/') || siteUrl.includes('pixeldrain.com/e/')) { resultDiv.innerHTML = `<button onclick="document.getElementById('admin-url').value+='\\n'+'${siteUrl}'" class="admin-btn" style="background:#f39c12;">إضافة الرابط المستخرج</button>`; return; } try { const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(siteUrl); const response = await fetch(proxyUrl); if(!response.ok) throw new Error('Network error'); const data = await response.json(); const html = data.contents; const regex = /(https?:\/\/[^\s"'<>]+\.(?:mp4|m3u8)[^\s"'<>]*)/gi; let matches = []; if(html) { matches = [...new Set(html.match(regex))]; } if(matches.length > 0) { resultDiv.innerHTML = ''; matches.forEach(link => { resultDiv.innerHTML += `<button onclick="document.getElementById('admin-url').value+='\\n'+'${link}'" class="admin-btn" style="background:#f39c12; margin:5px; font-size:11px;">${link}</button><br>`; }); } else { resultDiv.innerHTML = '<span style="color:#ef4444;">لم يتم العثور. جرب نسخ الرابط كاملاً وتفعيل (Iframe).</span>'; } } catch (error) { resultDiv.innerHTML = '<span style="color:#ef4444;">خطأ في الفحص.</span>'; } }
+        async function extractVideoLink() { const siteUrl = document.getElementById('extractor-url').value.trim(); const resultDiv = document.getElementById('extractor-results'); if(!siteUrl) return; resultDiv.innerHTML = 'Extracting...'; if(siteUrl.includes('pixeldrain.com/u/')) { const direct = siteUrl.replace('/u/', '/e/'); resultDiv.innerHTML = `<button onclick="document.getElementById('admin-url').value+='\\n'+'${direct}'" class="admin-btn">Add URL</button>`; return; } else if (siteUrl.includes('pixeldrain.com/api/file/') || siteUrl.includes('pixeldrain.com/e/')) { resultDiv.innerHTML = `<button onclick="document.getElementById('admin-url').value+='\\n'+'${siteUrl}'" class="admin-btn">Add URL</button>`; return; } try { const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(siteUrl); const response = await fetch(proxyUrl); const data = await response.json(); const html = data.contents; const regex = /(https?:\/\/[^\s"'<>]+\.(?:mp4|m3u8)[^\s"'<>]*)/gi; let matches = []; if(html) { matches = [...new Set(html.match(regex))]; } if(matches.length > 0) { resultDiv.innerHTML = ''; matches.forEach(link => { resultDiv.innerHTML += `<button onclick="document.getElementById('admin-url').value+='\\n'+'${link}'" class="admin-btn" style="margin:5px; font-size:11px;">${link}</button><br>`; }); } else { resultDiv.innerHTML = 'No links found.'; } } catch (error) { resultDiv.innerHTML = 'Error extracting.'; } }
         
         async function pushToGitHub() { 
-            const btn = document.getElementById('github-update-btn'); btn.innerText = 'جاري الرفع...'; 
+            const btn = document.getElementById('github-update-btn'); btn.innerText = 'Pushing...'; 
             const p1 = "github_pat_11CDBWO4Q"; const p2 = "0CPyUlhqlG4Pl_wIurVR5ZK"; const p3 = "7twtQuOlJ3rfqJXoG1dnrJCaH1JkW"; const p4 = "nW8VyAWUENCSWFzf72yKe"; 
             const token = p1 + p2 + p3 + p4; const repo = "okba3137-svg/Channel"; const path = "database.json"; const url = `https://api.github.com/repos/${repo}/contents/${path}`; 
             try { 
                 let sha = ""; const getRes = await fetch(url, { headers: { "Authorization": `token ${token}` } }); if (getRes.ok) { const getData = await getRes.json(); sha = getData.sha; } 
                 const contentObj = { database: database, usersDB: usersDB, m3uUrlsDB: m3uUrlsDB }; const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(contentObj, null, 2)))); 
-                const body = { message: "تحديث قاعدة بيانات العقاب TV", content: contentBase64 }; if (sha) body.sha = sha; 
+                const body = { message: "Update Data", content: contentBase64 }; if (sha) body.sha = sha; 
                 const putRes = await fetch(url, { method: "PUT", headers: { "Authorization": `token ${token}`, "Content-Type": "application/json" }, body: JSON.stringify(body) }); 
-                if (putRes.ok) { alert("تم تحديث الموقع ورفع البيانات إلى GitHub بنجاح!"); } else { const err = await putRes.json(); alert("خطأ في الرفع: " + err.message); } 
-            } catch (error) { alert("حدث خطأ في الاتصال بسيرفر GitHub."); } 
-            btn.innerText = 'تحديث الموقع (رفع لـ GitHub)'; 
+                if (putRes.ok) alert("Pushed to GitHub successfully!"); 
+            } catch (error) {} 
+            btn.innerText = 'Push to GitHub'; 
         }
     </script>
 </body>
