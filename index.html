@@ -1278,6 +1278,171 @@
             btn.innerText = 'Push to GitHub'; 
         }
     </script>
+
+    <style>
+        /* تأثير مرئي واضح للعنصر المحدد بواسطة الريموت */
+        .tv-focus {
+            outline: 3px solid #f39c12 !important;
+            outline-offset: 2px !important;
+            box-shadow: 0 0 20px rgba(243, 156, 18, 0.9) !important;
+            transform: scale(1.03);
+            transition: all 0.2s ease;
+            z-index: 9999;
+        }
+    </style>
+
+    <script>
+        (function initTVRemoteSupport() {
+            // جميع العناصر القابلة للتحديد والضغط في تطبيقك
+            const focusableSelectors = 'button, [onclick], input, select, textarea, .add-card, .profile-card, .dash-card, .dash-btn-outline, .list-item, .poster-card, .season-tab, .ep-btn, .close-modal, .admin-nav-item, .icon-btn, .server-btn';
+            
+            let currentFocus = null;
+
+            // جلب العناصر المرئية حالياً في الشاشة النشطة فقط
+            function getVisibleFocusables() {
+                return Array.from(document.querySelectorAll(focusableSelectors)).filter(el => {
+                    // تجاهل العناصر المخفية أو التي تقع داخل شاشة (view) غير نشطة
+                    if (!el.offsetParent && el.tagName !== 'BODY') return false; 
+                    const style = window.getComputedStyle(el);
+                    if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') return false;
+                    
+                    // تأكد أن العنصر ينتمي لشاشة نشطة أو نافذة منبثقة نشطة
+                    const view = el.closest('.view');
+                    const modal = el.closest('.modal');
+                    if (view && !view.classList.contains('active')) return false;
+                    if (modal && window.getComputedStyle(modal).display === 'none') return false;
+
+                    return true;
+                });
+            }
+
+            // تطبيق التركيز (Focus) على العنصر وتمرير الشاشة إليه
+            function setFocus(el) {
+                if (currentFocus) {
+                    currentFocus.classList.remove('tv-focus');
+                }
+                if (el) {
+                    el.classList.add('tv-focus');
+                    el.focus();
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+                }
+                currentFocus = el;
+            }
+
+            // التنقل باستخدام الخوارزمية المكانية (حساب أقرب عنصر في الاتجاه المضغوط)
+            function navigate(direction) {
+                const focusables = getVisibleFocusables();
+                if (focusables.length === 0) return;
+
+                if (!currentFocus || !focusables.includes(currentFocus)) {
+                    setFocus(focusables[0]);
+                    return;
+                }
+
+                const currentRect = currentFocus.getBoundingClientRect();
+                let bestMatch = null;
+                let minDistance = Infinity;
+
+                focusables.forEach(el => {
+                    if (el === currentFocus) return;
+                    const rect = el.getBoundingClientRect();
+                    
+                    let isDirectionValid = false;
+                    let distance = Infinity;
+
+                    // حساب نقاط المركز للعناصر
+                    const curX = currentRect.left + currentRect.width / 2;
+                    const curY = currentRect.top + currentRect.height / 2;
+                    const elX = rect.left + rect.width / 2;
+                    const elY = rect.top + rect.height / 2;
+
+                    const dx = elX - curX;
+                    const dy = elY - curY;
+
+                    // تحديد الاتجاهات
+                    if (direction === 'UP' && dy < 0 && Math.abs(dy) >= Math.abs(dx)) isDirectionValid = true;
+                    if (direction === 'DOWN' && dy > 0 && Math.abs(dy) >= Math.abs(dx)) isDirectionValid = true;
+                    if (direction === 'LEFT' && dx < 0 && Math.abs(dx) >= Math.abs(dy)) isDirectionValid = true;
+                    if (direction === 'RIGHT' && dx > 0 && Math.abs(dx) >= Math.abs(dy)) isDirectionValid = true;
+
+                    if (isDirectionValid) {
+                        distance = Math.sqrt(dx * dx + dy * dy);
+                        if (distance < minDistance) {
+                            minDistance = distance;
+                            bestMatch = el;
+                        }
+                    }
+                });
+
+                if (bestMatch) {
+                    setFocus(bestMatch);
+                }
+            }
+
+            // محاكاة زر الرجوع (يبحث عن زر العودة في الشاشة النشطة ويضغط عليه)
+            function goBack() {
+                const activeModal = document.querySelector('.modal[style*="display: flex"]');
+                if (activeModal) {
+                    const closeBtn = activeModal.querySelector('.close-modal');
+                    if (closeBtn) closeBtn.click();
+                } else {
+                    const activeView = document.querySelector('.view.active');
+                    if (activeView) {
+                        const backBtn = activeView.querySelector('.back-icon-btn, .back-btn, .details-back-btn');
+                        if (backBtn) backBtn.click();
+                    }
+                }
+            }
+
+            // الاستماع لحركة أزرار الكيبورد / الريموت كنترول
+            window.addEventListener('keydown', (e) => {
+                switch(e.key) {
+                    case 'ArrowUp':
+                    case 'Up':
+                        e.preventDefault(); navigate('UP'); break;
+                    case 'ArrowDown':
+                    case 'Down':
+                        e.preventDefault(); navigate('DOWN'); break;
+                    case 'ArrowLeft':
+                    case 'Left':
+                        e.preventDefault(); navigate('LEFT'); break;
+                    case 'ArrowRight':
+                    case 'Right':
+                        e.preventDefault(); navigate('RIGHT'); break;
+                    case 'Enter':
+                    case 'OK':
+                        if (currentFocus) {
+                            e.preventDefault();
+                            currentFocus.click();
+                        }
+                        break;
+                    case 'Escape':
+                    case 'Backspace':
+                        // تجاهل الرجوع إذا كان المستخدم يكتب داخل مربع نص
+                        if(document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') {
+                            if(e.key === 'Backspace') return; 
+                        }
+                        e.preventDefault();
+                        goBack();
+                        break;
+                }
+
+                // أكواد التلفاز المخصصة (Tizen لسامسونج 10009 و WebOS لـ LG 461)
+                if (e.keyCode === 10009 || e.keyCode === 461) {
+                    e.preventDefault();
+                    goBack();
+                }
+            });
+
+            // إعادة تعيين التركيز برفق عند النقر بالماوس (حتى لا يتعارض الماوس مع الريموت)
+            document.body.addEventListener('click', (e) => {
+                if (e.target.closest(focusableSelectors)) {
+                    setFocus(e.target.closest(focusableSelectors));
+                }
+            });
+
+        })();
+    </script>
 </body>
 </html>
 
